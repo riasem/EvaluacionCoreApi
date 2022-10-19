@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EvaluacionCore.Domain.Entities;
 
@@ -10,26 +10,20 @@ public class Locacion
     [Column("id", Order = 0, TypeName = "uniqueidentifier")]
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    [Column("identificacion", Order = 1, TypeName = "varchar")]
-    public string Identificacion { get; set; } = string.Empty;
+    [Column("codigo", Order = 1, TypeName = "varchar")]
+    public string Codigo { get; set; } = string.Empty;
 
-    [Column("idFeature", Order = 1, TypeName = "varchar")]
-    public string IdFeature { get; set; } = string.Empty;
+    [Column("idEmpresa", Order = 2, TypeName = "varchar")]
+    public string IdEmpresa { get; set; } = string.Empty;
 
-    [Column("idSolicitud", Order = 2, TypeName = "varchar")]
-    public string IdSolicitud { get; set; } = string.Empty;
+    [Column("latitud", Order = 3, TypeName = "varchar")]
+    public string Latitud { get; set; } = string.Empty;
 
-    [Column("idTipoSolicitud", Order = 3, TypeName = "varchar")]
-    public string IdTipoSolicitud { get; set; } = string.Empty;
+    [Column("longitud", Order = 4, TypeName = "varchar")]
+    public string Logintud { get; set; } = string.Empty;
 
-    [NotMapped]
-    public string ArchivoBase64 { get; set; } = string.Empty;
-
-    [Column("nombreArchivo", Order = 4, TypeName = "varchar")]
-    public string NombreArchivo { get; set; } = string.Empty;
-
-    [Column("rutaAcceso", Order = 5, TypeName = "varchar")]
-    public string RutaAcceso { get; set; } = string.Empty;
+    [Column("descripcion", Order = 5, TypeName = "varchar")]
+    public Guid Descripcion { get; set; }
 
     [Column("estado", Order = 6, TypeName = "varchar")]
     public string Estado { get; set; } = string.Empty;

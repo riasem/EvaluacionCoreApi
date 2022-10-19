@@ -39,7 +39,7 @@ try
         {
             Version = "v1",
             Title = " EvaluacionCore - API",
-            Description = "Web API de utilitarios que expone diferentes endpoint reutilizables en los sistemas del Grupo Corporativo RIASEM",
+            Description = "Web API que incluye el core para evaluar las marcaciones",
             Contact = new OpenApiContact
             {
                 Name = "Grupo Riasem",

@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "src\Domain\Domain
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Persistence", "src\Persistence\Persistence.csproj", "{9499A383-7F27-4DF1-9E6A-BF046DFBA428}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebUtilsApi", "src\WebUtilsApi\WebUtilsApi.csproj", "{5E1EAE88-8EB7-4DDB-A07D-B9E7675049CC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebEvaluacionCoreApi", "src\WebUtilsApi\WebEvaluacionCoreApi.csproj", "{5E1EAE88-8EB7-4DDB-A07D-B9E7675049CC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
