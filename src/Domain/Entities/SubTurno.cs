@@ -7,6 +7,7 @@ namespace EvaluacionCore.Domain.Entities;
 public class SubTurno
 {
     [Key]
+    [Required]
     [Column("id", Order = 0, TypeName = "uniqueidentifier")]
     public Guid Id { get; set; } = Guid.NewGuid();
 
@@ -22,26 +23,26 @@ public class SubTurno
 
 
     [Column("codigoSubturno", Order = 3, TypeName = "varchar")]
-    public string CodigoSubturno { get; set; } = string.Empty;
+    [StringLength(10)] public string CodigoSubturno { get; set; } = string.Empty;
 
 
     [Column("descripcion", Order = 4, TypeName = "varchar")]
-    public string Descripcion { get; set; } = string.Empty;
+    [StringLength(50)] public string Descripcion { get; set; } = string.Empty;
 
 
-    [Column("entrada", Order = 5, TypeName = "datetime")]
+    [Column("entrada", Order = 5, TypeName = "datetime2")]
     public DateTime Entrada { get; set; }
 
 
-    [Column("salida", Order = 6, TypeName = "datetime")]
+    [Column("salida", Order = 6, TypeName = "datetime2")]
     public DateTime Salida { get; set; }
 
 
-    [Column("margenEntrada", Order = 7, TypeName = "datetime")]
+    [Column("margenEntrada", Order = 7, TypeName = "datetime2")]
     public DateTime MargenEntrada { get; set; }
 
 
-    [Column("margenSalida", Order = 8, TypeName = "varchar")]
+    [Column("margenSalida", Order = 8, TypeName = "datetime2")]
     public DateTime MargenSalida { get; set; }
 
 
@@ -50,19 +51,19 @@ public class SubTurno
 
 
     [Column("estado", Order = 10, TypeName = "varchar")]
-    public string Estado { get; set; } = string.Empty;
+    public string Estado { get; set; } = "A";
 
     //AUDITORIA
     [Column("usuarioCreacion", Order = 11, TypeName = "varchar")]
     public string UsuarioCreacion { get; set; } = string.Empty;
 
-    [Column("fechaCreacion", Order = 12, TypeName = "datetime")]
+    [Column("fechaCreacion", Order = 12, TypeName = "datetime2")]
     public System.DateTime FechaCreacion { get; set; } = System.DateTime.Now;
 
     [Column("usuarioModificacion", Order = 13, TypeName = "varchar")]
     public string UsuarioModificacion { get; set; } = string.Empty;
 
-    [Column("fechaModificacion", Order = 14, TypeName = "datetime")]
+    [Column("fechaModificacion", Order = 14, TypeName = "datetime2")]
     public Nullable<System.DateTime> FechaModificacion { get; set; }
 
 }

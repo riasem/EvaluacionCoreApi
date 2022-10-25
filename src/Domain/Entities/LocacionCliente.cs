@@ -7,44 +7,35 @@ namespace EvaluacionCore.Domain.Entities;
 public class LocacionCliente
 {
     [Key]
+    [Required]
     [Column("id", Order = 0, TypeName = "uniqueidentifier")]
     public Guid Id { get; set; } = Guid.NewGuid();
 
+
     [Column("idLocacion", Order = 1, TypeName = "varchar")]
-    public string IdLocacion { get; set; } = string.Empty;
+    public Guid IdLocacion { get; set; }
+    public virtual Locacion Locacion { get; set; } 
 
-    [Column("idCliente", Order = 1, TypeName = "varchar")]
-    public string IdFeature { get; set; } = string.Empty;
 
-    [Column("idSolicitud", Order = 2, TypeName = "varchar")]
-    public string IdSolicitud { get; set; } = string.Empty;
+    [Column("idCliente", Order = 2, TypeName = "varchar")]
+    public Guid IdCliente { get; set; }
+    public virtual Cliente Cliente { get; set; }
 
-    [Column("idTipoSolicitud", Order = 3, TypeName = "varchar")]
-    public string IdTipoSolicitud { get; set; } = string.Empty;
-
-    [NotMapped]
-    public string ArchivoBase64 { get; set; } = string.Empty;
-
-    [Column("nombreArchivo", Order = 4, TypeName = "varchar")]
-    public string NombreArchivo { get; set; } = string.Empty;
-
-    [Column("rutaAcceso", Order = 5, TypeName = "varchar")]
-    public string RutaAcceso { get; set; } = string.Empty;
-
-    [Column("estado", Order = 6, TypeName = "varchar")]
-    public string Estado { get; set; } = string.Empty;
+   
+    [Column("estado", Order = 3, TypeName = "varchar")]
+    public string Estado { get; set; } = "A";
 
     //AUDITORIA
-    [Column("usuarioCreacion", Order = 7, TypeName = "varchar")]
-    public string UsuarioCreacion { get; set; } = string.Empty;
+    [Column("usuarioCreacion", Order = 4, TypeName = "varchar")]
+    [StringLength(20)] public string UsuarioCreacion { get; set; } = string.Empty;
 
-    [Column("fechaCreacion", Order = 8, TypeName = "datetime")]
+    [Column("fechaCreacion", Order = 5, TypeName = "datetime2")]
     public System.DateTime FechaCreacion { get; set; } = System.DateTime.Now;
 
-    [Column("usuarioModificacion", Order = 9, TypeName = "varchar")]
-    public string UsuarioModificacion { get; set; } = string.Empty;
+    [Column("usuarioModificacion", Order = 6, TypeName = "varchar")]
+    [StringLength(20)] public string UsuarioModificacion { get; set; } = string.Empty;
 
-    [Column("fechaModificacion", Order = 10, TypeName = "datetime")]
+    [Column("fechaModificacion", Order = 7, TypeName = "datetime2")]
     public Nullable<System.DateTime> FechaModificacion { get; set; }
 
 }

@@ -1,4 +1,7 @@
 ﻿using AutoMapper;
+using EvaluacionCore.Application.Features.Clients.Commands.CreateTurno;
+using EvaluacionCore.Application.Features.Clients.Dto;
+using EvaluacionCore.Domain.Entities;
 using System.Reflection;
 
 namespace EvaluacionCore.Application.Common.Mappings;
@@ -7,6 +10,8 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
+        CreateMap<CreateTurnoCommand, Turno>(MemberList.None).ReverseMap();
+        CreateMap<Turno, CreateTurnoCommand>().ReverseMap();
 
         //CreateMap<SendEmailVerificacionRequest, NotificacionDto>();
         //ApplyMappingsFromAssembly(Assembly.GetExecutingAssembly());

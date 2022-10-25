@@ -13,6 +13,7 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Canal> Canales { get; set; }
     public DbSet<Locacion> Locaciones { get; set; }
+    public DbSet<Cliente> Clientes { get; set; }
     public DbSet<LocacionCliente> LocacionClientes { get; set; }
     public DbSet<MarcacionCliente> MarcacionClientes { get; set; }
     public DbSet<SubTurno> SubTurnos { get; set; }
