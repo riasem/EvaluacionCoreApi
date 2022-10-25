@@ -18,6 +18,7 @@ public class MappingProfile : Profile
         CreateMap<Locacion, CreateLocacionRequest>().ReverseMap();
         CreateMap<Locacion, UpdateLocacionRequest>().ReverseMap();
         CreateMap<Locacion, LocacionType>().ReverseMap();
+        CreateMap<Turno, TurnoType>().ReverseMap();
 
         //CreateMap<SendEmailVerificacionRequest, NotificacionDto>();
         //ApplyMappingsFromAssembly(Assembly.GetExecutingAssembly());
