@@ -15,18 +15,18 @@ public class Locacion
     [StringLength(5)] public string Codigo { get; set; } = string.Empty;
 
 
-    [Column("idEmpresa", Order = 2, TypeName = "varchar")]
-    [StringLength(20)] public string IdEmpresa { get; set; } = string.Empty;
+    [Column("idEmpresa", Order = 2, TypeName = "uniqueidentifier")]
+    public Guid IdEmpresa { get; set; }
 
 
     [Column("latitud", Order = 3, TypeName = "float")]
     [MaxLength(8)] public double Latitud { get; set; } 
 
     [Column("longitud", Order = 4, TypeName = "float")]
-    [MaxLength(8)] public double Logintud { get; set; }
+    [MaxLength(8)] public double Longitud { get; set; }
 
     [Column("descripcion", Order = 5, TypeName = "varchar")]
-    public Guid Descripcion { get; set; }
+    public string Descripcion { get; set; }
 
     [Column("estado", Order = 6, TypeName = "varchar")]
     [StringLength(1)] public string Estado { get; set; } = "A";

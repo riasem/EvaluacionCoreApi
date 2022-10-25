@@ -1,6 +1,9 @@
 ﻿using AutoMapper;
 using EvaluacionCore.Application.Features.Clients.Commands.CreateTurno;
 using EvaluacionCore.Application.Features.Clients.Dto;
+using EvaluacionCore.Application.Features.Locacions.Commands.CreateLocacion;
+using EvaluacionCore.Application.Features.Locacions.Commands.UpdateLocacion;
+using EvaluacionCore.Application.Features.Locacions.Dto;
 using EvaluacionCore.Domain.Entities;
 using System.Reflection;
 
@@ -12,6 +15,9 @@ public class MappingProfile : Profile
     {
         CreateMap<CreateTurnoCommand, Turno>(MemberList.None).ReverseMap();
         CreateMap<Turno, CreateTurnoCommand>().ReverseMap();
+        CreateMap<Locacion, CreateLocacionRequest>().ReverseMap();
+        CreateMap<Locacion, UpdateLocacionRequest>().ReverseMap();
+        CreateMap<Locacion, LocacionType>().ReverseMap();
 
         //CreateMap<SendEmailVerificacionRequest, NotificacionDto>();
         //ApplyMappingsFromAssembly(Assembly.GetExecutingAssembly());
