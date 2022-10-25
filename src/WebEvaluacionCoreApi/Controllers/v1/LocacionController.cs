@@ -1,4 +1,5 @@
 ﻿using EvaluacionCore.Application.Common.Wrappers;
+using EvaluacionCore.Application.Features.Locacions.Commands.AsignarLocacionCliente;
 using EvaluacionCore.Application.Features.Locacions.Commands.CreateLocacion;
 using EvaluacionCore.Application.Features.Locacions.Commands.DeleteLocation;
 using EvaluacionCore.Application.Features.Locacions.Commands.UpdateLocacion;
@@ -60,7 +61,12 @@ public class LocacionController : ApiControllerBase
         return Ok(objResult);
 
     }
-
+    /// <summary>
+    /// Eliminar logicamente una Locación
+    /// </summary>
+    /// <param name="IdLocacion"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     [HttpGet("DeleteLocacion")]
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -68,6 +74,18 @@ public class LocacionController : ApiControllerBase
     public async Task<IActionResult> DeleteLocacion(string IdLocacion, CancellationToken cancellationToken)
     {
         var objResult = await Mediator.Send(new DeleteLocacionCommand(IdLocacion), cancellationToken);
+        return Ok(objResult);
+
+    }
+
+
+    [HttpPost("AsignaLocacionCliente")]
+    [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [AllowAnonymous]
+    public async Task<IActionResult> AsignaLocacionCliente([FromBody] AsignarLocacionClienteRequest request, CancellationToken cancellationToken)
+    {
+        var objResult = await Mediator.Send(new AsignarLocacionClienteCommand(request), cancellationToken);
         return Ok(objResult);
 
     }
