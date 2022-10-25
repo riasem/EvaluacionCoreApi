@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -355,44 +354,44 @@ namespace Workflow.Persistence.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "AS_Canal",
-                schema: "dbo");
+            //migrationBuilder.DropTable(
+            //    name: "AS_Canal",
+            //    schema: "dbo");
 
-            migrationBuilder.DropTable(
-                name: "AS_LocacionCliente",
-                schema: "dbo");
+            //migrationBuilder.DropTable(
+            //    name: "AS_LocacionCliente",
+            //    schema: "dbo");
 
-            migrationBuilder.DropTable(
-                name: "AS_MarcacionCliente",
-                schema: "dbo");
+            //migrationBuilder.DropTable(
+            //    name: "AS_MarcacionCliente",
+            //    schema: "dbo");
 
-            migrationBuilder.DropTable(
-                name: "AS_SubTurnoCliente",
-                schema: "dbo");
+            //migrationBuilder.DropTable(
+            //    name: "AS_SubTurnoCliente",
+            //    schema: "dbo");
 
-            migrationBuilder.DropTable(
-                name: "AS_Locacion",
-                schema: "dbo");
+            //migrationBuilder.DropTable(
+            //    name: "AS_Locacion",
+            //    schema: "dbo");
 
-            migrationBuilder.DropTable(
-                name: "AS_Subturno",
-                schema: "dbo");
+            //migrationBuilder.DropTable(
+            //    name: "AS_Subturno",
+            //    schema: "dbo");
 
-            migrationBuilder.DropTable(
-                name: "Clientes");
+            //migrationBuilder.DropTable(
+            //    name: "Clientes");
 
-            migrationBuilder.DropTable(
-                name: "AS_TipoSubTurno",
-                schema: "dbo");
+            //migrationBuilder.DropTable(
+            //    name: "AS_TipoSubTurno",
+            //    schema: "dbo");
 
-            migrationBuilder.DropTable(
-                name: "AS_Turno",
-                schema: "dbo");
+            //migrationBuilder.DropTable(
+            //    name: "AS_Turno",
+            //    schema: "dbo");
 
-            migrationBuilder.DropTable(
-                name: "AS_TipoTurno",
-                schema: "dbo");
+            //migrationBuilder.DropTable(
+            //    name: "AS_TipoTurno",
+            //    schema: "dbo");
         }
     }
 }

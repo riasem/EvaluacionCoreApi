@@ -4,7 +4,7 @@ namespace EvaluacionCore.Application.Features.Clients.Commands.CreateTurno
 {
     public class CreateTurnoRequest 
     {
-        [JsonPropertyName("idTipoSubturno")]
+        [JsonPropertyName("idTipoTurno")]
         public Guid IdTipoTurno { get; set; }
 
         [JsonPropertyName("codigoTurno")]

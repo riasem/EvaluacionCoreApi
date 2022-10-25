@@ -14,9 +14,9 @@ public class MarcacionCliente
     public Guid IdLocacion { get; set; }
     public virtual Locacion Locacion { get; set; }
 
-    [Column("idSubTurno", Order = 2, TypeName = "uniqueidentifier")]
-    public Guid IdSubTurno { get; set; }
-    public virtual SubTurno SubTurno { get; set; }
+    [Column("idCliente", Order = 2, TypeName = "uniqueidentifier")]
+    public Guid IdCliente { get; set; }
+    public virtual Cliente Cliente { get; set; }
 
     [Column("marcacionEntrada", Order = 3, TypeName = "datetime2")]
     public Nullable<System.DateTime> MarcacionEntrada { get; set; }

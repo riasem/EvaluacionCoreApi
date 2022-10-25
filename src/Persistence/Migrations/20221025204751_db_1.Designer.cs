@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Workflow.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20221024213424_ajusteTurnoDatetime")]
-    partial class ajusteTurnoDatetime
+    [Migration("20221025204751_db_1")]
+    partial class db_1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -220,8 +220,7 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnOrder(1);
 
                     b.Property<string>("Descripcion")
-                        .IsRequired()
-                        .HasColumnType("varchar(36)")
+                        .HasColumnType("varchar")
                         .HasColumnName("descripcion")
                         .HasColumnOrder(5);
 
@@ -242,6 +241,7 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnOrder(10);
 
                     b.Property<string>("IdEmpresa")
+                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)")
                         .HasColumnName("idEmpresa")
@@ -548,12 +548,12 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnName("idCliente")
                         .HasColumnOrder(2);
 
-                    b.Property<Guid>("IdTipoSubturno")
+                    b.Property<Guid>("IdSubturno")
                         .HasColumnType("uniqueidentifier")
-                        .HasColumnName("idTipoSubturno")
+                        .HasColumnName("idSubturno")
                         .HasColumnOrder(1);
 
-                    b.Property<Guid?>("TipoSubTurnoId")
+                    b.Property<Guid?>("SubTurnoId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("UsuarioCreacion")
@@ -572,7 +572,7 @@ namespace Workflow.Persistence.Migrations
 
                     b.HasIndex("ClienteId");
 
-                    b.HasIndex("TipoSubTurnoId");
+                    b.HasIndex("SubTurnoId");
 
                     b.ToTable("AS_SubTurnoCliente", "dbo");
                 });
@@ -826,13 +826,13 @@ namespace Workflow.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("ClienteId");
 
-                    b.HasOne("EvaluacionCore.Domain.Entities.TipoSubTurno", "TipoSubTurno")
+                    b.HasOne("EvaluacionCore.Domain.Entities.SubTurno", "SubTurno")
                         .WithMany()
-                        .HasForeignKey("TipoSubTurnoId");
+                        .HasForeignKey("SubTurnoId");
 
                     b.Navigation("Cliente");
 
-                    b.Navigation("TipoSubTurno");
+                    b.Navigation("SubTurno");
                 });
 
             modelBuilder.Entity("EvaluacionCore.Domain.Entities.Turno", b =>

@@ -36,5 +36,8 @@ public class TipoTurno
     [Column("fechaModificacion", Order = 7, TypeName = "datetime2")]
     public Nullable<System.DateTime> FechaModificacion { get; set; }
 
+
+    public virtual ICollection<Turno> Turnos { get; set; }
+
 }
 

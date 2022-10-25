@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using EvaluacionCore.Application.Features.Clients.Commands.CreateTurno;
 using EvaluacionCore.Application.Features.Clients.Dto;
+using EvaluacionCore.Application.Features.Turnos.Commands.AsignarTurno;
 using EvaluacionCore.Domain.Entities;
 using System.Reflection;
 
@@ -11,6 +12,8 @@ public class MappingProfile : Profile
     public MappingProfile()
     {
         CreateMap<CreateTurnoCommand, Turno>(MemberList.None).ReverseMap();
+        CreateMap<CreateTurnoRequest, Turno>(MemberList.None).ReverseMap();
+        CreateMap<AsignarTurnoRequest, SubTurnoCliente>(MemberList.None).ReverseMap();
         CreateMap<Turno, CreateTurnoCommand>().ReverseMap();
         CreateMap<Turno, TurnoType>().ReverseMap();
 

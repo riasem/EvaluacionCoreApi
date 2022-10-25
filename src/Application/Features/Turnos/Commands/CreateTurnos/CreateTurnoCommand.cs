@@ -31,7 +31,7 @@ public class CreateTurnoCommandHandler : IRequestHandler<CreateTurnoCommand, Res
 
     public async Task<ResponseType<string>> Handle(CreateTurnoCommand request, CancellationToken cancellationToken)
     {
-        var objClient = _mapper.Map<Turno>(request);
+        var objClient = _mapper.Map<Turno>(request.TurnoRequest);
 
         objClient.Id = Guid.NewGuid();
         objClient.Estado = "A";

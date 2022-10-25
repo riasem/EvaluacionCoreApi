@@ -1,8 +1,8 @@
 ﻿using EnrolApp.Application.Features.Clients.Queries.GetTurnoById;
 using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.Clients.Commands.CreateTurno;
+using EvaluacionCore.Application.Features.Turnos.Commands.AsignarTurno;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using WebEvaluacionCoreApi.Controllers;
 
@@ -79,4 +79,21 @@ public class TurnosController : ApiControllerBase
         var objResult = await Mediator.Send(new GetTurnosAsyncQuery(), cancellationToken);
         return Ok(objResult);
     }
+
+
+    /// <summary>
+    /// Asigna turno a un empleado
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpPost("AsignarTurno")]
+    [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
+    [AllowAnonymous]
+    public async Task<IActionResult> AsignarTurnos([FromBody] AsignarTurnoRequest request, CancellationToken cancellationToken)
+    {
+        var objResult = await Mediator.Send(new AsignarTurnoCommand(request), cancellationToken);
+        return Ok(objResult);
+    }
+
 }

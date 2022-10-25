@@ -11,9 +11,9 @@ public class SubTurnoCliente
     public Guid Id { get; set; } = Guid.NewGuid();
 
 
-    [Column("idTipoSubturno", Order = 1, TypeName = "uniqueidentifier")]
-    public Guid IdTipoSubturno { get; set; }
-    public virtual TipoSubTurno TipoSubTurno { get; set; }
+    [Column("idSubturno", Order = 1, TypeName = "uniqueidentifier")]
+    public Guid IdSubturno { get; set; }
+    public virtual SubTurno SubTurno { get; set; }
 
 
     [Column("idCliente", Order = 2, TypeName = "uniqueidentifier")]

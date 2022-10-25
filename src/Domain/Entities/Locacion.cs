@@ -16,7 +16,8 @@ public class Locacion
 
 
     [Column("idEmpresa", Order = 2, TypeName = "varchar")]
-    [StringLength(20)] public string IdEmpresa { get; set; } = string.Empty;
+    [StringLength(20)] public Guid IdEmpresa { get; set; }
+
 
 
     [Column("latitud", Order = 3, TypeName = "float")]
@@ -26,7 +27,7 @@ public class Locacion
     [MaxLength(8)] public double Logintud { get; set; }
 
     [Column("descripcion", Order = 5, TypeName = "varchar")]
-    public Guid Descripcion { get; set; }
+    public string Descripcion { get; set; }
 
     [Column("estado", Order = 6, TypeName = "varchar")]
     [StringLength(1)] public string Estado { get; set; } = "A";
@@ -43,6 +44,10 @@ public class Locacion
 
     [Column("fechaModificacion", Order = 10, TypeName = "datetime2")]
     public Nullable<System.DateTime> FechaModificacion { get; set; }
+
+
+    public virtual ICollection<LocacionCliente> LocacionClientes { get; set; }
+    public virtual ICollection<MarcacionCliente> MarcacionClientes { get; set; }
 
 }
 
