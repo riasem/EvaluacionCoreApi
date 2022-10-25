@@ -6,7 +6,8 @@ namespace EvaluacionCore.Application.Features.Clients.Dto
 {
     public class TurnoType
     {
-        public Guid IdTipoSubturno { get; set; }
+        [JsonPropertyName("idTipoTurno")]
+        public Guid IdTipoTurno { get; set; }
 
         [JsonPropertyName("codigoTurno")]
         public string CodigoTurno { get; set; } = string.Empty;

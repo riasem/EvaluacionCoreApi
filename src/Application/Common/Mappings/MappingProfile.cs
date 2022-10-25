@@ -12,6 +12,7 @@ public class MappingProfile : Profile
     {
         CreateMap<CreateTurnoCommand, Turno>(MemberList.None).ReverseMap();
         CreateMap<Turno, CreateTurnoCommand>().ReverseMap();
+        CreateMap<Turno, TurnoType>().ReverseMap();
 
         //CreateMap<SendEmailVerificacionRequest, NotificacionDto>();
         //ApplyMappingsFromAssembly(Assembly.GetExecutingAssembly());

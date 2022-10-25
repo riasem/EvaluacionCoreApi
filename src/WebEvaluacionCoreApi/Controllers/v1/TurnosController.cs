@@ -1,4 +1,5 @@
-﻿using EvaluacionCore.Application.Common.Wrappers;
+﻿using EnrolApp.Application.Features.Clients.Queries.GetTurnoById;
+using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.Clients.Commands.CreateTurno;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -65,23 +66,17 @@ public class TurnosController : ApiControllerBase
         
     }
 
-    ///// <summary>
-    ///// Actualiza el estado de suscripción del prospecto a Turno
-    ///// </summary>
-    ///// <param name="identificacion"></param>
-    ///// <param name="cancellationToken"></param>
-    ///// <returns></returns>
-    //[HttpGet("ActivaTurnoServicio/{identificacion}")]
-    //[EnableCors("AllowOrigin")]
-    //[ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
-    //[AllowAnonymous]
-    //public async Task<IActionResult> UpdateTurnoStatus(string identificacion, CancellationToken cancellationToken)
-    //{
-       
-    //    var objResult = await Mediator.Send(new ActivateTurnoCommand(identificacion), cancellationToken);
-    //    if(objResult.Succeeded)
-    //        return Redirect("https://enrolapp.app.link/NdJ6nFzRbK?bnc_validate=true");
-
-    //    return Ok(objResult);
-    //}
+    /// <summary>
+    /// Retorna el listado de turnos
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpGet("GetTurno")]
+    [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetTurnos(CancellationToken cancellationToken)
+    {
+        var objResult = await Mediator.Send(new GetTurnosAsyncQuery(), cancellationToken);
+        return Ok(objResult);
+    }
 }

@@ -8,7 +8,7 @@ using MediatR;
 
 namespace EnrolApp.Application.Features.Clients.Queries.GetTurnoById;
 
-public record GetTurnosAsyncQuery(string Codigo) : IRequest<ResponseType<List<TurnoType>>>;
+public record GetTurnosAsyncQuery() : IRequest<ResponseType<List<TurnoType>>>;
 
 public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, ResponseType<List<TurnoType>>>
 {
@@ -30,9 +30,9 @@ public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, Respon
         var objTurno = await _repositoryAsync.ListAsync(cancellationToken);
 
         if (objTurno is null)
-        { 
-            throw new NotFoundException($"Registro no encontrado {request.Codigo}");
+        {
+            return new ResponseType<List<TurnoType>>() { Data = null, Succeeded = false, Message = "Registros no encontrados" };
         }
-        return new ResponseType<List<TurnoType>>() { Data = _mapper.Map<List<TurnoType>>(objTurno), Succeeded = true };
+        return new ResponseType<List<TurnoType>>() { Data = _mapper.Map<List<TurnoType>>(objTurno), Succeeded = true, Message = "Registros encontrados" };
     }
 }
