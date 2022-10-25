@@ -22,8 +22,4 @@ RUN dotnet publish "WebEvaluacionCoreApi.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-COPY ["src/WebEvaluacionCoreApi/Plantillas/*", "/app/Plantillas/"]
-RUN ["mkdir", "/app/FilesDocsTmp/"]
-RUN ["mkdir", "/app/Archivos/"]
-
 ENTRYPOINT ["dotnet", "WebEvaluacionCoreApi.dll"]

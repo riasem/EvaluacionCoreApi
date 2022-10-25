@@ -12,6 +12,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="FilesDocsTmp\**" />
+    <Content Remove="FilesDocsTmp\**" />
+    <EmbeddedResource Remove="FilesDocsTmp\**" />
+    <None Remove="FilesDocsTmp\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.1.2" />
     <PackageReference Include="MediatR" Version="10.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.9" />
@@ -37,10 +44,5 @@
     <None Remove="MailKit" />
     <None Remove="RazorEngineCore" />
     <None Remove="Plantillas\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="FilesDocsTmp\" />
-    <Folder Include="FilesDocsTmp\" />
   </ItemGroup>
 </Project>
