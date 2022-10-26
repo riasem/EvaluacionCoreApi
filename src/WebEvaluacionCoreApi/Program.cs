@@ -31,6 +31,10 @@ try
         .Enrich.FromLogContext());
 
     // Add services to the container.
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+    });
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(c =>
@@ -149,6 +153,8 @@ try
     }
 
     app.UseHttpsRedirection();
+    app.UseRouting();
+    app.UseCors();
     app.UseAuthentication();
     app.UseAuthorization();
     app.UseErrorHandlerMiddleware();

@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
-using EvaluacionCore.Application.Features.Clients.Dto;
+using EvaluacionCore.Application.Features.Dto;
 using EvaluacionCore.Application.Features.Prospectos.Specifications;
 using EvaluacionCore.Domain.Entities;
 using MediatR;
@@ -30,7 +30,7 @@ public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, Respon
     public async Task<ResponseType<List<TurnoType>>> Handle(GetTurnosAsyncQuery request, CancellationToken cancellationToken)
     {
         var objTurno = await _repositoryAsync.ListAsync(cancellationToken);
-        List<TurnoType> lista = new List<TurnoType>();
+        List<TurnoType> lista = new();
 
         if (objTurno is null)
         {

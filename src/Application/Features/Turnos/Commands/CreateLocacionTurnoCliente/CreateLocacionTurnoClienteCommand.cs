@@ -1,27 +1,26 @@
 ﻿using AutoMapper;
 using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
-using EvaluacionCore.Application.Features.Turnos.Commands.AsignarTurno;
 using EvaluacionCore.Domain.Entities;
 using MediatR;
 
-namespace EvaluacionCore.Application.Features.Turnos.Commands.AsignarTurno;
+namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateLocacionTurnoCliente;
 
-public record AsignarTurnoCommand(AsignarTurnoRequest TurnoRequest) : IRequest<ResponseType<string>>;
+public record CreateLocacionTurnoClienteCommand(CreateLocacionTurnoClienteRequest TurnoRequest) : IRequest<ResponseType<string>>;
 
 
-public class AsignarTurnoCommandHandler : IRequestHandler<AsignarTurnoCommand, ResponseType<string>>
+public class CreateLocacionTurnoClienteCommandHandler : IRequestHandler<CreateLocacionTurnoClienteCommand, ResponseType<string>>
 {
     private readonly IRepositoryAsync<SubTurnoCliente> _repoTurnoAsync;
     private readonly IMapper _mapper;
 
-    public AsignarTurnoCommandHandler(IRepositoryAsync<SubTurnoCliente> repository, IMapper mapper)
+    public CreateLocacionTurnoClienteCommandHandler(IRepositoryAsync<SubTurnoCliente> repository, IMapper mapper)
     {
         _repoTurnoAsync = repository;
         _mapper = mapper;
     }
 
-    public async Task<ResponseType<string>> Handle(AsignarTurnoCommand request, CancellationToken cancellationToken)
+    public async Task<ResponseType<string>> Handle(CreateLocacionTurnoClienteCommand request, CancellationToken cancellationToken)
     {
         var objClient = _mapper.Map<SubTurnoCliente>(request.TurnoRequest);
 

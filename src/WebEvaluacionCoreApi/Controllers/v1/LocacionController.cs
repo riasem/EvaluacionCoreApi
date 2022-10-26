@@ -6,6 +6,7 @@ using EvaluacionCore.Application.Features.Locacions.Commands.UpdateLocacion;
 using EvaluacionCore.Application.Features.Locacions.Dto;
 using EvaluacionCore.Application.Features.Locacions.Queries.GetLocacion;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebEvaluacionCoreApi.Controllers.v1;
@@ -20,6 +21,7 @@ public class LocacionController : ApiControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost("CreateLocacion")]
+    [EnableCors("AllowOrigin")]
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [AllowAnonymous]
@@ -36,6 +38,7 @@ public class LocacionController : ApiControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet("GetLocacion")]
+    [EnableCors("AllowOrigin")]
     [ProducesResponseType(typeof(ResponseType<LocacionType>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [AllowAnonymous]
@@ -52,6 +55,7 @@ public class LocacionController : ApiControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost("UpdateLocacion")]
+    [EnableCors("AllowOrigin")]
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [AllowAnonymous]
@@ -68,6 +72,7 @@ public class LocacionController : ApiControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet("DeleteLocacion")]
+    [EnableCors("AllowOrigin")]
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [AllowAnonymous]
@@ -80,6 +85,7 @@ public class LocacionController : ApiControllerBase
 
 
     [HttpPost("AsignaLocacionCliente")]
+    [EnableCors("AllowOrigin")]
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [AllowAnonymous]

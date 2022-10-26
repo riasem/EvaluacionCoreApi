@@ -1,11 +1,11 @@
-﻿using EvaluacionCore.Application.Features.Turnos.Commands.AsignarTurno;
+﻿using EvaluacionCore.Application.Features.Turnos.Commands.CreateLocacionTurnoCliente;
 using FluentValidation;
 
-namespace EvaluacionCore.Application.Features.Turnos.Commands.AsignarTurno;
+namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateLocacionTurnoCliente;
 
-public class AsignarTurnoCommandValidator : AbstractValidator<AsignarTurnoCommand>
+public class CreateSubturnoClienteCommandValidator : AbstractValidator<CreateLocacionTurnoClienteCommand>
 {
-    public AsignarTurnoCommandValidator()
+    public CreateSubturnoClienteCommandValidator()
     {
 
         RuleFor(v => v.TurnoRequest.IdSubturno)
