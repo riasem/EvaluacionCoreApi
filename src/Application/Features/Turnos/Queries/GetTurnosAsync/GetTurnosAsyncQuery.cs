@@ -47,7 +47,7 @@ public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, Respon
                 Entrada = item.Entrada,
                 Salida = item.Salida,
                 IdTipoTurno = item.IdTipoTurno,
-                TipoTurno = tipoTurno.Descripcion,
+                TipoTurno = tipoTurno.CodigoTurno,
                 MargenEntrada = item.MargenEntrada,
                 MargenSalida = item.MargenSalida,
                 TotalHoras = item.TotalHoras
