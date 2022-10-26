@@ -1,7 +1,5 @@
-﻿using ExceptionsAp = EvaluacionCore.Application.Common.Exceptions;
-using EvaluacionCore.Application.Common.Wrappers;
-using System.Net;
-using System.Text.Json;
+﻿using System.Text.Json;
+using ExceptionsAp = EvaluacionCore.Application.Common.Exceptions;
 namespace WebEvaluacionCoreApi.Middleware;
 
 public class ErrorHandlerMiddleware : IMiddleware

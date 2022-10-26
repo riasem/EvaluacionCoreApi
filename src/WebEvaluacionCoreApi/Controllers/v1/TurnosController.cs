@@ -1,4 +1,4 @@
-﻿using EnrolApp.Application.Features.Clients.Queries.GetTurnoById;
+﻿using EvaluacionCore.Application.Features.Clients.Queries.GetTurnoById;
 using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.Clients.Commands.CreateTurno;
 using EvaluacionCore.Application.Features.Turnos.Commands.AsignarTurno;
@@ -87,10 +87,10 @@ public class TurnosController : ApiControllerBase
     /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    [HttpPost("AsignarTurno")]
+    [HttpPost("AsignarSuburnoCliente")]
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
     [AllowAnonymous]
-    public async Task<IActionResult> AsignarTurnos([FromBody] AsignarTurnoRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> AsignarSubturnoCliente([FromBody] AsignarTurnoRequest request, CancellationToken cancellationToken)
     {
         var objResult = await Mediator.Send(new AsignarTurnoCommand(request), cancellationToken);
         return Ok(objResult);

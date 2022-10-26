@@ -8,7 +8,7 @@ namespace EvaluacionCore.Application.Common.Exceptions;
 public class ValidationException : Exception
 {
     public ValidationException()
-        : base("Se han producidos uno o màs errores de validaciòn.")
+        : base("Se han producido uno o más errores de validación.")
     {
         Errors = new Dictionary<string, string[]>();
     }

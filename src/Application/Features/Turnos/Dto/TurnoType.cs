@@ -9,6 +9,9 @@ namespace EvaluacionCore.Application.Features.Clients.Dto
         [JsonPropertyName("idTipoTurno")]
         public Guid IdTipoTurno { get; set; }
 
+        [JsonPropertyName("TipoTurno")]
+        public string TipoTurno { get; set; }
+
         [JsonPropertyName("codigoTurno")]
         public string CodigoTurno { get; set; } = string.Empty;
 
@@ -29,12 +32,6 @@ namespace EvaluacionCore.Application.Features.Clients.Dto
 
         [JsonPropertyName("totalHoras")]
         public string TotalHoras { get; set; } = string.Empty;
-
-        [JsonPropertyName("estado")]
-        public string Estado { get; set; } = string.Empty;
-
-        [JsonPropertyName("usuario")]
-        public string Usario { get; set; } = string.Empty;
 
     }
 }
