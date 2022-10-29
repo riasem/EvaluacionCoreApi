@@ -5,9 +5,9 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace EvaluacionCore.Application.Features.Locacions.Dto;
+namespace EvaluacionCore.Application.Features.Localidads.Dto;
 
-public class LocacionType
+public class LocalidadType
 {
     [JsonPropertyName("id")]
     public Guid Id { get; set; }

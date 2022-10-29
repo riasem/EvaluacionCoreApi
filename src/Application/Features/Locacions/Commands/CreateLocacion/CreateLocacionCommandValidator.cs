@@ -5,30 +5,30 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EvaluacionCore.Application.Features.Locacions.Commands.CreateLocacion;
+namespace EvaluacionCore.Application.Features.Localidads.Commands.CreateLocalidad;
 
-public class CreateLocacionCommandValidator : AbstractValidator<CreateLocacionCommand>
+public class CreateLocalidadCommandValidator : AbstractValidator<CreateLocalidadCommand>
 {
-    public CreateLocacionCommandValidator()
+    public CreateLocalidadCommandValidator()
     {
-        RuleFor(v => v.LocacionRequest.Codigo)
+        RuleFor(v => v.LocalidadRequest.Codigo)
        .NotNull().WithMessage("{PropertyName} no puede ser nulo.")
        .NotEmpty().WithMessage("{PropertyName} no puede ser vacio.")
        .MaximumLength(5).WithMessage("{PropertyName} no debe exceder de {MaxLength} caracteres");
 
-        RuleFor(v => v.LocacionRequest.IdEmpresa)
+        RuleFor(v => v.LocalidadRequest.IdEmpresa)
        .NotNull().WithMessage("{PropertyName} no puede ser nulo.")
        .NotEmpty().WithMessage("{PropertyName} no puede ser vacio.");
 
-        RuleFor(v => v.LocacionRequest.Latitud)
+        RuleFor(v => v.LocalidadRequest.Latitud)
        .NotNull().WithMessage("{PropertyName} no puede ser nulo.")
        .NotEmpty().WithMessage("{PropertyName} no puede ser vacio.");
 
-        RuleFor(v => v.LocacionRequest.Longitud)
+        RuleFor(v => v.LocalidadRequest.Longitud)
        .NotNull().WithMessage("{PropertyName} no puede ser nulo.")
        .NotEmpty().WithMessage("{PropertyName} no puede ser vacio.");
 
-        RuleFor(v => v.LocacionRequest.Descripcion)
+        RuleFor(v => v.LocalidadRequest.Descripcion)
        .NotNull().WithMessage("{PropertyName} no puede ser nulo.")
        .NotEmpty().WithMessage("{PropertyName} no puede ser vacio.")
        .MaximumLength(20).WithMessage("{PropertyName} no debe exceder de {MaxLength} caracteres");

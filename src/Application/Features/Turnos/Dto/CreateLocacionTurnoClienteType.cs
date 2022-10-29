@@ -2,9 +2,9 @@
 using System.Text.Json.Serialization;
 
 
-namespace EvaluacionCore.Application.Features.Dto
+namespace EvaluacionCore.Application.Features.Turnos.Dto
 {
-    public class CreateLocacionTurnoCliente
+    public class CreateLocalidadTurnoCliente
     {
         [JsonPropertyName("idTipoTurno")]
         public Guid IdTipoTurno { get; set; }

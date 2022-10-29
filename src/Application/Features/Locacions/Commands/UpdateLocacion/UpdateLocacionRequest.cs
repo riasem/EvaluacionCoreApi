@@ -5,9 +5,9 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace EvaluacionCore.Application.Features.Locacions.Commands.UpdateLocacion;
+namespace EvaluacionCore.Application.Features.Localidads.Commands.UpdateLocalidad;
 
-public class UpdateLocacionRequest
+public class UpdateLocalidadRequest
 {
     [JsonPropertyName("id")]
     public Guid Id { get; set; }

@@ -5,12 +5,12 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace EvaluacionCore.Application.Features.Locacions.Commands.AsignarLocacionCliente;
+namespace EvaluacionCore.Application.Features.Localidads.Commands.AsignarLocalidadCliente;
 
-public class AsignarLocacionClienteRequest
+public class AsignarLocalidadClienteRequest
 {
-    [JsonPropertyName("idLocacion")]
-    public Guid IdLocacion { get; set; }
+    [JsonPropertyName("idLocalidad")]
+    public Guid IdLocalidad { get; set; }
 
     [JsonPropertyName("idCliente")]
     public Guid IdCliente { get; set; }

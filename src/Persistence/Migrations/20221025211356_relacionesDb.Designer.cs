@@ -205,7 +205,7 @@ namespace Workflow.Persistence.Migrations
                     b.ToTable("Clientes");
                 });
 
-            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Locacion", b =>
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Localidad", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -273,10 +273,10 @@ namespace Workflow.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AS_Locacion", "dbo");
+                    b.ToTable("AS_Localidad", "dbo");
                 });
 
-            modelBuilder.Entity("EvaluacionCore.Domain.Entities.LocacionCliente", b =>
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.LocalidadCliente", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -308,13 +308,13 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnName("idCliente")
                         .HasColumnOrder(2);
 
-                    b.Property<string>("IdLocacion")
+                    b.Property<string>("IdLocalidad")
                         .IsRequired()
                         .HasColumnType("varchar(36)")
-                        .HasColumnName("idLocacion")
+                        .HasColumnName("idLocalidad")
                         .HasColumnOrder(1);
 
-                    b.Property<Guid?>("LocacionId")
+                    b.Property<Guid?>("LocalidadId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("UsuarioCreacion")
@@ -333,9 +333,9 @@ namespace Workflow.Persistence.Migrations
 
                     b.HasIndex("ClienteId");
 
-                    b.HasIndex("LocacionId");
+                    b.HasIndex("LocalidadId");
 
-                    b.ToTable("AS_LocacionCliente", "dbo");
+                    b.ToTable("AS_LocalidadCliente", "dbo");
                 });
 
             modelBuilder.Entity("EvaluacionCore.Domain.Entities.MarcacionCliente", b =>
@@ -374,12 +374,12 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnName("idCliente")
                         .HasColumnOrder(2);
 
-                    b.Property<Guid>("IdLocacion")
+                    b.Property<Guid>("IdLocalidad")
                         .HasColumnType("uniqueidentifier")
-                        .HasColumnName("idLocacion")
+                        .HasColumnName("idLocalidad")
                         .HasColumnOrder(1);
 
-                    b.Property<Guid?>("LocacionId")
+                    b.Property<Guid?>("LocalidadId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("MarcacionEntrada")
@@ -417,7 +417,7 @@ namespace Workflow.Persistence.Migrations
 
                     b.HasIndex("ClienteId");
 
-                    b.HasIndex("LocacionId");
+                    b.HasIndex("LocalidadId");
 
                     b.ToTable("AS_MarcacionCliente", "dbo");
                 });
@@ -775,19 +775,19 @@ namespace Workflow.Persistence.Migrations
                     b.ToTable("AS_Turno", "dbo");
                 });
 
-            modelBuilder.Entity("EvaluacionCore.Domain.Entities.LocacionCliente", b =>
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.LocalidadCliente", b =>
                 {
                     b.HasOne("EvaluacionCore.Domain.Entities.Cliente", "Cliente")
-                        .WithMany("LocacionClientes")
+                        .WithMany("LocalidadClientes")
                         .HasForeignKey("ClienteId");
 
-                    b.HasOne("EvaluacionCore.Domain.Entities.Locacion", "Locacion")
-                        .WithMany("LocacionClientes")
-                        .HasForeignKey("LocacionId");
+                    b.HasOne("EvaluacionCore.Domain.Entities.Localidad", "Localidad")
+                        .WithMany("LocalidadClientes")
+                        .HasForeignKey("LocalidadId");
 
                     b.Navigation("Cliente");
 
-                    b.Navigation("Locacion");
+                    b.Navigation("Localidad");
                 });
 
             modelBuilder.Entity("EvaluacionCore.Domain.Entities.MarcacionCliente", b =>
@@ -796,13 +796,13 @@ namespace Workflow.Persistence.Migrations
                         .WithMany("MarcacionClientes")
                         .HasForeignKey("ClienteId");
 
-                    b.HasOne("EvaluacionCore.Domain.Entities.Locacion", "Locacion")
+                    b.HasOne("EvaluacionCore.Domain.Entities.Localidad", "Localidad")
                         .WithMany("MarcacionClientes")
-                        .HasForeignKey("LocacionId");
+                        .HasForeignKey("LocalidadId");
 
                     b.Navigation("Cliente");
 
-                    b.Navigation("Locacion");
+                    b.Navigation("Localidad");
                 });
 
             modelBuilder.Entity("EvaluacionCore.Domain.Entities.SubTurno", b =>
@@ -846,16 +846,16 @@ namespace Workflow.Persistence.Migrations
 
             modelBuilder.Entity("EvaluacionCore.Domain.Entities.Cliente", b =>
                 {
-                    b.Navigation("LocacionClientes");
+                    b.Navigation("LocalidadClientes");
 
                     b.Navigation("MarcacionClientes");
 
                     b.Navigation("SubTurnoClientes");
                 });
 
-            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Locacion", b =>
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Localidad", b =>
                 {
-                    b.Navigation("LocacionClientes");
+                    b.Navigation("LocalidadClientes");
 
                     b.Navigation("MarcacionClientes");
                 });

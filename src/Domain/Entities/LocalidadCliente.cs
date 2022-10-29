@@ -1,28 +1,26 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EvaluacionCore.Domain.Entities;
 
-[Table("AS_LocacionTurnoCliente", Schema = "dbo")]
-public class LocacionTurnoCliente
+[Table("AS_LocalidadCliente", Schema = "dbo")]
+public class LocalidadCliente
 {
     [Key]
     [Required]
     [Column("id", Order = 0, TypeName = "uniqueidentifier")]
     public Guid Id { get; set; } = Guid.NewGuid();
 
+    [Column("idLocalidad", Order = 1, TypeName = "uniqueidentifier")]
+    public Guid IdLocaliad { get; set; }
+    //public virtual Localidad Localidad { get; set; } 
 
-    [Column("idLocacion", Order = 1, TypeName = "uniqueidentifier")]
-    public virtual Locacion Locacion { get; set; }
-
-
-    [Column("idSubturnoCliente", Order = 2, TypeName = "uniqueidentifier")]
-    public virtual SubTurnoCliente SubTurnoCliente { get; set; }
-
-
-    [Column("fechaAsignacion", Order = 3, TypeName = "datetime2")]
-    public System.DateTime FechaEvaluacion { get; set; } = System.DateTime.Now;
-
+    [Column("idCliente", Order = 2, TypeName = "uniqueidentifier")]
+    public Guid IdCliente { get; set; }
+    //public virtual Cliente Cliente { get; set; }
+   
+    [Column("estado", Order = 3, TypeName = "varchar")]
+    public string Estado { get; set; } = "A";
 
 
     //AUDITORIA
@@ -38,8 +36,7 @@ public class LocacionTurnoCliente
     [Column("fechaModificacion", Order = 7, TypeName = "datetime2")]
     public Nullable<System.DateTime> FechaModificacion { get; set; }
 
-    public virtual ICollection<SubTurno> SubTurnos { get; set; }
-    public virtual ICollection<SubTurnoCliente> SubTurnoClientes { get; set; }
+    //public virtual ICollection<LocalidadSubturnoCliente> LocalidadSubturnoClientes { get; set; }
 
 }
 

@@ -9,31 +9,31 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EvaluacionCore.Application.Features.Locacions.Commands.AsignarLocacionCliente;
+namespace EvaluacionCore.Application.Features.Localidads.Commands.AsignarLocalidadCliente;
 
-public record AsignarLocacionClienteCommand(AsignarLocacionClienteRequest LocacionCliRequest) : IRequest<ResponseType<string>>;
-public class AsignarLocacionClienteCommandHandler : IRequestHandler<AsignarLocacionClienteCommand, ResponseType<string>>
+public record AsignarLocalidadClienteCommand(AsignarLocalidadClienteRequest LocalidadCliRequest) : IRequest<ResponseType<string>>;
+public class AsignarLocalidadClienteCommandHandler : IRequestHandler<AsignarLocalidadClienteCommand, ResponseType<string>>
 {
     private readonly IMapper _mapper;
-    private readonly IRepositoryAsync<LocacionCliente> _repoLocacionCliAsync;
+    private readonly IRepositoryAsync<LocalidadCliente> _repoLocalidadCliAsync;
 
-    public AsignarLocacionClienteCommandHandler(IMapper mapper, IRepositoryAsync<LocacionCliente> repoLocacionCliAsync)
+    public AsignarLocalidadClienteCommandHandler(IMapper mapper, IRepositoryAsync<LocalidadCliente> repoLocalidadCliAsync)
     {
         _mapper = mapper;
-        _repoLocacionCliAsync = repoLocacionCliAsync;
+        _repoLocalidadCliAsync = repoLocalidadCliAsync;
 
     }
 
-    public async Task<ResponseType<string>> Handle(AsignarLocacionClienteCommand request, CancellationToken cancellationToken)
+    public async Task<ResponseType<string>> Handle(AsignarLocalidadClienteCommand request, CancellationToken cancellationToken)
     {
-        var objLocacionClie = _mapper.Map<LocacionCliente>(request.LocacionCliRequest);
+        var objLocalidadClie = _mapper.Map<LocalidadCliente>(request.LocalidadCliRequest);
 
-        objLocacionClie.Id = Guid.NewGuid();
-        objLocacionClie.Estado = "A";
-        objLocacionClie.UsuarioCreacion = "Admin";
+        objLocalidadClie.Id = Guid.NewGuid();
+        objLocalidadClie.Estado = "A";
+        objLocalidadClie.UsuarioCreacion = "Admin";
 
 
-        var objResult = await _repoLocacionCliAsync.AddAsync(objLocacionClie, cancellationToken);
+        var objResult = await _repoLocalidadCliAsync.AddAsync(objLocalidadClie, cancellationToken);
         if (objResult is null)
         {
             return new ResponseType<string>() { Data = objResult.Id.ToString(), Message = "Ocurrió un error al registrar el turno", StatusCode = "000", Succeeded = true };

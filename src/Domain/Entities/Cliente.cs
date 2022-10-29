@@ -94,9 +94,8 @@ public class Cliente
     [Column("nombreUsuario", Order = 23, TypeName = "varchar")]
     public string NombreUsuario { get; set; }
 
-    public virtual ICollection<SubTurnoCliente> SubTurnoClientes { get; set; }
-    public virtual ICollection<LocacionCliente> LocacionClientes { get; set; }
-    public virtual ICollection<MarcacionCliente> MarcacionClientes { get; set; }
+    //public virtual ICollection<SubTurnoCliente> SubTurnoClientes { get; set; }
+    //public virtual ICollection<LocalidadCliente> LocalidadClientes { get; set; }
 
 }
 

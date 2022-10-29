@@ -12,10 +12,10 @@ public class ApplicationDbContext : DbContext
     }
 
     public DbSet<Canal> Canales { get; set; }
-    public DbSet<Locacion> Locaciones { get; set; }
+    public DbSet<Localidad> Localidades { get; set; }
     public DbSet<Cliente> Clientes { get; set; }
-    public DbSet<LocacionCliente> LocacionClientes { get; set; }
-    public DbSet<LocacionTurnoCliente> LocacionTurnoClientes { get; set; }
+    public DbSet<LocalidadCliente> LocalidadClientes { get; set; }
+    public DbSet<LocalidadSubturnoCliente> LocalidadTurnoClientes { get; set; }
     public DbSet<MarcacionCliente> MarcacionClientes { get; set; }
     public DbSet<SubTurno> SubTurnos { get; set; }
     public DbSet<SubTurnoCliente> SubTurnoClientes { get; set; }

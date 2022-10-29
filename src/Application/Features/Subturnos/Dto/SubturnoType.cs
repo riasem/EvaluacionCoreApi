@@ -2,9 +2,9 @@
 using System.Text.Json.Serialization;
 
 
-namespace EvaluacionCore.Application.Features.Turnos.Dto
+namespace EvaluacionCore.Application.Features.Subturnos.Dto
 {
-    public class TurnoType
+    public class SubturnoType
     {
         [JsonPropertyName("idTipoTurno")]
         public Guid IdTipoTurno { get; set; }

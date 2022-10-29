@@ -5,13 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EvaluacionCore.Application.Features.Locacions.Commands.DeleteLocation;
+namespace EvaluacionCore.Application.Features.Localidads.Commands.DeleteLocation;
 
-public class DeleteLocacionCommandValidator : AbstractValidator<DeleteLocacionCommand>
+public class DeleteLocalidadCommandValidator : AbstractValidator<DeleteLocalidadCommand>
 {
-    public DeleteLocacionCommandValidator()
+    public DeleteLocalidadCommandValidator()
     {
-        RuleFor(v => v.IdLocacion)
+        RuleFor(v => v.IdLocalidad)
        .NotNull().WithMessage("{PropertyName} no puede ser nulo.")
        .NotEmpty().WithMessage("{PropertyName} no puede ser vacio.");
     }

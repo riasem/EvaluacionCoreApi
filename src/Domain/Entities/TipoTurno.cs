@@ -10,17 +10,15 @@ public class TipoTurno
     [Column("id", Order = 0, TypeName = "uniqueidentifier")]
     public Guid Id { get; set; } = Guid.NewGuid();
 
-
     [Column("codigoTurno", Order = 1, TypeName = "varchar")]
     [StringLength(10)] public string CodigoTurno { get; set; } = string.Empty;
-
 
     [Column("descripcion", Order = 2, TypeName = "varchar")]
     [StringLength(50)] public string Descripcion { get; set; } = string.Empty;
 
-
     [Column("estado", Order = 3, TypeName = "varchar")]
     public string Estado { get; set; } = "A";
+
 
 
     //AUDITORIA
@@ -37,7 +35,7 @@ public class TipoTurno
     public Nullable<System.DateTime> FechaModificacion { get; set; }
 
 
-    public virtual ICollection<Turno> Turnos { get; set; }
+    //public virtual ICollection<Turno> Turnos { get; set; }
 
 }
 

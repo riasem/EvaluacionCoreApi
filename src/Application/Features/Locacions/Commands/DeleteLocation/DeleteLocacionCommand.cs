@@ -9,31 +9,31 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EvaluacionCore.Application.Features.Locacions.Commands.DeleteLocation;
+namespace EvaluacionCore.Application.Features.Localidads.Commands.DeleteLocation;
 
-public record DeleteLocacionCommand(string IdLocacion) : IRequest<ResponseType<string>>;
+public record DeleteLocalidadCommand(string IdLocalidad) : IRequest<ResponseType<string>>;
 
-public class DeleteLocacionCommandHandler : IRequestHandler<DeleteLocacionCommand,ResponseType<string>>
+public class DeleteLocalidadCommandHandler : IRequestHandler<DeleteLocalidadCommand,ResponseType<string>>
 {
-    private readonly IRepositoryAsync<Locacion> _repoLocacionAsync;
+    private readonly IRepositoryAsync<Localidad> _repoLocalidadAsync;
     private readonly IMapper _mapper;
-    public DeleteLocacionCommandHandler(IRepositoryAsync<Locacion> repoLocacionAsync, IMapper mapper)
+    public DeleteLocalidadCommandHandler(IRepositoryAsync<Localidad> repoLocalidadAsync, IMapper mapper)
     {
-        _repoLocacionAsync = repoLocacionAsync;
+        _repoLocalidadAsync = repoLocalidadAsync;
         _mapper = mapper;
     }
 
-    public async Task<ResponseType<string>> Handle(DeleteLocacionCommand request, CancellationToken cancellationToken)
+    public async Task<ResponseType<string>> Handle(DeleteLocalidadCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            var objLocacion = await _repoLocacionAsync.GetByIdAsync(Guid.Parse(request.IdLocacion), cancellationToken);
-            if (objLocacion is null)
+            var objLocalidad = await _repoLocalidadAsync.GetByIdAsync(Guid.Parse(request.IdLocalidad), cancellationToken);
+            if (objLocalidad is null)
             {
                 return new ResponseType<string>() { Data = null, Message = "No existe la locación que desea eliminar", StatusCode = "999", Succeeded = false };
             }
-            objLocacion.Estado = "I";
-            await _repoLocacionAsync.UpdateAsync(objLocacion, cancellationToken);
+            objLocalidad.Estado = "I";
+            await _repoLocalidadAsync.UpdateAsync(objLocalidad, cancellationToken);
 
             return new ResponseType<string>() { Data = null, Message = "Locación eliminada exitosamente", StatusCode = "000", Succeeded = true };
 

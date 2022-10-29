@@ -37,7 +37,7 @@ public class TipoSubTurno
     [Column("fechaModificacion", Order = 7, TypeName = "datetime2")]
     public Nullable<System.DateTime> FechaModificacion { get; set; }
 
-    public virtual ICollection<SubTurno> SubTurnos { get; set; }
+    //public virtual ICollection<SubTurno> SubTurnos { get; set; }
 
 }
 

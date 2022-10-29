@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
-using EvaluacionCore.Application.Features.Turnos.Commands.CreateSubturnoCliente;
 using EvaluacionCore.Domain.Entities;
 using MediatR;
 

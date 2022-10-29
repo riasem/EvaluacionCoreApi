@@ -30,7 +30,7 @@ namespace Workflow.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AS_Locacion",
+                name: "AS_Localidad",
                 schema: "dbo",
                 columns: table => new
                 {
@@ -48,7 +48,7 @@ namespace Workflow.Persistence.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AS_Locacion", x => x.id);
+                    table.PrimaryKey("PK_AS_Localidad", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -156,32 +156,32 @@ namespace Workflow.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AS_LocacionCliente",
+                name: "AS_LocalidadCliente",
                 schema: "dbo",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    idLocacion = table.Column<string>(type: "varchar(36)", nullable: false),
+                    idLocalidad = table.Column<string>(type: "varchar(36)", nullable: false),
                     idCliente = table.Column<string>(type: "varchar(36)", nullable: false),
                     estado = table.Column<string>(type: "varchar", nullable: true),
                     usuarioCreacion = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
                     fechaCreacion = table.Column<DateTime>(type: "datetime", nullable: false),
                     usuarioModificacion = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
                     fechaModificacion = table.Column<DateTime>(type: "datetime", nullable: true),
-                    LocacionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    LocalidadId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     ClienteId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AS_LocacionCliente", x => x.id);
+                    table.PrimaryKey("PK_AS_LocalidadCliente", x => x.id);
                     table.ForeignKey(
-                        name: "FK_AS_LocacionCliente_AS_Locacion_LocacionId",
-                        column: x => x.LocacionId,
+                        name: "FK_AS_LocalidadCliente_AS_Localidad_LocalidadId",
+                        column: x => x.LocalidadId,
                         principalSchema: "dbo",
-                        principalTable: "AS_Locacion",
+                        principalTable: "AS_Localidad",
                         principalColumn: "id");
                     table.ForeignKey(
-                        name: "FK_AS_LocacionCliente_Clientes_ClienteId",
+                        name: "FK_AS_LocalidadCliente_Clientes_ClienteId",
                         column: x => x.ClienteId,
                         principalTable: "Clientes",
                         principalColumn: "id");
@@ -265,7 +265,7 @@ namespace Workflow.Persistence.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    idLocacion = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    idLocalidad = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     idSubTurno = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     marcacionEntrada = table.Column<DateTime>(type: "datetime", nullable: true),
                     marcacionSalida = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -277,17 +277,17 @@ namespace Workflow.Persistence.Migrations
                     fechaCreacion = table.Column<DateTime>(type: "datetime", nullable: false),
                     usuarioModificacion = table.Column<string>(type: "varchar", nullable: true),
                     fechaModificacion = table.Column<DateTime>(type: "datetime", nullable: true),
-                    LocacionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    LocalidadId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     SubTurnoId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AS_MarcacionCliente", x => x.id);
                     table.ForeignKey(
-                        name: "FK_AS_MarcacionCliente_AS_Locacion_LocacionId",
-                        column: x => x.LocacionId,
+                        name: "FK_AS_MarcacionCliente_AS_Localidad_LocalidadId",
+                        column: x => x.LocalidadId,
                         principalSchema: "dbo",
-                        principalTable: "AS_Locacion",
+                        principalTable: "AS_Localidad",
                         principalColumn: "id");
                     table.ForeignKey(
                         name: "FK_AS_MarcacionCliente_AS_Subturno_SubTurnoId",
@@ -298,22 +298,22 @@ namespace Workflow.Persistence.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AS_LocacionCliente_ClienteId",
+                name: "IX_AS_LocalidadCliente_ClienteId",
                 schema: "dbo",
-                table: "AS_LocacionCliente",
+                table: "AS_LocalidadCliente",
                 column: "ClienteId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AS_LocacionCliente_LocacionId",
+                name: "IX_AS_LocalidadCliente_LocalidadId",
                 schema: "dbo",
-                table: "AS_LocacionCliente",
-                column: "LocacionId");
+                table: "AS_LocalidadCliente",
+                column: "LocalidadId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AS_MarcacionCliente_LocacionId",
+                name: "IX_AS_MarcacionCliente_LocalidadId",
                 schema: "dbo",
                 table: "AS_MarcacionCliente",
-                column: "LocacionId");
+                column: "LocalidadId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AS_MarcacionCliente_SubTurnoId",
@@ -359,7 +359,7 @@ namespace Workflow.Persistence.Migrations
             //    schema: "dbo");
 
             //migrationBuilder.DropTable(
-            //    name: "AS_LocacionCliente",
+            //    name: "AS_LocalidadCliente",
             //    schema: "dbo");
 
             //migrationBuilder.DropTable(
@@ -371,7 +371,7 @@ namespace Workflow.Persistence.Migrations
             //    schema: "dbo");
 
             //migrationBuilder.DropTable(
-            //    name: "AS_Locacion",
+            //    name: "AS_Localidad",
             //    schema: "dbo");
 
             //migrationBuilder.DropTable(

@@ -3,21 +3,19 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EvaluacionCore.Domain.Entities;
 
-[Table("AS_Locacion", Schema = "dbo")]
-public class Locacion
+[Table("AS_Localidad", Schema = "dbo")]
+public class Localidad
 {
     [Key]
     [Required]
     [Column("id", Order = 0, TypeName = "uniqueidentifier")]
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    [Column("codigo", Order = 1, TypeName = "varchar")]
-    [StringLength(5)] public string Codigo { get; set; } = string.Empty;
-
-
-    [Column("idEmpresa", Order = 2, TypeName = "uniqueidentifier")]
+    [Column("idEmpresa", Order = 1, TypeName = "uniqueidentifier")]
     public Guid IdEmpresa { get; set; }
 
+    [Column("codigo", Order = 2, TypeName = "varchar")]
+    [StringLength(10)] public string Codigo { get; set; } = string.Empty;
 
     [Column("latitud", Order = 3, TypeName = "float")]
     [MaxLength(8)] public double Latitud { get; set; } 
@@ -45,8 +43,7 @@ public class Locacion
     public Nullable<System.DateTime> FechaModificacion { get; set; }
 
 
-    public virtual ICollection<LocacionCliente> LocacionClientes { get; set; }
-    public virtual ICollection<MarcacionCliente> MarcacionClientes { get; set; }
+    //public virtual ICollection<LocalidadCliente> LocalidadClientes { get; set; }
 
 }
 

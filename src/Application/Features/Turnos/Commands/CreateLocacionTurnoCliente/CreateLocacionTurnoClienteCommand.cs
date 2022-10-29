@@ -4,23 +4,23 @@ using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Domain.Entities;
 using MediatR;
 
-namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateLocacionTurnoCliente;
+namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateLocalidadTurnoCliente;
 
-public record CreateLocacionTurnoClienteCommand(CreateLocacionTurnoClienteRequest TurnoRequest) : IRequest<ResponseType<string>>;
+public record CreateLocalidadTurnoClienteCommand(CreateLocalidadTurnoClienteRequest TurnoRequest) : IRequest<ResponseType<string>>;
 
 
-public class CreateLocacionTurnoClienteCommandHandler : IRequestHandler<CreateLocacionTurnoClienteCommand, ResponseType<string>>
+public class CreateLocalidadTurnoClienteCommandHandler : IRequestHandler<CreateLocalidadTurnoClienteCommand, ResponseType<string>>
 {
     private readonly IRepositoryAsync<SubTurnoCliente> _repoTurnoAsync;
     private readonly IMapper _mapper;
 
-    public CreateLocacionTurnoClienteCommandHandler(IRepositoryAsync<SubTurnoCliente> repository, IMapper mapper)
+    public CreateLocalidadTurnoClienteCommandHandler(IRepositoryAsync<SubTurnoCliente> repository, IMapper mapper)
     {
         _repoTurnoAsync = repository;
         _mapper = mapper;
     }
 
-    public async Task<ResponseType<string>> Handle(CreateLocacionTurnoClienteCommand request, CancellationToken cancellationToken)
+    public async Task<ResponseType<string>> Handle(CreateLocalidadTurnoClienteCommand request, CancellationToken cancellationToken)
     {
         var objClient = _mapper.Map<SubTurnoCliente>(request.TurnoRequest);
 

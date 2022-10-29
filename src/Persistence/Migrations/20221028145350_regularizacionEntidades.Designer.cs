@@ -4,6 +4,7 @@ using EvaluacionCore.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Workflow.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221028145350_regularizacionEntidades")]
+    partial class regularizacionEntidades
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -282,6 +284,9 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnName("id")
                         .HasColumnOrder(0);
 
+                    b.Property<Guid?>("ClienteId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Estado")
                         .HasColumnType("varchar")
                         .HasColumnName("estado")
@@ -307,6 +312,9 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnName("idLocalidad")
                         .HasColumnOrder(1);
 
+                    b.Property<Guid?>("LocalidadId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("UsuarioCreacion")
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)")
@@ -320,6 +328,10 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnOrder(6);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClienteId");
+
+                    b.HasIndex("LocalidadId");
 
                     b.ToTable("AS_LocalidadCliente", "dbo");
                 });
@@ -357,6 +369,12 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnName("idSubturnoCliente")
                         .HasColumnOrder(2);
 
+                    b.Property<Guid?>("LocalidadClienteId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("SubTurnoClienteId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("UsuarioCreacion")
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)")
@@ -370,6 +388,10 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnOrder(6);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LocalidadClienteId");
+
+                    b.HasIndex("SubTurnoClienteId");
 
                     b.ToTable("AS_LocalidadSubturnoCliente", "dbo");
                 });
@@ -402,10 +424,13 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnName("fechaModificacion")
                         .HasColumnOrder(11);
 
-                    b.Property<Guid>("IdLocalidadSubturnoCliente")
+                    b.Property<Guid>("IdLocalidadTurnoCliente")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("idCliente")
                         .HasColumnOrder(1);
+
+                    b.Property<Guid?>("LocalidadSubturnoClienteId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("MarcacionEntrada")
                         .HasColumnType("datetime2")
@@ -440,6 +465,8 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnOrder(10);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LocalidadSubturnoClienteId");
 
                     b.ToTable("AS_MarcacionCliente", "dbo");
                 });
@@ -514,11 +541,17 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnName("salida")
                         .HasColumnOrder(6);
 
+                    b.Property<Guid?>("TipoSubTurnoId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("TotalHoras")
                         .HasMaxLength(2)
                         .HasColumnType("varchar(2)")
                         .HasColumnName("totalHoras")
                         .HasColumnOrder(9);
+
+                    b.Property<Guid?>("TurnoId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("UsuarioCreacion")
                         .HasMaxLength(20)
@@ -534,6 +567,10 @@ namespace Workflow.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TipoSubTurnoId");
+
+                    b.HasIndex("TurnoId");
+
                     b.ToTable("AS_Subturno", "dbo");
                 });
 
@@ -544,6 +581,9 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("id")
                         .HasColumnOrder(0);
+
+                    b.Property<Guid?>("ClienteId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Estado")
                         .HasColumnType("varchar")
@@ -570,6 +610,9 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnName("idSubturno")
                         .HasColumnOrder(1);
 
+                    b.Property<Guid?>("SubTurnoId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("UsuarioCreacion")
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)")
@@ -583,6 +626,10 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnOrder(6);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClienteId");
+
+                    b.HasIndex("SubTurnoId");
 
                     b.ToTable("AS_SubTurnoCliente", "dbo");
                 });
@@ -757,6 +804,9 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnName("salida")
                         .HasColumnOrder(6);
 
+                    b.Property<Guid?>("TipoSubTurnoId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("TotalHoras")
                         .HasMaxLength(2)
                         .HasColumnType("varchar(2)")
@@ -777,7 +827,129 @@ namespace Workflow.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TipoSubTurnoId");
+
                     b.ToTable("AS_Turno", "dbo");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.LocalidadCliente", b =>
+                {
+                    b.HasOne("EvaluacionCore.Domain.Entities.Cliente", "Cliente")
+                        .WithMany("LocalidadClientes")
+                        .HasForeignKey("ClienteId");
+
+                    b.HasOne("EvaluacionCore.Domain.Entities.Localidad", "Localidad")
+                        .WithMany("LocalidadClientes")
+                        .HasForeignKey("LocalidadId");
+
+                    b.Navigation("Cliente");
+
+                    b.Navigation("Localidad");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.LocalidadSubturnoCliente", b =>
+                {
+                    b.HasOne("EvaluacionCore.Domain.Entities.LocalidadCliente", "LocalidadCliente")
+                        .WithMany("LocalidadSubturnoClientes")
+                        .HasForeignKey("LocalidadClienteId");
+
+                    b.HasOne("EvaluacionCore.Domain.Entities.SubTurnoCliente", "SubTurnoCliente")
+                        .WithMany()
+                        .HasForeignKey("SubTurnoClienteId");
+
+                    b.Navigation("LocalidadCliente");
+
+                    b.Navigation("SubTurnoCliente");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.MarcacionCliente", b =>
+                {
+                    b.HasOne("EvaluacionCore.Domain.Entities.LocalidadSubturnoCliente", "LocalidadSubturnoCliente")
+                        .WithMany("MarcacionClientes")
+                        .HasForeignKey("LocalidadSubturnoClienteId");
+
+                    b.Navigation("LocalidadSubturnoCliente");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.SubTurno", b =>
+                {
+                    b.HasOne("EvaluacionCore.Domain.Entities.TipoSubTurno", "TipoSubTurno")
+                        .WithMany("SubTurnos")
+                        .HasForeignKey("TipoSubTurnoId");
+
+                    b.HasOne("EvaluacionCore.Domain.Entities.Turno", "Turno")
+                        .WithMany("SubTurnos")
+                        .HasForeignKey("TurnoId");
+
+                    b.Navigation("TipoSubTurno");
+
+                    b.Navigation("Turno");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.SubTurnoCliente", b =>
+                {
+                    b.HasOne("EvaluacionCore.Domain.Entities.Cliente", "Cliente")
+                        .WithMany("SubTurnoClientes")
+                        .HasForeignKey("ClienteId");
+
+                    b.HasOne("EvaluacionCore.Domain.Entities.SubTurno", "SubTurno")
+                        .WithMany("SubTurnoClientes")
+                        .HasForeignKey("SubTurnoId");
+
+                    b.Navigation("Cliente");
+
+                    b.Navigation("SubTurno");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Turno", b =>
+                {
+                    b.HasOne("EvaluacionCore.Domain.Entities.TipoTurno", "TipoSubTurno")
+                        .WithMany("Turnos")
+                        .HasForeignKey("TipoSubTurnoId");
+
+                    b.Navigation("TipoSubTurno");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Cliente", b =>
+                {
+                    b.Navigation("LocalidadClientes");
+
+                    b.Navigation("SubTurnoClientes");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Localidad", b =>
+                {
+                    b.Navigation("LocalidadClientes");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.LocalidadCliente", b =>
+                {
+                    b.Navigation("LocalidadSubturnoClientes");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.LocalidadSubturnoCliente", b =>
+                {
+                    b.Navigation("MarcacionClientes");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.SubTurno", b =>
+                {
+                    b.Navigation("SubTurnoClientes");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.TipoSubTurno", b =>
+                {
+                    b.Navigation("SubTurnos");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.TipoTurno", b =>
+                {
+                    b.Navigation("Turnos");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Turno", b =>
+                {
+                    b.Navigation("SubTurnos");
                 });
 #pragma warning restore 612, 618
         }

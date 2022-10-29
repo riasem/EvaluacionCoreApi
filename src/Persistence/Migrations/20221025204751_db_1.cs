@@ -251,7 +251,7 @@ namespace Workflow.Persistence.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "fechaModificacion",
                 schema: "dbo",
-                table: "AS_LocacionCliente",
+                table: "AS_LocalidadCliente",
                 type: "datetime2",
                 nullable: true,
                 oldClrType: typeof(DateTime),
@@ -261,7 +261,7 @@ namespace Workflow.Persistence.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "fechaCreacion",
                 schema: "dbo",
-                table: "AS_LocacionCliente",
+                table: "AS_LocalidadCliente",
                 type: "datetime2",
                 nullable: false,
                 oldClrType: typeof(DateTime),
@@ -270,7 +270,7 @@ namespace Workflow.Persistence.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "idEmpresa",
                 schema: "dbo",
-                table: "AS_Locacion",
+                table: "AS_Localidad",
                 type: "varchar(20)",
                 maxLength: 20,
                 nullable: false,
@@ -283,7 +283,7 @@ namespace Workflow.Persistence.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "fechaModificacion",
                 schema: "dbo",
-                table: "AS_Locacion",
+                table: "AS_Localidad",
                 type: "datetime2",
                 nullable: true,
                 oldClrType: typeof(DateTime),
@@ -293,7 +293,7 @@ namespace Workflow.Persistence.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "fechaCreacion",
                 schema: "dbo",
-                table: "AS_Locacion",
+                table: "AS_Localidad",
                 type: "datetime2",
                 nullable: false,
                 oldClrType: typeof(DateTime),
@@ -302,7 +302,7 @@ namespace Workflow.Persistence.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "descripcion",
                 schema: "dbo",
-                table: "AS_Locacion",
+                table: "AS_Localidad",
                 type: "varchar",
                 nullable: true,
                 oldClrType: typeof(string),
@@ -581,7 +581,7 @@ namespace Workflow.Persistence.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "fechaModificacion",
                 schema: "dbo",
-                table: "AS_LocacionCliente",
+                table: "AS_LocalidadCliente",
                 type: "datetime",
                 nullable: true,
                 oldClrType: typeof(DateTime),
@@ -591,7 +591,7 @@ namespace Workflow.Persistence.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "fechaCreacion",
                 schema: "dbo",
-                table: "AS_LocacionCliente",
+                table: "AS_LocalidadCliente",
                 type: "datetime",
                 nullable: false,
                 oldClrType: typeof(DateTime),
@@ -600,7 +600,7 @@ namespace Workflow.Persistence.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "idEmpresa",
                 schema: "dbo",
-                table: "AS_Locacion",
+                table: "AS_Localidad",
                 type: "varchar(20)",
                 maxLength: 20,
                 nullable: true,
@@ -611,7 +611,7 @@ namespace Workflow.Persistence.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "fechaModificacion",
                 schema: "dbo",
-                table: "AS_Locacion",
+                table: "AS_Localidad",
                 type: "datetime",
                 nullable: true,
                 oldClrType: typeof(DateTime),
@@ -621,7 +621,7 @@ namespace Workflow.Persistence.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "fechaCreacion",
                 schema: "dbo",
-                table: "AS_Locacion",
+                table: "AS_Localidad",
                 type: "datetime",
                 nullable: false,
                 oldClrType: typeof(DateTime),
@@ -630,7 +630,7 @@ namespace Workflow.Persistence.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "descripcion",
                 schema: "dbo",
-                table: "AS_Locacion",
+                table: "AS_Localidad",
                 type: "varchar(36)",
                 nullable: false,
                 defaultValue: "",

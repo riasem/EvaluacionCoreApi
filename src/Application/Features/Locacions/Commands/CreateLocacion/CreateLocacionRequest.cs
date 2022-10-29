@@ -5,9 +5,9 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace EvaluacionCore.Application.Features.Locacions.Commands.CreateLocacion;
+namespace EvaluacionCore.Application.Features.Localidads.Commands.CreateLocalidad;
 
-public class CreateLocacionRequest
+public class CreateLocalidadRequest
 {
     [JsonPropertyName("codigo")]
     public string Codigo { get; set; }

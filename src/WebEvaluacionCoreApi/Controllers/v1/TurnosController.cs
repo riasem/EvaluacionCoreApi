@@ -1,7 +1,7 @@
 ﻿using EvaluacionCore.Application.Common.Wrappers;
-using EvaluacionCore.Application.Features.Clients.Commands.CreateTurno;
-using EvaluacionCore.Application.Features.Clients.Queries.GetTurnoById;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateSubturnoCliente;
+using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurno;
+using EvaluacionCore.Application.Features.Turnos.Queries.GetTurnoById;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;

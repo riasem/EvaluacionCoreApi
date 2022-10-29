@@ -1,9 +1,9 @@
-﻿using EvaluacionCore.Application.Features.Turnos.Commands.CreateLocacionTurnoCliente;
+﻿using EvaluacionCore.Application.Features.Turnos.Commands.CreateLocalidadTurnoCliente;
 using FluentValidation;
 
-namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateLocacionTurnoCliente;
+namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateLocalidadTurnoCliente;
 
-public class CreateSubturnoClienteCommandValidator : AbstractValidator<CreateLocacionTurnoClienteCommand>
+public class CreateSubturnoClienteCommandValidator : AbstractValidator<CreateLocalidadTurnoClienteCommand>
 {
     public CreateSubturnoClienteCommandValidator()
     {

@@ -4,30 +4,30 @@ using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Domain.Entities;
 using MediatR;
 
-namespace EvaluacionCore.Application.Features.Locacions.Commands.CreateLocacion;
+namespace EvaluacionCore.Application.Features.Localidads.Commands.CreateLocalidad;
 
-public record CreateLocacionCommand(CreateLocacionRequest LocacionRequest) : IRequest<ResponseType<string>>;
-public class CreateLocacionCommandHandler : IRequestHandler<CreateLocacionCommand, ResponseType<string>>
+public record CreateLocalidadCommand(CreateLocalidadRequest LocalidadRequest) : IRequest<ResponseType<string>>;
+public class CreateLocalidadCommandHandler : IRequestHandler<CreateLocalidadCommand, ResponseType<string>>
 {
-    private readonly IRepositoryAsync<Locacion> _repoLocacionAsync;
+    private readonly IRepositoryAsync<Localidad> _repoLocalidadAsync;
     private readonly IMapper _mapper;
 
-    public CreateLocacionCommandHandler(IRepositoryAsync<Locacion> repoLocacionAsync, IMapper mapper)
+    public CreateLocalidadCommandHandler(IRepositoryAsync<Localidad> repoLocalidadAsync, IMapper mapper)
     {
-        _repoLocacionAsync = repoLocacionAsync;
+        _repoLocalidadAsync = repoLocalidadAsync;
         _mapper = mapper;
     }
 
-    public async Task<ResponseType<string>> Handle(CreateLocacionCommand request, CancellationToken cancellationToken)
+    public async Task<ResponseType<string>> Handle(CreateLocalidadCommand request, CancellationToken cancellationToken)
     {
-        var objLocacion = _mapper.Map<Locacion>(request.LocacionRequest);
+        var objLocalidad = _mapper.Map<Localidad>(request.LocalidadRequest);
 
-        objLocacion.Id = Guid.NewGuid();
-        objLocacion.Estado = "A";
-        objLocacion.UsuarioCreacion = "Admin";
+        objLocalidad.Id = Guid.NewGuid();
+        objLocalidad.Estado = "A";
+        objLocalidad.UsuarioCreacion = "Admin";
 
 
-        var objResult = await _repoLocacionAsync.AddAsync(objLocacion, cancellationToken);
+        var objResult = await _repoLocalidadAsync.AddAsync(objLocalidad, cancellationToken);
         if (objResult is null)
         {
             return new ResponseType<string>() { Data = objResult.Id.ToString(), Message = "Ocurrió un error al registrar el turno", StatusCode = "000", Succeeded = true };

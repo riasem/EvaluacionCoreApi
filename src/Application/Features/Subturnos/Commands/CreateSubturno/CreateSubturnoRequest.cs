@@ -1,17 +1,17 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateTurno
+namespace EvaluacionCore.Application.Features.Subturnos.Commands.CreateSubturno
 {
-    public class CreateTurnoRequest 
+    public class CreateSubturnoRequest 
     {
-        [JsonPropertyName("idTipoTurno")]
-        public Guid IdTipoTurno { get; set; }
+        [JsonPropertyName("idTipoSubturno")]
+        public Guid IdTipoSubturno { get; set; }
 
-        [JsonPropertyName("codigoTurno")]
-        public string CodigoTurno { get; set; } = string.Empty;
+        [JsonPropertyName("idTturno")]
+        public Guid IdTurno { get; set; }
 
-        [JsonPropertyName("codigoIntegracion")]
-        public string CodigoIntegracion { get; set; } = string.Empty;
+        [JsonPropertyName("codigoSubturno")]
+        public string CodigoSubturno { get; set; } = string.Empty;
 
         [JsonPropertyName("descripcion")]
         public string Descripcion { get; set; } = string.Empty;
@@ -28,8 +28,6 @@ namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateTurno
         [JsonPropertyName("margenSalida")]
         public DateTime MargenSalida { get; set; }
 
-        [JsonPropertyName("totalHoras")]
-        public string TotalHoras { get; set; } = string.Empty;
 
     }
 }

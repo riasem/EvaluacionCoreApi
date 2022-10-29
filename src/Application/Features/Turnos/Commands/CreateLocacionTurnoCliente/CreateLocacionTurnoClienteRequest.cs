@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateLocacionTurnoCliente
+namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateLocalidadTurnoCliente
 {
-    public class CreateLocacionTurnoClienteRequest
+    public class CreateLocalidadTurnoClienteRequest
     {
         [JsonPropertyName("idSubTurno")]
         public Guid IdSubturno { get; set; }

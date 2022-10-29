@@ -3,11 +3,11 @@ using EvaluacionCore.Domain.Entities;
 
 namespace EvaluacionCore.Application.Features.Turnos.Specifications;
 
-public class TipoTurnoByIdSpec : Specification<TipoTurno>
+public class TurnoByCodigoSpec : Specification<Turno>
 {
-    public TipoTurnoByIdSpec(Guid id)
+    public TurnoByCodigoSpec(string codigoTurno)
     {
-        Query.Where((p => p.Id == id));
+        Query.Where((p => p.CodigoTurno == codigoTurno));
             
     }
 }

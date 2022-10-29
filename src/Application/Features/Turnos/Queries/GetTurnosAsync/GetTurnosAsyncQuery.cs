@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
 using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
-using EvaluacionCore.Application.Features.Dto;
-using EvaluacionCore.Application.Features.Prospectos.Specifications;
+using EvaluacionCore.Application.Features.Turnos.Dto;
+using EvaluacionCore.Application.Features.Turnos.Specifications;
 using EvaluacionCore.Domain.Entities;
 using MediatR;
 
-namespace EvaluacionCore.Application.Features.Clients.Queries.GetTurnoById;
+namespace EvaluacionCore.Application.Features.Turnos.Queries.GetTurnoById;
 
 public record GetTurnosAsyncQuery() : IRequest<ResponseType<List<TurnoType>>>;
 

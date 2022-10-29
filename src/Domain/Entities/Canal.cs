@@ -22,13 +22,13 @@ public class Canal
 
     //AUDITORIA
     [Column("usuarioCreacion", Order = 4, TypeName = "varchar")]
-    public string UsuarioCreacion { get; set; } = string.Empty;
+    [StringLength(20)] public string UsuarioCreacion { get; set; } = string.Empty;
 
     [Column("fechaCreacion", Order = 5, TypeName = "datetime2")]
     public System.DateTime FechaCreacion { get; set; } = System.DateTime.Now;
 
     [Column("usuarioModificacion", Order = 6, TypeName = "varchar")]
-    public string UsuarioModificacion { get; set; } = string.Empty;
+    [StringLength(20)] public string UsuarioModificacion { get; set; } = string.Empty;
 
     [Column("fechaModificacion", Order = 7, TypeName = "datetime2")]
     public Nullable<System.DateTime> FechaModificacion { get; set; }
