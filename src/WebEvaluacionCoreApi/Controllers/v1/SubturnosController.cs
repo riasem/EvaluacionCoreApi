@@ -41,7 +41,7 @@ public class SubturnosController : ApiControllerBase
     [EnableCors("AllowOrigin")]
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [AllowAnonymous]
+    [Authorize]
     public async Task<IActionResult> CreateSubturno([FromBody] CreateSubturnoRequest request, CancellationToken cancellationToken)
     {
         var objResult = await Mediator.Send(new CreateSubturnoCommand(request), cancellationToken);
@@ -57,7 +57,7 @@ public class SubturnosController : ApiControllerBase
     [HttpGet("GetSubturno")]
     [EnableCors("AllowOrigin")]
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
-    [AllowAnonymous]
+    [Authorize]
     public async Task<IActionResult> GetSubturnos(CancellationToken cancellationToken)
     {
         var objResult = await Mediator.Send(new GetSubturnosAsyncQuery(), cancellationToken);

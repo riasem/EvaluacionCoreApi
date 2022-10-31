@@ -24,7 +24,7 @@ public class LocalidadController : ApiControllerBase
     [EnableCors("AllowOrigin")]
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [AllowAnonymous]
+    [Authorize]
     public async Task<IActionResult> CreateLocalidad([FromBody] CreateLocalidadRequest request, CancellationToken cancellationToken)
     {
         var objResult = await Mediator.Send(new CreateLocalidadCommand(request), cancellationToken);
@@ -41,7 +41,7 @@ public class LocalidadController : ApiControllerBase
     [EnableCors("AllowOrigin")]
     [ProducesResponseType(typeof(ResponseType<LocalidadType>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [AllowAnonymous]
+    [Authorize]
     public async Task<IActionResult> GetLocalidad(string? IdLocalidad , CancellationToken cancellationToken)
     {
         var objResult = await Mediator.Send(new GetLocalidadAsyncQueries(IdLocalidad), cancellationToken);
@@ -58,7 +58,7 @@ public class LocalidadController : ApiControllerBase
     [EnableCors("AllowOrigin")]
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [AllowAnonymous]
+    [Authorize]
     public async Task<IActionResult> UpdateLocalidad([FromBody] UpdateLocalidadRequest request, CancellationToken cancellationToken)
     {
         var objResult = await Mediator.Send(new UpdateLocalidadCommand(request), cancellationToken);
@@ -75,7 +75,7 @@ public class LocalidadController : ApiControllerBase
     [EnableCors("AllowOrigin")]
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [AllowAnonymous]
+    [Authorize]
     public async Task<IActionResult> DeleteLocalidad(string IdLocalidad, CancellationToken cancellationToken)
     {
         var objResult = await Mediator.Send(new DeleteLocalidadCommand(IdLocalidad), cancellationToken);
@@ -88,7 +88,7 @@ public class LocalidadController : ApiControllerBase
     [EnableCors("AllowOrigin")]
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [AllowAnonymous]
+    [Authorize]
     public async Task<IActionResult> AsignaLocalidadCliente([FromBody] AsignarLocalidadClienteRequest request, CancellationToken cancellationToken)
     {
         var objResult = await Mediator.Send(new AsignarLocalidadClienteCommand(request), cancellationToken);

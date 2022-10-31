@@ -42,7 +42,7 @@ public class TurnosController : ApiControllerBase
     [EnableCors("AllowOrigin")]
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [AllowAnonymous]
+    [Authorize]
     public async Task<IActionResult> CreateTurno([FromBody] CreateTurnoRequest request, CancellationToken cancellationToken)
     {
         var objResult = await Mediator.Send(new CreateTurnoCommand(request), cancellationToken);
@@ -58,7 +58,7 @@ public class TurnosController : ApiControllerBase
     [HttpGet("GetTurno")]
     [EnableCors("AllowOrigin")]
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
-    [AllowAnonymous]
+    [Authorize]
     public async Task<IActionResult> GetTurnos(CancellationToken cancellationToken)
     {
         var objResult = await Mediator.Send(new GetTurnosAsyncQuery(), cancellationToken);
@@ -75,7 +75,7 @@ public class TurnosController : ApiControllerBase
     [HttpPost("AsignarSubturnoCliente")]
     [EnableCors("AllowOrigin")]
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
-    [AllowAnonymous]
+    [Authorize]
     public async Task<IActionResult> AsignarSubturnoCliente([FromBody] CreateSubturnoClienteRequest request, CancellationToken cancellationToken)
     {
         var objResult = await Mediator.Send(new CreateSubturnoClienteCommand(request), cancellationToken);
