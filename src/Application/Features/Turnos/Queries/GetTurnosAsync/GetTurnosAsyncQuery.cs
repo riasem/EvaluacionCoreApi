@@ -8,9 +8,9 @@ using MediatR;
 
 namespace EvaluacionCore.Application.Features.Turnos.Queries.GetTurnoById;
 
-public record GetTurnosAsyncQuery() : IRequest<ResponseType<List<TurnoType>>>;
+public record GetTurnosAsyncQuery() : IRequest<ResponseType<List<TurnoResponseType>>>;
 
-public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, ResponseType<List<TurnoType>>>
+public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, ResponseType<List<TurnoResponseType>>>
 {
     private readonly IRepositoryAsync<Turno> _repositoryAsync;
     private readonly IRepositoryAsync<TipoTurno> _repositoryTurnoAsync;
@@ -27,33 +27,35 @@ public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, Respon
     }
 
    
-    public async Task<ResponseType<List<TurnoType>>> Handle(GetTurnosAsyncQuery request, CancellationToken cancellationToken)
+    public async Task<ResponseType<List<TurnoResponseType>>> Handle(GetTurnosAsyncQuery request, CancellationToken cancellationToken)
     {
         var objTurno = await _repositoryAsync.ListAsync(cancellationToken);
-        List<TurnoType> lista = new();
+        List<TurnoResponseType> lista = new();
+        List<TurnoType> listaTurno = new();
 
-        if (objTurno is null)
+        var agrupado = from turno in objTurno group turno by turno.IdTipoTurno;
+
+
+        if (objTurno.Count < 1)
         {
-            return new ResponseType<List<TurnoType>>() { Data = null, Succeeded = false, Message = "Registros no encontrados" };
+            return new ResponseType<List<TurnoResponseType>>() { Data = null, Succeeded = false, Message = "Registros no encontrados" };
         }
 
-        foreach (var item in objTurno)
+        var agr = objTurno.GroupBy(x => x.IdTipoTurno).ToList();
+
+
+        foreach (var itema in agrupado)
         {
-            var tipoTurno = await _repositoryTurnoAsync.FirstOrDefaultAsync(new TipoTurnoByIdSpec(item.IdTipoTurno), cancellationToken);
-            lista.Add(new TurnoType
+            var tipoTurno = await _repositoryTurnoAsync.FirstOrDefaultAsync(new TipoTurnoByIdSpec(itema.FirstOrDefault().IdTipoTurno), cancellationToken);
+
+            lista.Add(new TurnoResponseType
             {
-                CodigoTurno = item.CodigoTurno,
-                Descripcion = item.Descripcion,
-                Entrada = item.Entrada,
-                Salida = item.Salida,
-                IdTipoTurno = item.IdTipoTurno,
-                TipoTurno = tipoTurno.CodigoTurno,
-                MargenEntrada = item.MargenEntrada,
-                MargenSalida = item.MargenSalida,
-                TotalHoras = item.TotalHoras
+                TipoTurno = tipoTurno.Descripcion,
+                TurnoType = _mapper.Map<List<TurnoType>>(itema) 
             });
-        }
 
-        return new ResponseType<List<TurnoType>>() { Data = lista, Succeeded = true, Message = "Registros encontrados" };
+        };
+
+        return new ResponseType<List<TurnoResponseType>>() { Data = lista, Succeeded = true, Message = "Registros encontrados" };
     }
 }

@@ -21,20 +21,18 @@ public class TurnosController : ApiControllerBase
     /// <returns>Retorna el codigo  uid del nuevo Turno </returns>
     /// <remarks>
     /// Ejemplo request:
-    ///
-    ///{
-    ///  "idTipoTurno": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    ///  "codigoTurno": "string",
-    ///  "descripcion": "string",
-    ///  "entrada": "2022-10-26T20:06:46.379Z",
-    ///  "salida": "2022-10-26T20:06:46.379Z",
-    ///  "margenEntrada": "2022-10-26T20:06:46.379Z",
-    ///  "margenSalida": "2022-10-26T20:06:46.379Z",
-    ///  "totalHoras": "string",
-    ///  "estado": "string",
-    ///  "usuario": "string"
-    ///}
-    ///
+    /// {
+    ///       "idTipoTurno": "A04BB059-033B-43EA-9738-A5F351E00C8B",
+    ///       "codigoTurno": "A1",
+    ///       "codigoIntegracion": "A1",
+    ///       "descripcion": "ADMINISTRATIVO 1 PRUEBA",
+    ///       "entrada": "1990-01-01T08:00:00.570Z",
+    ///       "salida": "1990-01-01T17:00:00.070Z",
+    ///       "margenEntrada": "1990-01-01T00:05:00.570Z",
+    ///       "margenSalida": "1990-01-01T14:05:00.500Z",
+    ///       "totalHoras": "8"
+    /// }
+    /// 
     /// </remarks>
     /// <response code="201">Turno creado</response>
     /// <response code="400">Si el registro es nulo</response>

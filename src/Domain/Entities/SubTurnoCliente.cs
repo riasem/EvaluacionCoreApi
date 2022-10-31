@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 namespace EvaluacionCore.Domain.Entities;
 
 [Table("AS_SubTurnoCliente", Schema = "dbo")]
-public class SubTurnoCliente
+public partial class SubTurnoCliente
 {
     [Key]
     [Column("id", Order = 0, TypeName = "uniqueidentifier")]

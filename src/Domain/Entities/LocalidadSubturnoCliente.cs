@@ -4,20 +4,25 @@ using System.ComponentModel.DataAnnotations;
 namespace EvaluacionCore.Domain.Entities;
 
 [Table("AS_LocalidadSubturnoCliente", Schema = "dbo")]
-public class LocalidadSubturnoCliente
+public partial class LocalidadSubturnoCliente
 {
+    public LocalidadSubturnoCliente()
+    {
+        this.SubTurnoClientes = new HashSet<SubTurnoCliente>();
+    }
+
     [Key]
     [Required]
     [Column("id", Order = 0, TypeName = "uniqueidentifier")]
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    [Column("idLocalidad", Order = 1, TypeName = "uniqueidentifier")]
-    public Guid IdLocalidad { get; set; }
-    //public virtual LocalidadCliente LocalidadCliente { get; set; }
+    [Column("localidadId", Order = 1, TypeName = "uniqueidentifier")]
+    public Guid LocalidadId { get; set; }
+    public virtual LocalidadCliente LocalidadCliente { get; set; }
 
-    [Column("idSubturnoCliente", Order = 2, TypeName = "uniqueidentifier")]
-    public Guid IdSubturnoCliente { get; set; }
-    //public virtual SubTurnoCliente SubTurnoCliente { get; set; }
+    [Column("SubturnoClienteId", Order = 2, TypeName = "uniqueidentifier")]
+    public Guid SubturnoClienteId { get; set; }
+    public virtual SubTurnoCliente SubTurnoCliente { get; set; }
 
     [Column("fechaAsignacion", Order = 3, TypeName = "datetime2")]
     public System.DateTime FechaAsignacion { get; set; }
@@ -38,6 +43,7 @@ public class LocalidadSubturnoCliente
     public Nullable<System.DateTime> FechaModificacion { get; set; }
 
     //public virtual ICollection<MarcacionCliente> MarcacionClientes { get; set; }
+    public virtual ICollection<SubTurnoCliente> SubTurnoClientes { get; set; }
 
 }
 

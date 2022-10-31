@@ -22,7 +22,9 @@ public class MappingProfile : Profile
         CreateMap<Localidad, CreateLocalidadRequest>().ReverseMap();
         CreateMap<Localidad, UpdateLocalidadRequest>().ReverseMap();
         CreateMap<Localidad, LocalidadType>().ReverseMap();
-        CreateMap<Turno, TurnoType>().ReverseMap();
+        CreateMap<Turno, List<TurnoType>>().ReverseMap();
+        CreateMap<TurnoType, Turno>().ReverseMap();
+        CreateMap<TurnoType, TurnoResponseType>().ReverseMap();
         CreateMap<LocalidadCliente, AsignarLocalidadClienteRequest>().ReverseMap();
 
         //CreateMap<SendEmailVerificacionRequest, NotificacionDto>();
