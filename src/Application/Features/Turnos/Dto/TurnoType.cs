@@ -1,4 +1,5 @@
 ﻿
+using EvaluacionCore.Application.Features.Subturnos.Dto;
 using System.Text.Json.Serialization;
 
 
@@ -35,6 +36,9 @@ namespace EvaluacionCore.Application.Features.Turnos.Dto
 
         [JsonPropertyName("totalHoras")]
         public string TotalHoras { get; set; } = string.Empty;
+
+        [JsonPropertyName("SubturnoType")]
+        public List<SubturnoType> SubturnoType { get; set; }
 
     }
 }

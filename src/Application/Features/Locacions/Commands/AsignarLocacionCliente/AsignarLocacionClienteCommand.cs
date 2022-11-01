@@ -3,11 +3,6 @@ using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Domain.Entities;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvaluacionCore.Application.Features.Localidads.Commands.AsignarLocalidadCliente;
 
@@ -26,20 +21,30 @@ public class AsignarLocalidadClienteCommandHandler : IRequestHandler<AsignarLoca
 
     public async Task<ResponseType<string>> Handle(AsignarLocalidadClienteCommand request, CancellationToken cancellationToken)
     {
-        var objLocalidadClie = _mapper.Map<LocalidadCliente>(request.LocalidadCliRequest);
-
-        objLocalidadClie.Id = Guid.NewGuid();
-        objLocalidadClie.Estado = "A";
-        objLocalidadClie.UsuarioCreacion = "Admin";
-
-
-        var objResult = await _repoLocalidadCliAsync.AddAsync(objLocalidadClie, cancellationToken);
-        if (objResult is null)
+        try
         {
-            return new ResponseType<string>() { Data = objResult.Id.ToString(), Message = "Ocurrió un error al registrar el turno", StatusCode = "000", Succeeded = true };
+            var objLocalidadClie = _mapper.Map<LocalidadCliente>(request.LocalidadCliRequest);
+
+            objLocalidadClie.Id = Guid.NewGuid();
+            objLocalidadClie.Estado = "A";
+            objLocalidadClie.UsuarioCreacion = "Admin";
+
+
+            var objResult = await _repoLocalidadCliAsync.AddAsync(objLocalidadClie, cancellationToken);
+            if (objResult is null)
+            {
+                return new ResponseType<string>() { Data = objResult.Id.ToString(), Message = "Ocurrió un error al registrar el turno", StatusCode = "001", Succeeded = true };
+
+            }
+
+            return new ResponseType<string>() { Data = objResult.Id.ToString(), Message = "Locación guardada exitosamente", StatusCode = "000", Succeeded = true };
 
         }
+        catch (Exception)
+        {
 
-        return new ResponseType<string>() { Data = objResult.Id.ToString(), Message = "Locación registrada exitosamente", StatusCode = "000", Succeeded = true };
+            throw;
+        }
+        
     }
 }

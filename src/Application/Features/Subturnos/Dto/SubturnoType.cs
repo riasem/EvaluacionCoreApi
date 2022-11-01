@@ -6,14 +6,17 @@ namespace EvaluacionCore.Application.Features.Subturnos.Dto
 {
     public class SubturnoType
     {
-        [JsonPropertyName("idTipoTurno")]
-        public Guid IdTipoTurno { get; set; }
+        [JsonPropertyName("id")]
+        public Guid Id { get; set; }
 
-        [JsonPropertyName("TipoTurno")]
-        public string TipoTurno { get; set; }
+        [JsonPropertyName("idTurno")]
+        public Guid IdTurno { get; set; }
+
+        [JsonPropertyName("idTipoSubturno")]
+        public Guid IdTipoSuburno { get; set; }
 
         [JsonPropertyName("codigoTurno")]
-        public string CodigoTurno { get; set; } = string.Empty;
+        public string CodigoSubturno { get; set; } = string.Empty;
 
         [JsonPropertyName("descripcion")]
         public string Descripcion { get; set; } = string.Empty;
