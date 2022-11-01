@@ -43,15 +43,15 @@ public class CreateSubturnoCommandHandler : IRequestHandler<CreateSubturnoComman
             //Caso donde no se guarda correctamente el Subturno
             if (objResult is null)
             {
-                return new ResponseType<string>() { Data = objResult.Id.ToString(), Message = "Ocurrió un error al registrar el Subturno", StatusCode = "102", Succeeded = false };
+                return new ResponseType<string>() { Data = null, Message = "Ocurrió un error al registrar el Subturno", StatusCode = "101", Succeeded = true };
 
             }
 
-            return new ResponseType<string>() { Data = objResult.Id.ToString(), Message = "Subturno registrado exitosamente", StatusCode = "100", Succeeded = true };
+            return new ResponseType<string>() { Data = objResult.Id.ToString(), Message = "Subturno guardado exitosamente", StatusCode = "100", Succeeded = true };
         }
         catch (Exception e)
         {
-            return new ResponseType<string>() { Data = null, Message = "Ocurrió un error al registrar el Subturno ", StatusCode = "102", Succeeded = false };
+            return new ResponseType<string>() { Data = null, Message = "Ocurrió un error durante el registro del Subturno ", StatusCode = "102", Succeeded = false };
         }
         
     }

@@ -45,7 +45,7 @@ public class CreateTurnoCommandHandler : IRequestHandler<CreateTurnoCommand, Res
             //Caso donde no se guarda correctamente el turno
             if (objResult is null)
             {
-                return new ResponseType<string>() { Data = objResult.Id.ToString(), Message = "Ocurrió un error al registrar el turno", StatusCode = "102", Succeeded = false };
+                return new ResponseType<string>() { Data = null, Message = "Ocurrió un error al registrar el turno", StatusCode = "102", Succeeded = false };
 
             }
 

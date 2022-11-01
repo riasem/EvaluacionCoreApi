@@ -28,27 +28,35 @@ public class GetSubturnosAsyncHandler : IRequestHandler<GetSubturnosAsyncQuery, 
    
     public async Task<ResponseType<List<SubturnoType>>> Handle(GetSubturnosAsyncQuery request, CancellationToken cancellationToken)
     {
-        var objSubturno = await _repositoryAsync.ListAsync(cancellationToken);
-        List<SubturnoType> lista = new();
-
-        if (objSubturno is null)
+        try
         {
-            return new ResponseType<List<SubturnoType>>() { Data = null, Succeeded = false, Message = "Registros no encontrados" };
-        }
+            var objSubturno = await _repositoryAsync.ListAsync(cancellationToken);
+            List<SubturnoType> lista = new();
 
-        foreach (var item in objSubturno)
-        {
-            lista.Add(new SubturnoType
+            if (objSubturno is null)
             {
-                Descripcion = item.Descripcion,
-                Entrada = item.Entrada,
-                Salida = item.Salida,
-                MargenEntrada = item.MargenEntrada,
-                MargenSalida = item.MargenSalida,
-                TotalHoras = item.TotalHoras
-            });
-        }
+                return new ResponseType<List<SubturnoType>>() { Data = null, Succeeded = true, Message = "La consulta no retorna datos", StatusCode = "001" };
+            }
 
-        return new ResponseType<List<SubturnoType>>() { Data = lista, Succeeded = true, Message = "Registros encontrados" };
+            foreach (var item in objSubturno)
+            {
+                lista.Add(new SubturnoType
+                {
+                    Descripcion = item.Descripcion,
+                    Entrada = item.Entrada,
+                    Salida = item.Salida,
+                    MargenEntrada = item.MargenEntrada,
+                    MargenSalida = item.MargenSalida,
+                    TotalHoras = item.TotalHoras
+                });
+            }
+
+            return new ResponseType<List<SubturnoType>>() { Data = lista, Succeeded = true, Message = "Consulta generada exitosamente", StatusCode = "000" };
+        }
+        catch (Exception)
+        {
+            return new ResponseType<List<SubturnoType>>() { Data = null, Succeeded = false, Message = "Ocurrió un error durante la consulta", StatusCode = "002" };
+        }
+        
     }
 }

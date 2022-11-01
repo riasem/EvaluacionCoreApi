@@ -28,19 +28,18 @@ public class UpdateLocalidadCommandHandler : IRequestHandler<UpdateLocalidadComm
             var entityLocalidad = await _repoLocalidadAsync.GetByIdAsync(objLocalidad.Id,cancellationToken);
             if (entityLocalidad is null)
             {
-                return new ResponseType<string>() { Data = null, Message = "No existe la locación que intenta modificar", StatusCode = "999", Succeeded = false };
+                return new ResponseType<string>() { Data = null, Message = "No existe la locación que intenta modificar", StatusCode = "201", Succeeded = false };
             }
             objLocalidad.IdEmpresa = entityLocalidad.IdEmpresa;
             objLocalidad.FechaModificacion = DateTime.Now;
             objLocalidad.UsuarioModificacion = "Admin";
             await _repoLocalidadAsync.UpdateAsync(objLocalidad, cancellationToken);
-            return new ResponseType<string>() { Data = null, Message = "Locación modificada exitosamente", StatusCode = "000", Succeeded = true };
+            return new ResponseType<string>() { Data = null, Message = "Locación actualizada exitosamente", StatusCode = "200", Succeeded = true };
 
         }
         catch (Exception ex)
         {
-
-            return new ResponseType<string>() { Data = null, Message = ex.Message, StatusCode = "999", Succeeded = false };
+            return new ResponseType<string>() { Data = null, Message = "No se pudo actualizar la locación", StatusCode = "201", Succeeded = false };
         }
     }
 }

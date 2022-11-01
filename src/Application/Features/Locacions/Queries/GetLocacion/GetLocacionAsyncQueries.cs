@@ -28,24 +28,26 @@ public class GetLocalidadAsyncQueriesHandler : IRequestHandler<GetLocalidadAsync
 
     public async Task<ResponseType<List<LocalidadType>>> Handle(GetLocalidadAsyncQueries request, CancellationToken cancellationToken)
     {
-
-        var objLocalidad = await _repositoryAsync.ListAsync(cancellationToken);
-
-        if (objLocalidad is null)
+        try
         {
-            throw new NotFoundException($"Registro no encontrado {request.IdLocalidad}");
-        }
+            var objLocalidad = await _repositoryAsync.ListAsync(cancellationToken);
 
-        if (request.IdLocalidad is not null)
-        {
-            objLocalidad =  objLocalidad.Where(x => x.Id == Guid.Parse(request.IdLocalidad) && x.Estado == "A").ToList();
+            if (request.IdLocalidad is not null)
+            {
+                objLocalidad = objLocalidad.Where(x => x.Id == Guid.Parse(request.IdLocalidad) && x.Estado == "A").ToList();
+
+            }
+            else
+            {
+                objLocalidad = objLocalidad.Where(x => x.Estado == "A").ToList();
+            }
+            return new ResponseType<List<LocalidadType>>() { Data = _mapper.Map<List<LocalidadType>>(objLocalidad), Message = "Consulta Generada exitosamente", StatusCode = "000", Succeeded = true };
 
         }
-        else
+        catch (Exception e)
         {
-            objLocalidad = objLocalidad.Where(x => x.Estado == "A").ToList();
+            return new ResponseType<List<LocalidadType>>() { Data = null, Message = "Ocurrió un error durante la consulta", StatusCode = "002", Succeeded = false };
         }
-        return new ResponseType<List<LocalidadType>>() { Data = _mapper.Map<List<LocalidadType>>(objLocalidad), Succeeded = true };
         
         
     }

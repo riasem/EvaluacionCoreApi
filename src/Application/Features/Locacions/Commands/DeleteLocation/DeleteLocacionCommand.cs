@@ -3,11 +3,6 @@ using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Domain.Entities;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvaluacionCore.Application.Features.Localidads.Commands.DeleteLocation;
 
@@ -30,18 +25,17 @@ public class DeleteLocalidadCommandHandler : IRequestHandler<DeleteLocalidadComm
             var objLocalidad = await _repoLocalidadAsync.GetByIdAsync(Guid.Parse(request.IdLocalidad), cancellationToken);
             if (objLocalidad is null)
             {
-                return new ResponseType<string>() { Data = null, Message = "No existe la locación que desea eliminar", StatusCode = "999", Succeeded = false };
+                return new ResponseType<string>() { Data = null, Message = "No existe la locación que desea eliminar", StatusCode = "301", Succeeded = false };
             }
             objLocalidad.Estado = "I";
             await _repoLocalidadAsync.UpdateAsync(objLocalidad, cancellationToken);
 
-            return new ResponseType<string>() { Data = null, Message = "Locación eliminada exitosamente", StatusCode = "000", Succeeded = true };
+            return new ResponseType<string>() { Data = null, Message = "Locación eliminada exitosamente", StatusCode = "300", Succeeded = true };
 
         }
         catch (Exception ex)
         {
-
-            return new ResponseType<string>() { Data = null, Message = ex.Message, StatusCode = "999", Succeeded = false };
+            return new ResponseType<string>() { Data = null, Message = "No se pudo eliminar la locación.", StatusCode = "301", Succeeded = false };
         }
 
 

@@ -20,21 +20,29 @@ public class CreateLocalidadCommandHandler : IRequestHandler<CreateLocalidadComm
 
     public async Task<ResponseType<string>> Handle(CreateLocalidadCommand request, CancellationToken cancellationToken)
     {
-        var objLocalidad = _mapper.Map<Localidad>(request.LocalidadRequest);
-
-        objLocalidad.Id = Guid.NewGuid();
-        objLocalidad.Estado = "A";
-        objLocalidad.UsuarioCreacion = "Admin";
-
-
-        var objResult = await _repoLocalidadAsync.AddAsync(objLocalidad, cancellationToken);
-        if (objResult is null)
+        try
         {
-            return new ResponseType<string>() { Data = objResult.Id.ToString(), Message = "Ocurrió un error al registrar el turno", StatusCode = "000", Succeeded = true };
+            var objLocalidad = _mapper.Map<Localidad>(request.LocalidadRequest);
 
+            objLocalidad.Id = Guid.NewGuid();
+            objLocalidad.Estado = "A";
+            objLocalidad.UsuarioCreacion = "Admin";
+
+
+            var objResult = await _repoLocalidadAsync.AddAsync(objLocalidad, cancellationToken);
+            if (objResult is null)
+            {
+                return new ResponseType<string>() { Data = objResult.Id.ToString(), Message = "No se pudo registrar la localidad", StatusCode = "001", Succeeded = true };
+
+            }
+
+            return new ResponseType<string>() { Data = objResult.Id.ToString(), Message = "Locación registrada exitosamente", StatusCode = "000", Succeeded = true };
         }
-
-        return new ResponseType<string>() { Data = objResult.Id.ToString(), Message = "Locación registrada exitosamente", StatusCode = "000", Succeeded = true };
+        catch (Exception e)
+        {
+            return new ResponseType<string>() { Data = null, Message = "Ocurrió un error durante el registro de la locación.", StatusCode = "002", Succeeded = false };
+        }
+        
     }
 
 }
