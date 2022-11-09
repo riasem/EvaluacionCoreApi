@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
-using EvaluacionCore.Domain.Entities;
+using EvaluacionCore.Domain.Entities.Asistencia;
 using MediatR;
 
 namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateLocalidadTurnoCliente;
@@ -11,10 +11,10 @@ public record CreateLocalidadTurnoClienteCommand(CreateLocalidadTurnoClienteRequ
 
 public class CreateLocalidadTurnoClienteCommandHandler : IRequestHandler<CreateLocalidadTurnoClienteCommand, ResponseType<string>>
 {
-    private readonly IRepositoryAsync<SubTurnoCliente> _repoTurnoAsync;
+    private readonly IRepositoryAsync<TurnoColaborador> _repoTurnoAsync;
     private readonly IMapper _mapper;
 
-    public CreateLocalidadTurnoClienteCommandHandler(IRepositoryAsync<SubTurnoCliente> repository, IMapper mapper)
+    public CreateLocalidadTurnoClienteCommandHandler(IRepositoryAsync<TurnoColaborador> repository, IMapper mapper)
     {
         _repoTurnoAsync = repository;
         _mapper = mapper;
@@ -25,7 +25,7 @@ public class CreateLocalidadTurnoClienteCommandHandler : IRequestHandler<CreateL
 
         try
         {
-            var objClient = _mapper.Map<SubTurnoCliente>(request.TurnoRequest);
+            var objClient = _mapper.Map<TurnoColaborador>(request.TurnoRequest);
 
             objClient.Id = Guid.NewGuid();
             objClient.Estado = "A";

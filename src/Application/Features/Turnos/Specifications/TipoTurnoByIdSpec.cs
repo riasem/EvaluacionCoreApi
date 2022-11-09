@@ -1,5 +1,5 @@
 ﻿using Ardalis.Specification;
-using EvaluacionCore.Domain.Entities;
+using EvaluacionCore.Domain.Entities.Asistencia;
 
 namespace EvaluacionCore.Application.Features.Turnos.Specifications;
 

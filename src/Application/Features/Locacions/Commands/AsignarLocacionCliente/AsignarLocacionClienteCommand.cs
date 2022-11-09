@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
-using EvaluacionCore.Domain.Entities;
+using EvaluacionCore.Domain.Entities.Asistencia;
 using MediatR;
 
 namespace EvaluacionCore.Application.Features.Localidads.Commands.AsignarLocalidadCliente;
@@ -10,9 +10,9 @@ public record AsignarLocalidadClienteCommand(AsignarLocalidadClienteRequest Loca
 public class AsignarLocalidadClienteCommandHandler : IRequestHandler<AsignarLocalidadClienteCommand, ResponseType<string>>
 {
     private readonly IMapper _mapper;
-    private readonly IRepositoryAsync<LocalidadCliente> _repoLocalidadCliAsync;
+    private readonly IRepositoryAsync<LocalidadColaborador> _repoLocalidadCliAsync;
 
-    public AsignarLocalidadClienteCommandHandler(IMapper mapper, IRepositoryAsync<LocalidadCliente> repoLocalidadCliAsync)
+    public AsignarLocalidadClienteCommandHandler(IMapper mapper, IRepositoryAsync<LocalidadColaborador> repoLocalidadCliAsync)
     {
         _mapper = mapper;
         _repoLocalidadCliAsync = repoLocalidadCliAsync;
@@ -23,7 +23,7 @@ public class AsignarLocalidadClienteCommandHandler : IRequestHandler<AsignarLoca
     {
         try
         {
-            var objLocalidadClie = _mapper.Map<LocalidadCliente>(request.LocalidadCliRequest);
+            var objLocalidadClie = _mapper.Map<LocalidadColaborador>(request.LocalidadCliRequest);
 
             objLocalidadClie.Id = Guid.NewGuid();
             objLocalidadClie.Estado = "A";
