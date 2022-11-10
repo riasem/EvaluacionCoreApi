@@ -20,6 +20,26 @@ namespace EnrolApp.Persistence.Configurations
             builder.Property(x => x.IdTurnoPadre)
                .IsRequired(false);
 
+            builder.Property(x => x.MargenEntradaPrevio)
+              .HasMaxLength(4)
+              .IsRequired();
+
+
+            builder.Property(x => x.MargenEntradaPosterior)
+              .HasMaxLength(4)
+              .IsRequired();
+
+
+            builder.Property(x => x.MargenSalidaPrevio)
+              .HasMaxLength(4)
+              .IsRequired();
+
+
+            builder.Property(x => x.MargenSalidaPosterior)
+              .HasMaxLength(4)
+              .IsRequired();
+
+
             builder.Property(x => x.CodigoTurno)
                 .HasMaxLength(10)
                .IsRequired();

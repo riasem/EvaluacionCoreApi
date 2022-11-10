@@ -62,6 +62,22 @@ public class TurnosController : ApiControllerBase
         var objResult = await Mediator.Send(new GetTurnosAsyncQuery(), cancellationToken);
         return Ok(objResult);
     }
+    
+
+    /// <summary>
+    /// Retorna el listado de maestros de turnos
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpGet("GetMatestrosTurno")]
+    [EnableCors("AllowOrigin")]
+    [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
+    [Authorize]
+    public async Task<IActionResult> GetMaestrosTurnos(CancellationToken cancellationToken)
+    {
+        var objResult = await Mediator.Send(new GetMaestrosTurnoAsyncQuery(), cancellationToken);
+        return Ok(objResult);
+    }
 
 
     /// <summary>

@@ -93,7 +93,7 @@ public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, Respon
 
             var prev = listaTurno.GroupBy(x => x.TipoTurno).ToList();
 
-            for (int i = 0; i < prev.Count(); i++)
+            for (int i = 0; i < prev.Count; i++)
             {
                 lista.Add(new TurnoResponseType
                 {
