@@ -3,7 +3,7 @@ using EvaluacionCore.Application.Common.Exceptions;
 using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.Localidads.Dto;
-using EvaluacionCore.Domain.Entities;
+using EvaluacionCore.Domain.Entities.Asistencia;
 using MediatR;
 using System;
 using System.Collections.Generic;

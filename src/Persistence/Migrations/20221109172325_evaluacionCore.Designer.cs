@@ -4,6 +4,7 @@ using EvaluacionCore.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Workflow.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221109172325_evaluacionCore")]
+    partial class evaluacionCore
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -222,24 +224,24 @@ namespace Workflow.Persistence.Migrations
                     b.Property<string>("EstadoMarcacionEntrada")
                         .HasColumnType("varchar")
                         .HasColumnName("estadoMarcacionEntrada")
-                        .HasColumnOrder(5);
+                        .HasColumnOrder(9);
 
                     b.Property<bool>("EstadoProcesado")
                         .HasColumnType("bit")
                         .HasColumnName("estadoProcesado")
-                        .HasColumnOrder(8);
+                        .HasColumnOrder(12);
 
                     b.Property<DateTime>("FechaCreacion")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasColumnName("fechaCreacion")
-                        .HasColumnOrder(10)
+                        .HasColumnOrder(14)
                         .HasDefaultValueSql("getdate()");
 
                     b.Property<DateTime?>("FechaModificacion")
                         .HasColumnType("datetime2")
                         .HasColumnName("fechaModificacion")
-                        .HasColumnOrder(12);
+                        .HasColumnOrder(16);
 
                     b.Property<Guid>("IdLocalidadColaborador")
                         .HasColumnType("uniqueidentifier")
@@ -259,29 +261,57 @@ namespace Workflow.Persistence.Migrations
                     b.Property<DateTime?>("MarcacionSalida")
                         .HasColumnType("datetime2")
                         .HasColumnName("marcacionSalida")
+                        .HasColumnOrder(6);
+
+                    b.Property<string>("MargenEntradaPosterior")
+                        .IsRequired()
+                        .HasMaxLength(4)
+                        .HasColumnType("varchar(4)")
+                        .HasColumnName("margenEntradaPosterior")
+                        .HasColumnOrder(5);
+
+                    b.Property<string>("MargenEntradaPrevio")
+                        .IsRequired()
+                        .HasMaxLength(4)
+                        .HasColumnType("varchar(4)")
+                        .HasColumnName("margenEntradaPrevio")
                         .HasColumnOrder(4);
+
+                    b.Property<string>("MargenSalidaPosterior")
+                        .IsRequired()
+                        .HasMaxLength(4)
+                        .HasColumnType("varchar(4)")
+                        .HasColumnName("margenSalidaPosterior")
+                        .HasColumnOrder(8);
+
+                    b.Property<string>("MargenSalidaPrevio")
+                        .IsRequired()
+                        .HasMaxLength(4)
+                        .HasColumnType("varchar(4)")
+                        .HasColumnName("margenSalidaPrevio")
+                        .HasColumnOrder(7);
 
                     b.Property<string>("SalidaEntrada")
                         .HasColumnType("varchar")
                         .HasColumnName("estadoMarcacionSalida")
-                        .HasColumnOrder(6);
+                        .HasColumnOrder(10);
 
                     b.Property<DateTime?>("TotalAtraso")
                         .HasColumnType("datetime2")
                         .HasColumnName("totalAtraso")
-                        .HasColumnOrder(7);
+                        .HasColumnOrder(11);
 
                     b.Property<string>("UsuarioCreacion")
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)")
                         .HasColumnName("usuarioCreacion")
-                        .HasColumnOrder(9);
+                        .HasColumnOrder(13);
 
                     b.Property<string>("UsuarioModificacion")
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)")
                         .HasColumnName("usuarioModificacion")
-                        .HasColumnOrder(11);
+                        .HasColumnOrder(15);
 
                     b.HasKey("Id");
 
@@ -360,11 +390,11 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnName("id")
                         .HasColumnOrder(0);
 
-                    b.Property<string>("CodigoTipoTurno")
+                    b.Property<string>("CodigoTurno")
                         .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("varchar(10)")
-                        .HasColumnName("codigoTipoTurno")
+                        .HasColumnName("codigoTurno")
                         .HasColumnOrder(1);
 
                     b.Property<string>("Descripcion")
@@ -451,20 +481,20 @@ namespace Workflow.Persistence.Migrations
                         .HasMaxLength(1)
                         .HasColumnType("varchar(1)")
                         .HasColumnName("estado")
-                        .HasColumnOrder(19)
+                        .HasColumnOrder(15)
                         .HasDefaultValueSql("A");
 
                     b.Property<DateTime>("FechaCreacion")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasColumnName("fechaCreacion")
-                        .HasColumnOrder(21)
+                        .HasColumnOrder(17)
                         .HasDefaultValueSql("getdate()");
 
                     b.Property<DateTime?>("FechaModificacion")
                         .HasColumnType("datetime2")
                         .HasColumnName("fechaModificacion")
-                        .HasColumnOrder(23);
+                        .HasColumnOrder(19);
 
                     b.Property<Guid>("IdClaseTurno")
                         .HasColumnType("uniqueidentifier")
@@ -501,38 +531,10 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnName("margenEntrada")
                         .HasColumnOrder(12);
 
-                    b.Property<string>("MargenEntradaPosterior")
-                        .IsRequired()
-                        .HasMaxLength(4)
-                        .HasColumnType("varchar(4)")
-                        .HasColumnName("margenEntradaPosterior")
-                        .HasColumnOrder(15);
-
-                    b.Property<string>("MargenEntradaPrevio")
-                        .IsRequired()
-                        .HasMaxLength(4)
-                        .HasColumnType("varchar(4)")
-                        .HasColumnName("margenEntradaPrevio")
-                        .HasColumnOrder(14);
-
                     b.Property<DateTime>("MargenSalida")
                         .HasColumnType("datetime")
                         .HasColumnName("margenSalida")
                         .HasColumnOrder(13);
-
-                    b.Property<string>("MargenSalidaPosterior")
-                        .IsRequired()
-                        .HasMaxLength(4)
-                        .HasColumnType("varchar(4)")
-                        .HasColumnName("margenSalidaPosterior")
-                        .HasColumnOrder(17);
-
-                    b.Property<string>("MargenSalidaPrevio")
-                        .IsRequired()
-                        .HasMaxLength(4)
-                        .HasColumnType("varchar(4)")
-                        .HasColumnName("margenSalidaPrevio")
-                        .HasColumnOrder(16);
 
                     b.Property<DateTime>("Salida")
                         .HasColumnType("datetime")
@@ -543,19 +545,19 @@ namespace Workflow.Persistence.Migrations
                         .HasMaxLength(2)
                         .HasColumnType("varchar(2)")
                         .HasColumnName("totalHoras")
-                        .HasColumnOrder(18);
+                        .HasColumnOrder(14);
 
                     b.Property<string>("UsuarioCreacion")
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)")
                         .HasColumnName("usuarioCreacion")
-                        .HasColumnOrder(20);
+                        .HasColumnOrder(16);
 
                     b.Property<string>("UsuarioModificacion")
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)")
                         .HasColumnName("usuarioModificacion")
-                        .HasColumnOrder(22);
+                        .HasColumnOrder(18);
 
                     b.HasKey("Id");
 

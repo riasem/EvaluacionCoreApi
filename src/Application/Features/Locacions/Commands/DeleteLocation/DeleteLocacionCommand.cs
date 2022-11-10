@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
-using EvaluacionCore.Domain.Entities;
+using EvaluacionCore.Domain.Entities.Asistencia;
 using MediatR;
 
 namespace EvaluacionCore.Application.Features.Localidads.Commands.DeleteLocation;

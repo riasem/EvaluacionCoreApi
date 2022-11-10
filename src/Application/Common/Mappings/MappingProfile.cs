@@ -6,7 +6,7 @@ using EvaluacionCore.Application.Features.Localidads.Dto;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateSubturnoCliente;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurno;
 using EvaluacionCore.Application.Features.Turnos.Dto;
-using EvaluacionCore.Domain.Entities;
+using EvaluacionCore.Domain.Entities.Asistencia;
 using System.Reflection;
 
 namespace EvaluacionCore.Application.Common.Mappings;
@@ -17,15 +17,17 @@ public class MappingProfile : Profile
     {
         CreateMap<CreateTurnoCommand, Turno>(MemberList.None).ReverseMap();
         CreateMap<CreateTurnoRequest, Turno>(MemberList.None).ReverseMap();
-        CreateMap<CreateSubturnoClienteRequest, SubTurnoCliente>(MemberList.None).ReverseMap();
+        CreateMap<CreateSubturnoClienteRequest, TurnoColaborador>(MemberList.None).ReverseMap();
         CreateMap<Turno, CreateTurnoCommand>().ReverseMap();
         CreateMap<Localidad, CreateLocalidadRequest>().ReverseMap();
         CreateMap<Localidad, UpdateLocalidadRequest>().ReverseMap();
         CreateMap<Localidad, LocalidadType>().ReverseMap();
-        CreateMap<Turno, List<TurnoType>>().ReverseMap();
+        CreateMap<ClaseTurno, ClaseTurnoType>().ReverseMap();
+        CreateMap<SubclaseTurno, SubclaseTurnoType>().ReverseMap();
+        CreateMap<TipoTurno, TipoTurnoType>().ReverseMap();
         CreateMap<TurnoType, Turno>().ReverseMap();
         CreateMap<TurnoType, TurnoResponseType>().ReverseMap();
-        CreateMap<LocalidadCliente, AsignarLocalidadClienteRequest>().ReverseMap();
+        CreateMap<LocalidadColaborador, AsignarLocalidadClienteRequest>().ReverseMap();
 
         //CreateMap<SendEmailVerificacionRequest, NotificacionDto>();
         //ApplyMappingsFromAssembly(Assembly.GetExecutingAssembly());
