@@ -30,7 +30,7 @@ public class Turno
     public Guid IdTipoJornada { get; set; }
 
     [Column("idModalidadJornada", Order = 6, TypeName = "uniqueidentifier")] // completa - parcial
-    public Guid IdMidalidadJornada { get; set; }
+    public Guid IdModalidadJornada { get; set; }
 
     [Column("codigoTurno", Order = 7, TypeName = "varchar")]
     [StringLength(10)] public string CodigoTurno { get; set; } = string.Empty;

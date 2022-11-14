@@ -34,8 +34,11 @@ public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, Respon
         try
         {
             var objTurno = await _repositoryAsync.ListAsync(cancellationToken);
+            var obtTurnosPadre = objTurno.Where(e => e.IdTurnoPadre == null).ToList();
+            var _subturno = objTurno.Where(e => e.IdTurnoPadre != null).ToList();
 
-            List<TurnoType> listaTurno = new();
+
+            List <TurnoType> listaTurno = new();
             List<TurnoResponseType> lista = new();
 
             if (objTurno.Count < 1)
@@ -43,42 +46,40 @@ public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, Respon
                 return new ResponseType<List<TurnoResponseType>>() { Data = null, Succeeded = true, StatusCode = "001", Message = "La consulta no retorna datos" };
             }
 
-            var agr = objTurno.GroupBy(x => x.IdTipoTurno).ToList();
+            var agr = objTurno.GroupBy(x => x.IdTipoJornada).ToList();
+
 
 
             foreach (var item in objTurno)
             {
 
-                //List<SubturnoType> listaSubturno = new();
+                List<SubturnoType> listaSubturno = new();
 
                 var tipoTurno = await _repositoryTurnoAsync.FirstOrDefaultAsync(new TipoTurnoByIdSpec(item.IdTipoTurno), cancellationToken);
                 //var _subturno = await _repositorySubtAsync.ListAsync(new SubturnoByTurnoIdSpec(item.Id), cancellationToken);
 
-                //if (_subturno.Count > 0)
-                //{
-                //    foreach (var subturno_ in _subturno)
-                //    {
-                //        listaSubturno.Add(new SubturnoType
-                //        {
-                //            CodigoSubturno = subturno_.CodigoSubturno,
-                //            TotalHoras = subturno_.TotalHoras,
-                //            Descripcion = subturno_.Descripcion,
-                //            Entrada = subturno_.Entrada,
-                //            MargenEntrada = subturno_.MargenEntrada,
-                //            MargenSalida = subturno_.MargenSalida,
-                //            Salida = subturno_.Salida,
-                //            Id = subturno_.Id,
-                //            IdTipoSuburno = subturno_.IdTipoSubturno,
-                //            IdTurno = subturno_.IdTurno,
-                //        });
-                //    }
-                //}
+                if (_subturno.Count > 0)
+                {
+                    foreach (var subturno_ in _subturno)
+                    {
+                        listaSubturno.Add(new SubturnoType
+                        {
+                            TotalHoras = subturno_.TotalHoras,
+                            Descripcion = subturno_.Descripcion,
+                            Entrada = subturno_.Entrada,
+                            MargenEntrada = subturno_.MargenEntrada,
+                            MargenSalida = subturno_.MargenSalida,
+                            Salida = subturno_.Salida,
+                            IdTipoTurno = subturno_.IdTipoTurno,
+                        });
+                    }
+                }
 
                 listaTurno.Add(new TurnoType
                 {
                     Id = item.Id,
                     TipoTurno = tipoTurno.Descripcion,
-                    IdTipoTurno = item.IdTipoTurno,
+                    TipoJornada = item.IdTipoJornada.ToString(),
                     Descripcion = item.Descripcion,
                     CodigoTurno = item.CodigoTurno,
                     Entrada = item.Entrada,
@@ -86,18 +87,18 @@ public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, Respon
                     Salida = item.Salida,
                     MargenSalida = item.MargenSalida,
                     TotalHoras = item.TotalHoras,
-                    //SubturnoType = listaSubturno
+                    SubturnoType = listaSubturno
                 });
 
             };
 
-            var prev = listaTurno.GroupBy(x => x.TipoTurno).ToList();
+            var prev = listaTurno.GroupBy(x => x.TipoJornada).ToList();
 
             for (int i = 0; i < prev.Count; i++)
             {
                 lista.Add(new TurnoResponseType
                 {
-                    TipoTurno = prev[i].Key.ToString(),
+                    TipoJornada = prev[i].Key.ToString(),
                     TurnoType = _mapper.Map<List<TurnoType>>(prev[i])
                 });
             }

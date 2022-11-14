@@ -7,8 +7,8 @@ namespace EvaluacionCore.Application.Features.Turnos.Dto
     public class TurnoResponseType
     {
 
-        [JsonPropertyName("TipoTurno")]
-        public string TipoTurno { get; set; }
+        [JsonPropertyName("tipoJornada")]
+        public string TipoJornada { get; set; }
 
         [JsonPropertyName("turnoType")]
         public List<TurnoType> TurnoType { get; set; }
