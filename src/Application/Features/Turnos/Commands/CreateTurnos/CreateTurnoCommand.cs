@@ -77,6 +77,7 @@ public class CreateTurnoCommandHandler : IRequestHandler<CreateTurnoCommand, Res
             {
                 objClient.IdTurnoPadre = null;
             }
+
             //registro
             var objResult = await _repoTurnoAsync.AddAsync(objClient, cancellationToken);
 
