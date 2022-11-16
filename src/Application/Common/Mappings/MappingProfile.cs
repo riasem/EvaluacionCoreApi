@@ -3,8 +3,8 @@ using EvaluacionCore.Application.Features.Localidads.Commands.AsignarLocalidadCl
 using EvaluacionCore.Application.Features.Localidads.Commands.CreateLocalidad;
 using EvaluacionCore.Application.Features.Localidads.Commands.UpdateLocalidad;
 using EvaluacionCore.Application.Features.Localidads.Dto;
-using EvaluacionCore.Application.Features.Turnos.Commands.CreateSubturnoCliente;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurno;
+using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoColaborador;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoSubTurno;
 using EvaluacionCore.Application.Features.Turnos.Dto;
 using EvaluacionCore.Domain.Entities.Asistencia;
@@ -18,7 +18,7 @@ public class MappingProfile : Profile
     {
         CreateMap<CreateTurnoCommand, Turno>(MemberList.None).ReverseMap();
         CreateMap<CreateTurnoRequest, Turno>(MemberList.None).ReverseMap();
-        CreateMap<CreateSubturnoClienteRequest, TurnoColaborador>(MemberList.None).ReverseMap();
+        CreateMap<CreateTurnoColaboradorRequest, TurnoColaborador>(MemberList.None).ReverseMap();
         CreateMap<Turno, CreateTurnoCommand>().ReverseMap();
         CreateMap<Turno, CreateTurnoSubTurnoRequest>().ReverseMap();
         CreateMap<Localidad, CreateLocalidadRequest>().ReverseMap();

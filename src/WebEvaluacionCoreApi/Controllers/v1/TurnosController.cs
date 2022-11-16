@@ -1,6 +1,6 @@
 ﻿using EvaluacionCore.Application.Common.Wrappers;
-using EvaluacionCore.Application.Features.Turnos.Commands.CreateSubturnoCliente;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurno;
+using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoColaborador;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoSubTurno;
 using EvaluacionCore.Application.Features.Turnos.Queries.GetTurnoById;
 using Microsoft.AspNetCore.Authorization;
@@ -57,13 +57,13 @@ public class TurnosController : ApiControllerBase
     /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    [HttpPost("AsignarSubturnoCliente")]
+    [HttpPost("AsignarTurnoColaborador")]
     [EnableCors("AllowOrigin")]
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
     [Authorize]
-    public async Task<IActionResult> AsignarSubturnoCliente([FromBody] CreateSubturnoClienteRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> AsignarSubturnoColaborador([FromBody] CreateTurnoColaboradorRequest request, CancellationToken cancellationToken)
     {
-        var objResult = await Mediator.Send(new CreateSubturnoClienteCommand(request), cancellationToken);
+        var objResult = await Mediator.Send(new CreateTurnoColaboradorCommand(request), cancellationToken);
         return Ok(objResult);
     }
 
