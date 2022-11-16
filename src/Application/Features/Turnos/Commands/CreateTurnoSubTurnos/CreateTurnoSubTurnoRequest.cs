@@ -1,12 +1,11 @@
-﻿using System.Text.Json.Serialization;
+﻿using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurno;
+using EvaluacionCore.Domain.Entities.Asistencia;
+using System.Text.Json.Serialization;
 
-namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateTurno
+namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoSubTurno
 {
-    public class CreateTurnoRequest 
+    public class CreateTurnoSubTurnoRequest 
     {
-
-        [JsonPropertyName("id")]
-        public Guid Id { get; set; }
 
         [JsonPropertyName("idTurnoPadre")]
         public Guid? IdTurnoPadre { get; set; }
@@ -79,5 +78,6 @@ namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateTurno
         [JsonPropertyName("fechaModificacion")]
         public DateTime? FechaModificacion { get; set; }
 
+        public List<CreateTurnoRequest> Turnos { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateSubturnoCliente;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurno;
+using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoSubTurno;
 using EvaluacionCore.Application.Features.Turnos.Queries.GetTurnoById;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -34,6 +35,40 @@ public class TurnosController : ApiControllerBase
     }
 
     /// <summary>
+    /// Crea un nuveo turno con sus respectivos turnos
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpPost("CreateTurnoSubturno")]
+    [EnableCors("AllowOrigin")]
+    [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
+    [Authorize]
+    public async Task<IActionResult> CreateTurnoSubturno([FromBody] CreateTurnoSubTurnoRequest request, CancellationToken cancellationToken)
+    {
+        var objResult = await Mediator.Send(new CreateTurnoSubTurnoCommand(request), cancellationToken);
+        return Ok(objResult);
+    }
+
+
+    /// <summary>
+    /// Asigna turno a un empleado
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpPost("AsignarSubturnoCliente")]
+    [EnableCors("AllowOrigin")]
+    [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
+    [Authorize]
+    public async Task<IActionResult> AsignarSubturnoCliente([FromBody] CreateSubturnoClienteRequest request, CancellationToken cancellationToken)
+    {
+        var objResult = await Mediator.Send(new CreateSubturnoClienteCommand(request), cancellationToken);
+        return Ok(objResult);
+    }
+
+
+    /// <summary>
     /// Retorna el listado de turnos
     /// </summary>
     /// <param name="cancellationToken"></param>
@@ -63,22 +98,5 @@ public class TurnosController : ApiControllerBase
         var objResult = await Mediator.Send(new GetMaestrosTurnoAsyncQuery(), cancellationToken);
         return Ok(objResult);
     }
-
-
-    /// <summary>
-    /// Asigna turno a un empleado
-    /// </summary>
-    /// <param name="request"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    [HttpPost("AsignarSubturnoCliente")]
-    [EnableCors("AllowOrigin")]
-    [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
-    [Authorize]
-    public async Task<IActionResult> AsignarSubturnoCliente([FromBody] CreateSubturnoClienteRequest request, CancellationToken cancellationToken)
-    {
-        var objResult = await Mediator.Send(new CreateSubturnoClienteCommand(request), cancellationToken);
-        return Ok(objResult);
-    }
-
+    
 }
