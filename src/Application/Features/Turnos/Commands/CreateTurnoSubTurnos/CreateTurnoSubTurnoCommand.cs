@@ -1,17 +1,18 @@
 ﻿using AutoMapper;
 using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
+using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurno;
 using EvaluacionCore.Application.Features.Turnos.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 
-namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateTurno;
+namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoSubTurno;
 
-public record CreateTurnoCommand(CreateTurnoRequest TurnoRequest) : IRequest<ResponseType<string>>;
+public record CreateTurnoSubTurnoCommand(CreateTurnoSubTurnoRequest TurnoRequest) : IRequest<ResponseType<string>>;
 
 
-public class CreateTurnoCommandHandler : IRequestHandler<CreateTurnoCommand, ResponseType<string>>
+public class CreateTurnoSubTurnoCommandHandler : IRequestHandler<CreateTurnoSubTurnoCommand, ResponseType<string>>
 {
     private readonly IRepositoryAsync<Turno> _repoTurnoAsync;
     private readonly IMapper _mapper;
@@ -19,7 +20,7 @@ public class CreateTurnoCommandHandler : IRequestHandler<CreateTurnoCommand, Res
     private readonly IRepositoryAsync<SubclaseTurno> _repositorySubcAsync;
     private readonly IRepositoryAsync<TipoTurno> _repositoryTurnoAsync;
 
-    public CreateTurnoCommandHandler(IRepositoryAsync<Turno> repository, IRepositoryAsync<ClaseTurno> repositoryClass, 
+    public CreateTurnoSubTurnoCommandHandler(IRepositoryAsync<Turno> repository, IRepositoryAsync<ClaseTurno> repositoryClass, 
         IRepositoryAsync<SubclaseTurno> repositorySubt, IConfiguration config, IRepositoryAsync<TipoTurno> repositoryTurno,  IMapper mapper)
     {
         _repoTurnoAsync = repository; 
@@ -29,11 +30,13 @@ public class CreateTurnoCommandHandler : IRequestHandler<CreateTurnoCommand, Res
         _mapper = mapper;
     }
 
-    public async Task<ResponseType<string>> Handle(CreateTurnoCommand request, CancellationToken cancellationToken)
+    public async Task<ResponseType<string>> Handle(CreateTurnoSubTurnoCommand request, CancellationToken cancellationToken)
     {
+        //VALIDAR CON CASOS REALES (WEB)
         try
         {
             var objClient = _mapper.Map<Turno>(request.TurnoRequest);
+            var objDetClient = _mapper.Map<List<CreateTurnoRequest>>(request.TurnoRequest.Turnos);
 
             var objTurno = await _repoTurnoAsync.ListAsync(cancellationToken);
 
@@ -87,6 +90,12 @@ public class CreateTurnoCommandHandler : IRequestHandler<CreateTurnoCommand, Res
             if (objResult is null)
             {
                 return new ResponseType<string>() { Data = null, Message = "Ocurrió un error al registrar el turno", StatusCode = "101", Succeeded = false };
+            }
+
+            foreach (var item in objDetClient)
+            {
+                item.IdTurnoPadre = objResult.Id;
+                _ = new CreateTurnoCommand(item);
             }
 
             return new ResponseType<string>() { Data = objResult.Id.ToString(), Message = "Turno registrado exitosamente", StatusCode = "100", Succeeded = true };
