@@ -23,5 +23,6 @@ namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoColabor
     public class Subturno
     {
         public Guid IdSubturno { get; set; }
+        public DateTime FechaAsignacion { get; set; }
     }
 }

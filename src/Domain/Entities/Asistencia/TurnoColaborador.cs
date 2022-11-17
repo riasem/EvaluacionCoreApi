@@ -19,22 +19,25 @@ public partial class TurnoColaborador
     public Guid IdColaborador { get; set; }
     public virtual Cliente Colaborador { get; set; }
 
-    [Column("estado", Order = 3, TypeName = "varchar")]
+    [Column("fechaAsginacion", Order = 3, TypeName = "datetime")]
+    public DateTime FechaAsignacion { get; set; }
+    
+    [Column("estado", Order = 4, TypeName = "varchar")]
     public string Estado { get; set; } = "A";
 
 
 
     //AUDITORIA
-    [Column("usuarioCreacion", Order = 4, TypeName = "varchar")]
+    [Column("usuarioCreacion", Order = 5, TypeName = "varchar")]
     [StringLength(20)] public string UsuarioCreacion { get; set; } = string.Empty;
 
-    [Column("fechaCreacion", Order = 5, TypeName = "datetime2")]
+    [Column("fechaCreacion", Order = 6, TypeName = "datetime2")]
     public DateTime FechaCreacion { get; set; } = DateTime.Now;
 
-    [Column("usuarioModificacion", Order = 6, TypeName = "varchar")]
+    [Column("usuarioModificacion", Order = 7, TypeName = "varchar")]
     [StringLength(20)] public string UsuarioModificacion { get; set; } = string.Empty;
 
-    [Column("fechaModificacion", Order = 7, TypeName = "datetime2")]
+    [Column("fechaModificacion", Order = 8, TypeName = "datetime2")]
     public DateTime? FechaModificacion { get; set; }
 
 

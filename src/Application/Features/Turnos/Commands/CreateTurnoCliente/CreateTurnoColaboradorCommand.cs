@@ -27,6 +27,8 @@ public class CreateTurnoColaboradorCommandHandler : IRequestHandler<CreateTurnoC
         {
             foreach (var item in request.TurnoRequest.ClienteSubturnos)
             {
+                var consCliente = 2;
+
                 TurnoColaborador objClient = new()
                 {
                     Id = Guid.NewGuid(),
@@ -51,7 +53,8 @@ public class CreateTurnoColaboradorCommandHandler : IRequestHandler<CreateTurnoC
                         Estado = "A",
                         UsuarioCreacion = "Admin",
                         IdTurno = item2.IdSubturno,
-                        IdColaborador = item.IdCliente
+                        IdColaborador = item.IdCliente,
+                        FechaAsignacion = item2.FechaAsignacion
                     };
 
                     var objResult2 = await _repoTurnoAsync.AddAsync(objClient, cancellationToken);
