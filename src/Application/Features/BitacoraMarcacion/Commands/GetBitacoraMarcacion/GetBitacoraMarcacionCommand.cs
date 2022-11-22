@@ -17,7 +17,7 @@ namespace EvaluacionCore.Application.Features.Marcacion.Commands.GetBitacoraMarc
     {
         private readonly IBitacoraMarcacion _repoBitMarcacionAsync;
 
-        public GetMarcacionCommandHandler(IConfiguration config, IMapper mapper, ILogger<GetMarcacionCommandHandler> log, IBitacoraMarcacion repoBitMarcacionAsync)
+        public GetMarcacionCommandHandler(IBitacoraMarcacion repoBitMarcacionAsync)
         { 
             _repoBitMarcacionAsync = repoBitMarcacionAsync;
         }

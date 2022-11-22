@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using System.Data;
 using Dapper;
 using EvaluacionCore.Application.Common.Wrappers;
+using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetComboBitacoraMarcacion;
 
 namespace Workflow.Persistence.Repository.BitacoraMarcacion
 {
@@ -57,6 +58,37 @@ namespace Workflow.Persistence.Repository.BitacoraMarcacion
             }
 
             return bitacoraMarcacion;
+        }
+
+        public async Task<List<ComboBitacoraMarcacionType>> GetComboBitacoraMarcacionAsync(GetComboBitacoraMarcacionRequest request)
+        {
+            List<ComboBitacoraMarcacionType> lstCombo = new();
+
+            try
+            {
+                string BitacoraMarcacion = _config.GetSection("StoredProcedure:Marcacion:ComboBitacoraMarcaciones").Get<string>();
+
+                using IDbConnection con = new SqlConnection(ConnectionString);
+                if (con.State == ConnectionState.Closed) con.Open();
+
+                lstCombo = (await con.QueryAsync<ComboBitacoraMarcacionType>(
+                    sql: string.Concat(Esquema, BitacoraMarcacion),
+                    param: new
+                    {
+                        tipo = request.Tipo,
+                        codigo = request.Codigo,
+                        identificacion = string.Empty,
+                    },
+                    commandType: CommandType.StoredProcedure)).ToList();
+
+                if (con.State == ConnectionState.Open) con.Close();
+            }
+            catch (Exception e)
+            {
+                _log.LogError(e, string.Empty);
+            }
+
+            return lstCombo;
         }
 
     }
