@@ -42,7 +42,6 @@ public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, Respon
         {
             var objTurno = await _repositoryAsync.ListAsync(cancellationToken);
             var obtTurnosPadre = objTurno.Where(e => e.IdTurnoPadre == null).ToList();
-            var _subturno = objTurno.Where(e => e.IdTurnoPadre != null).ToList();
 
 
             var modalidadJornadaTypes = _config.GetSection("modalidadJornada").Get<List<ModalidadJornadaType>>();
@@ -59,7 +58,7 @@ public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, Respon
 
             var agr = objTurno.GroupBy(x => x.IdTipoJornada).ToList();
 
-            foreach (var item in objTurno)
+            foreach (var item in obtTurnosPadre)
             {
                 List<SubturnoType> listaSubturno = new();
 
@@ -68,6 +67,9 @@ public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, Respon
                 var subClaseTurno = await _repositorySubClaseAsync.GetByIdAsync(item.IdSubclaseTurno, cancellationToken);
                 var modalidadJornada = modalidadJornadaTypes.Where(e => e.Id == item.IdModalidadJornada).FirstOrDefault();
                 var tipoJornada = tipoJornadaTypes.Where(e => e.Id == item.IdTipoJornada).FirstOrDefault();
+
+
+                var _subturno = objTurno.Where(e => e.IdTurnoPadre == item.Id).ToList();
 
                 if (_subturno.Count > 0)
                 {
@@ -82,6 +84,11 @@ public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, Respon
                             MargenSalida = subturno_.MargenSalida,
                             Salida = subturno_.Salida,
                             IdTipoTurno = subturno_.IdTipoTurno,
+                            CodigoTurno = subturno_.CodigoTurno,
+                            TipoTurno = subturno_.IdTipoTurno.ToString(),
+                            MargenEntradaPosterior = subturno_.MargenEntradaPosterior,
+                            MargenEntradaPrevio = subturno_.MargenEntradaPrevio,
+                            MargenSalidaPosterior = subturno_.MargenSalidaPosterior
                         });
                     }
                 }

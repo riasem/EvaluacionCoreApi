@@ -29,6 +29,18 @@ namespace EvaluacionCore.Application.Features.Turnos.Dto
         [JsonPropertyName("margenSalida")]
         public DateTime MargenSalida { get; set; }
 
+        [JsonPropertyName("margenEntradaPrevio")]
+        public string MargenEntradaPrevio { get; set; } = string.Empty;
+
+        [JsonPropertyName("margenEntradaPosterior")]
+        public string MargenEntradaPosterior { get; set; } = string.Empty;
+
+        [JsonPropertyName("margenSalidaPrevio")]
+        public string MargenSalidaPrevio { get; set; } = string.Empty;
+
+        [JsonPropertyName("margenSalidaPosterior")]
+        public string MargenSalidaPosterior { get; set; } = string.Empty;
+
         [JsonPropertyName("totalHoras")]
         public string TotalHoras { get; set; } = string.Empty;
 
