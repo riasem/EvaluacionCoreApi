@@ -125,9 +125,12 @@ public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, Respon
 
             for (int i = 0; i < prev.Count; i++)
             {
+                var tipoJ = prev[i].Key.ToString();
+                var idTipoJ = tipoJornadaTypes.Where(e => e.Descripcion == tipoJ).FirstOrDefault().Id;
                 lista.Add(new TurnoResponseType
                 {
-                    TipoJornada = prev[i].Key.ToString(),
+                    IdTipoJornada = idTipoJ.ToString(),
+                    TipoJornada = tipoJ,
                     TurnoType = _mapper.Map<List<TurnoType>>(prev[i])
                 });
             }
