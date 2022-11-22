@@ -27,8 +27,6 @@ public class CreateTurnoColaboradorCommandHandler : IRequestHandler<CreateTurnoC
         {
             foreach (var item in request.TurnoRequest.ClienteSubturnos)
             {
-                var consCliente = 2;
-
                 TurnoColaborador objClient = new()
                 {
                     Id = Guid.NewGuid(),
@@ -42,7 +40,7 @@ public class CreateTurnoColaboradorCommandHandler : IRequestHandler<CreateTurnoC
 
                 if (objResult is null)
                 {
-                    return new ResponseType<string>() { Data = null, Message = "No se pudo registrar la asignación", StatusCode = "101", Succeeded = true };
+                    return new ResponseType<string>() { Data = null, Message = "No se pudo registrar la asignación", StatusCode = "101", Succeeded = false };
                 }
 
                 foreach (var item2 in item.Subturnos)
@@ -61,7 +59,7 @@ public class CreateTurnoColaboradorCommandHandler : IRequestHandler<CreateTurnoC
 
                     if (objResult2 is null)
                     {
-                        return new ResponseType<string>() { Data = null, Message = "No se pudo registrar la asignación", StatusCode = "101", Succeeded = true };
+                        return new ResponseType<string>() { Data = null, Message = "No se pudo registrar la asignación", StatusCode = "101", Succeeded = false };
                     }
                 }
             }

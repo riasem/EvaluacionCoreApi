@@ -33,14 +33,14 @@ public class AsignarLocalidadClienteCommandHandler : IRequestHandler<AsignarLoca
             var objResult = await _repoLocalidadCliAsync.AddAsync(objLocalidadClie, cancellationToken);
             if (objResult is null)
             {
-                return new ResponseType<string>() { Data = objResult.Id.ToString(), Message = "No se pudo registrar la asignación", StatusCode = "001", Succeeded = true };
+                return new ResponseType<string>() { Data = null, Message = "No se pudo registrar la asignación", StatusCode = "001", Succeeded = false };
 
             }
 
             return new ResponseType<string>() { Data = objResult.Id.ToString(), Message = "Locación asignada exitosamente", StatusCode = "000", Succeeded = true };
 
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return new ResponseType<string>() { Data = null, Message = "Ocurrió un error durante el registro", StatusCode = "002", Succeeded = false };
         }

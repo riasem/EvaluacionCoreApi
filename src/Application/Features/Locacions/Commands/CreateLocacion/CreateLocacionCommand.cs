@@ -32,13 +32,13 @@ public class CreateLocalidadCommandHandler : IRequestHandler<CreateLocalidadComm
             var objResult = await _repoLocalidadAsync.AddAsync(objLocalidad, cancellationToken);
             if (objResult is null)
             {
-                return new ResponseType<string>() { Data = objResult.Id.ToString(), Message = "No se pudo registrar la localidad", StatusCode = "001", Succeeded = true };
+                return new ResponseType<string>() { Data = null, Message = "No se pudo registrar la localidad", StatusCode = "001", Succeeded = false };
 
             }
 
             return new ResponseType<string>() { Data = objResult.Id.ToString(), Message = "Locación registrada exitosamente", StatusCode = "000", Succeeded = true };
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return new ResponseType<string>() { Data = null, Message = "Ocurrió un error durante el registro de la locación.", StatusCode = "002", Succeeded = false };
         }

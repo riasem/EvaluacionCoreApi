@@ -17,7 +17,7 @@ namespace EnrolApp.Persistence.Configurations
               .IsRequired()
               .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Property(x => x.CodigoTipoTurno)
+            builder.Property(x => x.CodigoTurno)
                 .HasMaxLength(10)
                .IsRequired();
 
