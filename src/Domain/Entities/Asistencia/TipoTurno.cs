@@ -10,8 +10,8 @@ public class TipoTurno
     [Column("id", Order = 0, TypeName = "uniqueidentifier")]
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    [Column("codigoTipoTurno", Order = 1, TypeName = "varchar")]
-    [StringLength(10)] public string CodigoTipoTurno { get; set; } = string.Empty;
+    [Column("codigoTurno", Order = 1, TypeName = "varchar")]
+    [StringLength(10)] public string CodigoTurno { get; set; } = string.Empty;
 
     [Column("descripcion", Order = 2, TypeName = "varchar")]
     [StringLength(50)] public string Descripcion { get; set; } = string.Empty;

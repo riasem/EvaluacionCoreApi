@@ -100,7 +100,7 @@ public class CreateTurnoSubTurnoCommandHandler : IRequestHandler<CreateTurnoSubT
 
             return new ResponseType<string>() { Data = objResult.Id.ToString(), Message = "Turno registrado exitosamente", StatusCode = "100", Succeeded = true };
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return new ResponseType<string>() { Data = null, Message = "Ocurrió un error al registrar el turno ", StatusCode = "102", Succeeded = false };
         }

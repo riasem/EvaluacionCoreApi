@@ -21,7 +21,6 @@ public class UpdateLocalidadCommandHandler : IRequestHandler<UpdateLocalidadComm
 
     public async Task<ResponseType<string>> Handle(UpdateLocalidadCommand request, CancellationToken cancellationToken)
     {
-        
         try
         {
             var objLocalidad = _mapper.Map<Localidad>(request.UpdateLocalidad);
@@ -37,7 +36,7 @@ public class UpdateLocalidadCommandHandler : IRequestHandler<UpdateLocalidadComm
             return new ResponseType<string>() { Data = null, Message = "Locación actualizada exitosamente", StatusCode = "200", Succeeded = true };
 
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return new ResponseType<string>() { Data = null, Message = "No se pudo actualizar la locación", StatusCode = "201", Succeeded = false };
         }

@@ -22,7 +22,6 @@ public class CreateLocalidadTurnoClienteCommandHandler : IRequestHandler<CreateL
 
     public async Task<ResponseType<string>> Handle(CreateLocalidadTurnoClienteCommand request, CancellationToken cancellationToken)
     {
-
         try
         {
             var objClient = _mapper.Map<TurnoColaborador>(request.TurnoRequest);
@@ -34,11 +33,11 @@ public class CreateLocalidadTurnoClienteCommandHandler : IRequestHandler<CreateL
             var objResult = await _repoTurnoAsync.AddAsync(objClient, cancellationToken);
             if (objResult is null)
             {
-                return new ResponseType<string>() { Data = null, Message = "No se pudo registrar la asignación", StatusCode = "001", Succeeded = true };
+                return new ResponseType<string>() { Data = null, Message = "No se pudo registrar la asignación", StatusCode = "001", Succeeded = false };
             }
             return new ResponseType<string>() { Data = objResult.Id.ToString(),Message = "Turno asignado exitosamente", StatusCode ="000",Succeeded = true };
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return new ResponseType<string>() { Data = null, Message = "Ocurrió un error durante el registro", StatusCode = "002", Succeeded = false };
         }

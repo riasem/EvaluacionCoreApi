@@ -35,7 +35,7 @@ public class DeleteLocalidadCommandHandler : IRequestHandler<DeleteLocalidadComm
         }
         catch (Exception ex)
         {
-            return new ResponseType<string>() { Data = null, Message = "No se pudo eliminar la locación.", StatusCode = "301", Succeeded = false };
+            return new ResponseType<string>() { Data = null, Message = "No se pudo eliminar la locación.", StatusCode = "302", Succeeded = false };
         }
 
 

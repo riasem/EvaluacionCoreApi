@@ -48,8 +48,6 @@ public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, Respon
 
             var agr = objTurno.GroupBy(x => x.IdTipoJornada).ToList();
 
-
-
             foreach (var item in objTurno)
             {
 

@@ -1,15 +1,9 @@
 ﻿using AutoMapper;
-using EvaluacionCore.Application.Common.Exceptions;
 using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.Localidads.Dto;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvaluacionCore.Application.Features.Localidads.Queries.GetLocalidad;
 
