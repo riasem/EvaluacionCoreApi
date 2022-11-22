@@ -12,19 +12,34 @@ namespace EvaluacionCore.Application.Features.Turnos.Dto
         public Guid? IdTurnoPadre { get; set; }
 
         [JsonPropertyName("idTipoTurno")]
-        public string TipoTurno { get; set; } = string.Empty;
+        public Guid? IdTipoTurno { get; set; }
 
         [JsonPropertyName("idClaseTurno")]
-        public string ClaseTurno { get; set; } = string.Empty;
+        public Guid? IdClaseTurno { get; set; }
 
         [JsonPropertyName("idSubclaseTurno")]
-        public string SubclaseTurno { get; set; } = string.Empty;
+        public Guid? IdSubclaseTurno { get; set; }
 
         [JsonPropertyName("idTipoJornada")]
-        public string TipoJornada { get; set; } = string.Empty;
+        public Guid? IdTipoJornada { get; set; }
 
         [JsonPropertyName("idModalidadJornada")]
-        public string MidalidadJornada { get; set; } = string.Empty;
+        public Guid? IdModalidadJornada { get; set; }
+
+        [JsonPropertyName("tipoTurno")]
+        public string TipoTurno { get; set; } = string.Empty;
+
+        [JsonPropertyName("claseTurno")]
+        public string ClaseTurno { get; set; } = string.Empty;
+
+        [JsonPropertyName("subclaseTurno")]
+        public string SubclaseTurno { get; set; } = string.Empty;
+
+        [JsonPropertyName("tipoJornada")]
+        public string TipoJornada { get; set; } = string.Empty;
+
+        [JsonPropertyName("modalidadJornada")]
+        public string ModalidadJornada { get; set; } = string.Empty;
 
         [JsonPropertyName("codigoTurno")]
         public string CodigoTurno { get; set; } = string.Empty;
