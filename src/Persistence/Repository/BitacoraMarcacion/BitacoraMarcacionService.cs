@@ -45,8 +45,8 @@ namespace Workflow.Persistence.Repository.BitacoraMarcacion
                         unidadNegocio = request.CodUdn,
                         area = request.CodArea,
                         subcentro = request.CodSubcentro,
-                        fechaDesde = request.FechaDesde,
-                        fechaHasta = request.FechaHasta
+                        fechaDesde = ConvertDateYYYYMMDD(request.FechaDesde),
+                        fechaHasta = ConvertDateYYYYMMDD(request.FechaHasta)
                     },
                     commandType: CommandType.StoredProcedure)).ToList();
 
@@ -89,6 +89,17 @@ namespace Workflow.Persistence.Repository.BitacoraMarcacion
             }
 
             return lstCombo;
+        }
+
+        private static string ConvertDateYYYYMMDD(string fechaDDMMYYYY)
+        {
+            string fechaYYYYMMDD;
+
+            var fs = fechaDDMMYYYY.Split("/");
+            var date = new DateTime(Convert.ToInt32(fs[2]), Convert.ToInt32(fs[1]), Convert.ToInt32(fs[0]));
+            fechaYYYYMMDD = date.ToString("yyyy-MM-dd");
+
+            return fechaYYYYMMDD;
         }
 
     }

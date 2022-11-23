@@ -25,7 +25,7 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         [HttpGet("GetBitacoraMarcacion")]
         [EnableCors("AllowOrigin")]
         [ProducesResponseType(typeof(ResponseType<List<BitacoraMarcacionType>>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetBitacoraMarcacion(string CodUdn, string CodArea, string CodSubcentro, string FechaDesde, string FechaHasta, CancellationToken cancellationToken, string Suscriptor)
+        public async Task<IActionResult> GetBitacoraMarcacion(string CodUdn, string CodArea, string CodSubcentro, string FechaDesde, string FechaHasta, CancellationToken cancellationToken, string? Suscriptor)
         {
             var request = new GetBitacoraMarcacionRequest() { Suscriptor = Suscriptor, CodUdn = CodUdn, CodArea = CodArea, CodSubcentro = CodSubcentro, FechaDesde = FechaDesde, FechaHasta = FechaHasta };
 
