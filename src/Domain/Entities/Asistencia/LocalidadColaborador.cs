@@ -13,7 +13,7 @@ public class LocalidadColaborador
     public Guid Id { get; set; } = Guid.NewGuid();
 
     [Column("idLocalidad", Order = 1, TypeName = "uniqueidentifier")]
-    public Guid IdLocaliad { get; set; }
+    public Guid IdLocalidad { get; set; }
     public virtual Localidad Localidad { get; set; }
 
     [Column("idColaborador", Order = 2, TypeName = "uniqueidentifier")]
