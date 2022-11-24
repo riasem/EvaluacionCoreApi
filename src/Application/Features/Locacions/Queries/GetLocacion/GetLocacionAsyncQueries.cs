@@ -54,6 +54,5 @@ public class GetLocalidadAsyncQueriesHandler : IRequestHandler<GetLocalidadAsync
         {
             return new ResponseType<List<LocalidadType>>() { Data = null, Message = "Ocurrió un error durante la consulta", StatusCode = "002", Succeeded = false };
         }
-
     }
 }
