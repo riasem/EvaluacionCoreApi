@@ -1,4 +1,5 @@
-﻿using EvaluacionCore.Application.Common.Wrappers;
+﻿using EnrolApp.Application.Features.Marcacion.Commands.CreateMarcacion;
+using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetBitacoraMarcacion;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetComboBitacoraMarcacion;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Dto;
@@ -56,6 +57,22 @@ namespace WebEvaluacionCoreApi.Controllers.v1
             var request = new GetComboBitacoraMarcacionRequest() { Tipo = Tipo, Codigo = Codigo };
 
             var objResult = await Mediator.Send(new GetComboBitacoraMarcacionCommand(request), cancellationToken);
+            return Ok(objResult);
+        }
+
+        /// <summary>
+        /// Registro de marcación de entrada y salida
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpPost("GenerarMarcacion")]
+        [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CreateMarcacion([FromBody] CreateMarcacionRequest request, CancellationToken cancellationToken)
+        {
+            var query = new CreateMarcacionCommand(request);
+            var objResult = await Mediator.Send(query, cancellationToken);
             return Ok(objResult);
         }
     }

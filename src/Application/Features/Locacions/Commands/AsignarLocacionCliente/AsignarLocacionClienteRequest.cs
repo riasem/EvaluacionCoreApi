@@ -13,6 +13,6 @@ public class AsignarLocalidadClienteRequest
     public Guid IdLocalidad { get; set; }
 
     [JsonPropertyName("idCliente")]
-    public Guid IdCliente { get; set; }
+    public Guid IdColaborador { get; set; }
  
 }
