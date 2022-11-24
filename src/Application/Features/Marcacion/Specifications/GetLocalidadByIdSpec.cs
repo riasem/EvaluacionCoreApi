@@ -4,12 +4,14 @@ using EvaluacionCore.Domain.Entities.Common;
 
 namespace EnrolApp.Application.Features.Marcacion.Specifications;
 
-public class GetLocalidadByIdSpec : Specification<LocalidadColaborador>
+public class GetLocalidadByIdSpec : Specification<Localidad>
 {
     public GetLocalidadByIdSpec(Guid id, string codigoEmpleado)
     {
-        Query.Where(p => p.Id == id)
-            .Include(p => p.Colaborador).Where(p => p.Colaborador.CodigoConvivencia == codigoEmpleado);
-           
+        Query.Where(p => p.Id == id && p.LocalidadColaboradores.Where(x => x.Colaborador.CodigoConvivencia == codigoEmpleado).Any())
+            .Include(p => p.LocalidadColaboradores.Where(x => x.Colaborador.CodigoConvivencia == codigoEmpleado))
+            .ThenInclude(p => p.Colaborador);
+            
+
     }
 }
