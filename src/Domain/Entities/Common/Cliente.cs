@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using EvaluacionCore.Domain.Entities.Asistencia;
+using EnrolApp.Domain.Entities.Common;
 
 namespace EvaluacionCore.Domain.Entities.Common;
 
@@ -88,6 +89,7 @@ public class Cliente
     [NotMapped]
     [Column("cargoId", Order = 21, TypeName = "uniqueidentifier")]
     public Guid CargoId { get; set; }
+    public virtual Cargo Cargo { get; set; }
 
     [Column("clientePadreId", Order = 22, TypeName = "uniqueidentifier")]
     public Guid? ClientePadreId { get; set; }

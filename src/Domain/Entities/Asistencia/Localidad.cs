@@ -23,23 +23,26 @@ public class Localidad
     [Column("longitud", Order = 4, TypeName = "float")]
     [MaxLength(8)] public double Longitud { get; set; }
 
-    [Column("descripcion", Order = 5, TypeName = "varchar")]
+    [Column("radio", Order = 5, TypeName = "float")]
+    [MaxLength(8)] public double Radio { get; set; }
+
+    [Column("descripcion", Order = 6, TypeName = "varchar")]
     public string Descripcion { get; set; }
 
-    [Column("estado", Order = 6, TypeName = "varchar")]
+    [Column("estado", Order = 7, TypeName = "varchar")]
     [StringLength(1)] public string Estado { get; set; } = "A";
 
     //AUDITORIA
-    [Column("usuarioCreacion", Order = 7, TypeName = "varchar")]
+    [Column("usuarioCreacion", Order = 8, TypeName = "varchar")]
     [StringLength(20)] public string UsuarioCreacion { get; set; } = string.Empty;
 
-    [Column("fechaCreacion", Order = 8, TypeName = "datetime2")]
+    [Column("fechaCreacion", Order = 9, TypeName = "datetime2")]
     public DateTime FechaCreacion { get; set; } = DateTime.Now;
 
-    [Column("usuarioModificacion", Order = 9, TypeName = "varchar")]
+    [Column("usuarioModificacion", Order = 10, TypeName = "varchar")]
     [StringLength(20)] public string UsuarioModificacion { get; set; } = string.Empty;
 
-    [Column("fechaModificacion", Order = 10, TypeName = "datetime2")]
+    [Column("fechaModificacion", Order = 11, TypeName = "datetime2")]
     public DateTime? FechaModificacion { get; set; }
 
 

@@ -42,9 +42,9 @@ public class LocalidadController : ApiControllerBase
     [ProducesResponseType(typeof(ResponseType<LocalidadType>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [Authorize]
-    public async Task<IActionResult> GetLocalidad(string? IdLocalidad , CancellationToken cancellationToken)
+    public async Task<IActionResult> GetLocalidad(string? IdLocalidad, string? Identificacion, CancellationToken cancellationToken)
     {
-        var objResult = await Mediator.Send(new GetLocalidadAsyncQueries(IdLocalidad), cancellationToken);
+        var objResult = await Mediator.Send(new GetLocalidadAsyncQueries(IdLocalidad, Identificacion), cancellationToken);
         return Ok(objResult);
 
     }

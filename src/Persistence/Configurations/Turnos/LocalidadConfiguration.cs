@@ -13,7 +13,7 @@ namespace EnrolApp.Persistence.Configurations
 
             builder.HasMany(g => g.LocalidadColaboradores)
               .WithOne(g => g.Localidad)
-              .HasForeignKey(g => g.IdLocaliad)
+              .HasForeignKey(g => g.IdLocalidad)
               .IsRequired()
               .OnDelete(DeleteBehavior.Cascade);
 

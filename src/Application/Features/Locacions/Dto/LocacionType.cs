@@ -24,6 +24,9 @@ public class LocalidadType
     [JsonPropertyName("longitud")]
     public double Longitud { get; set; }
 
+    [JsonPropertyName("radio")]
+    public double Radio { get; set; }
+
     [JsonPropertyName("descripcion")]
     public string Descripcion { get; set; }
 }
