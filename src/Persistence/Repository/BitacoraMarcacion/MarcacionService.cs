@@ -146,7 +146,7 @@ public class MarcacionService : IMarcacion
                     MarcacionColaborador objMarcacionColaborador = new()
                     {
                         IdTurnoColaborador = idturnovalidado,
-                        IdLocalidadColaborador = objLocalidad.Id,
+                        IdLocalidadColaborador = objLocalidad.LocalidadColaboradores.ElementAt(0).Id,
                         MarcacionEntrada = tipoMarcacion == "E" ? marcacionColaborador : null,
                         MarcacionSalida = tipoMarcacion == "S" ? marcacionColaborador : null,
                         EstadoMarcacionEntrada = tipoMarcacion == "E" ? estadoMarcacion : null,
