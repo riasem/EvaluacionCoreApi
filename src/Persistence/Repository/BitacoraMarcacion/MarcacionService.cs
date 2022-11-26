@@ -9,16 +9,10 @@ using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.Marcacion.Interfaces;
 using EvaluacionCore.Application.Features.Marcacion.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
-using EvaluacionCore.Domain.Entities.Common;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Workflow.Persistence.Repository.BitacoraMarcacion;
 
@@ -84,7 +78,7 @@ public class MarcacionService : IMarcacion
                     tipoMarcacion = "E";
 
                     estadoMarcacion = marcacionColaborador < turnoEntrada && marcacionColaborador <= mEntrada ? "C" : "A";
-                    countMarcacion = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(margenEPre, margenEPos, tipoMarcacion));
+                    countMarcacion = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(margenEPre, margenEPos, tipoMarcacion), cancellationToken);
                     break;
 
                 }
@@ -94,7 +88,7 @@ public class MarcacionService : IMarcacion
                     tipoMarcacion = "S";
 
                     estadoMarcacion = marcacionColaborador > turnoSalida && marcacionColaborador <= mSalida ? "C" : "";
-                    countMarcacion = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(margenSPre, margenSPos, tipoMarcacion));
+                    countMarcacion = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(margenSPre, margenSPos, tipoMarcacion), cancellationToken);
 
                     break;
                 }
