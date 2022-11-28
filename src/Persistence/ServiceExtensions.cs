@@ -1,8 +1,10 @@
 ﻿using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Interfaces;
+using EvaluacionCore.Application.Features.EvalCore.Interfaces;
 using EvaluacionCore.Application.Features.Marcacion.Interfaces;
 using EvaluacionCore.Persistence.Contexts;
 using EvaluacionCore.Persistence.Repository;
+using EvaluacionCore.Persistence.Repository.Employees;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,6 +31,7 @@ public static class ServiceExtensions
         //services.AddTransient<IAdjuntoService, AdjuntoService>();
         services.AddTransient<IBitacoraMarcacion, BitacoraMarcacionService>();
         services.AddTransient<IMarcacion, MarcacionService>();
+        services.AddTransient<IEvaluacion, EvaluacionService>();
 
 
         #endregion
