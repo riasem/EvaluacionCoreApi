@@ -30,18 +30,19 @@ public class CreateTurnoColaboradorCommandHandler : IRequestHandler<CreateTurnoC
             DateTime fechaHasta = request.TurnoRequest.FechaAsignacionHasta;
             TimeSpan difFechas = fechaHasta - fechaDesde;
 
-            var consulta = await _repoTurnoAsync.ListAsync(cancellationToken);
-            var filtro = consulta.Where(e => e.FechaAsignacion > fechaDesde && e.FechaAsignacion < fechaHasta).ToList();
-
-            if (filtro.Count > 0)
-            {
-                return new ResponseType<string>() { Data = null, Message = "Ya existen turnos asignados en el rango de las fechas indicadas", StatusCode = "101", Succeeded = false };
-            }
 
             for (int i = 0; i <= difFechas.Days; i++ )
             {
                 foreach (var item in request.TurnoRequest.ClienteSubturnos)
                 {
+
+                    var consulta = await _repoTurnoAsync.ListAsync(cancellationToken);
+                    var filtro = consulta.Where(e => e.FechaAsignacion == fechaDesde.AddDays(i) && e.IdColaborador == item.IdCliente).ToList();
+
+                    if (filtro.Count > 0)
+                    {
+                        return new ResponseType<string>() { Data = null, Message = "Ya existen turnos asignados en el rango de las fechas indicadas", StatusCode = "101", Succeeded = false };
+                    }
                     Guid guid = Guid.NewGuid();
                     TurnoColaborador objClient = new()
                     {
