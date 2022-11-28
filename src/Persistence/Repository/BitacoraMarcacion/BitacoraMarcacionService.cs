@@ -45,6 +45,7 @@ namespace Workflow.Persistence.Repository.BitacoraMarcacion
                         unidadNegocio = request.CodUdn,
                         area = request.CodArea,
                         subcentro = request.CodSubcentro,
+                        codMarcacion = request.CodMarcacion,
                         fechaDesde = ConvertDateYYYYMMDD(request.FechaDesde),
                         fechaHasta = ConvertDateYYYYMMDD(request.FechaHasta)
                     },
