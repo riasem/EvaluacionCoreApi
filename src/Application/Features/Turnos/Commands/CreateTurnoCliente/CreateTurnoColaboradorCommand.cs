@@ -22,44 +22,67 @@ public class CreateTurnoColaboradorCommandHandler : IRequestHandler<CreateTurnoC
 
     public async Task<ResponseType<string>> Handle(CreateTurnoColaboradorCommand request, CancellationToken cancellationToken)
     {
+        DateTime fechaAsigna;
 
         try
         {
-            foreach (var item in request.TurnoRequest.ClienteSubturnos)
+            DateTime fechaDesde = request.TurnoRequest.FechaAsignacionDesde;
+            DateTime fechaHasta = request.TurnoRequest.FechaAsignacionHasta;
+            TimeSpan difFechas = fechaHasta - fechaDesde;
+
+            var consulta = await _repoTurnoAsync.ListAsync(cancellationToken);
+            var filtro = consulta.Where(e => e.FechaAsignacion > fechaDesde && e.FechaAsignacion < fechaHasta).ToList();
+
+            if (filtro.Count > 0)
             {
-                TurnoColaborador objClient = new()
-                {
-                    Id = Guid.NewGuid(),
-                    Estado = "A",
-                    UsuarioCreacion = "Admin",
-                    IdTurno = request.TurnoRequest.IdTurno,
-                    IdColaborador = item.IdCliente
-                };
+                return new ResponseType<string>() { Data = null, Message = "Ya existen turnos asignados en el rango de las fechas indicadas", StatusCode = "101", Succeeded = false };
+            }
 
-                var objResult = await _repoTurnoAsync.AddAsync(objClient, cancellationToken);
-
-                if (objResult is null)
+            for (int i = 0; i <= difFechas.Days; i++ )
+            {
+                foreach (var item in request.TurnoRequest.ClienteSubturnos)
                 {
-                    return new ResponseType<string>() { Data = null, Message = "No se pudo registrar la asignación", StatusCode = "101", Succeeded = false };
-                }
-
-                foreach (var item2 in item.Subturnos)
-                {
-                    TurnoColaborador objClient2 = new()
+                    Guid guid = Guid.NewGuid();
+                    TurnoColaborador objClient = new()
                     {
-                        Id = Guid.NewGuid(),
+                        Id = guid,
                         Estado = "A",
-                        UsuarioCreacion = "Admin",
-                        IdTurno = item2.IdSubturno,
+                        UsuarioCreacion = "SYSTEM",
+                        IdTurno = request.TurnoRequest.IdTurno,
                         IdColaborador = item.IdCliente,
-                        FechaAsignacion = item2.FechaAsignacion
+                        FechaAsignacion = fechaDesde.AddDays(i)
                     };
 
-                    var objResult2 = await _repoTurnoAsync.AddAsync(objClient, cancellationToken);
+                    var objResult = await _repoTurnoAsync.AddAsync(objClient, cancellationToken);
 
-                    if (objResult2 is null)
+                    if (objResult is null)
                     {
-                        return new ResponseType<string>() { Data = null, Message = "No se pudo registrar la asignación", StatusCode = "101", Succeeded = false };
+                        return new ResponseType<string>() { Data = null, Message = "No se pudo registrar la asignación del turno Laboral", StatusCode = "101", Succeeded = false };
+                    }
+
+                    if (item.Subturnos.Count > 0)
+                    {
+
+                        foreach (var item2 in item.Subturnos)
+                        {
+                            Guid guid2 = Guid.NewGuid();
+                            TurnoColaborador objClient2 = new()
+                            {
+                                Id = guid2,
+                                Estado = "A",
+                                UsuarioCreacion = "SYSTEM",
+                                IdTurno = item2.IdSubturno,
+                                IdColaborador = item.IdCliente,
+                                FechaAsignacion = fechaDesde.AddDays(i)
+                            };
+
+                            var objResult2 = await _repoTurnoAsync.AddAsync(objClient2, cancellationToken);
+
+                            if (objResult2 is null)
+                            {
+                                return new ResponseType<string>() { Data = null, Message = "No se pudo registrar la asignación del (los) turno(s) de receso", StatusCode = "101", Succeeded = false };
+                            }
+                        }
                     }
                 }
             }

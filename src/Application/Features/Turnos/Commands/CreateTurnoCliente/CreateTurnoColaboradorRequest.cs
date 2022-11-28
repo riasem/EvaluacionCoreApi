@@ -6,7 +6,13 @@ namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoColabor
     {
         [JsonPropertyName("idTurno")]
         public Guid IdTurno { get; set; }
-        
+
+        [JsonPropertyName("fechaAsignacionDesde")]
+        public DateTime FechaAsignacionDesde { get; set; }
+
+        [JsonPropertyName("fechaAsignacionHasta")]
+        public DateTime FechaAsignacionHasta { get; set; }
+
         [JsonPropertyName("clienteSubturno")]
         public List<ClienteSubturno> ClienteSubturnos { get; set; }
 
@@ -23,6 +29,5 @@ namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoColabor
     public class Subturno
     {
         public Guid IdSubturno { get; set; }
-        public DateTime FechaAsignacion { get; set; }
     }
 }

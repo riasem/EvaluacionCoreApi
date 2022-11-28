@@ -81,9 +81,6 @@ public class EvaluacionService : IEvaluacion
             var objTurno = await _repoTurnoColAsync.ListAsync(new TurnosByIdClienteSpec(objLocalidad.Colaborador.Id));
             if (!objTurno.Any()) return ("No tiene turnos asignados", 0);
 
-            var objMarcacion = await _repoMarcaColAsync.ListAsync(new MarcacionByColaborador(objLocalidad.Colaborador.Id));
-            if (!objMarcacion.Any()) return ("No posee marcaciones el colaborador", 0);
-
             var codigoConviviencia = objLocalidad.Colaborador.CodigoConvivencia;
 
             using IDbConnection con = new SqlConnection(ConnectionString_Marc);
@@ -91,6 +88,9 @@ public class EvaluacionService : IEvaluacion
             var objMarcacionBase = await con.ExecuteAsync(sql: (" Select * from [GRIAMSE].[dbo].[CHECKINOUT] where USERID = "+ codigoConviviencia +" and CHECKTIME BETWEEN " + fechaDesde +  " AND "+ fechaHasta +" ORDER BY CHECKTIME;"), commandType: CommandType.Text);
             con.Close();
 
+
+            var objMarcacion = await _repoMarcaColAsync.ListAsync(new MarcacionByColaborador(objLocalidad.Colaborador.Id));
+            if (!objMarcacion.Any()) return ("No posee marcaciones el colaborador", 0);
 
 
             return ("",1);
