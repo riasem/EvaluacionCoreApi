@@ -17,6 +17,28 @@ public class EvaluarAsistenciasCommandValidator : AbstractValidator<EvaluarAsist
                 .Matches("^[0-9]+$").WithMessage("{PropertyName} debe contener ser solo numeros.");
         });
 
+
+        When(v => v.FechaDesde != null || v.FechaHasta != null , () =>
+        {
+            RuleFor(v => v.FechaDesde.Value.Date).Custom((list, context) =>
+            {
+                if (list.Date >=  DateTime.Now.Date)
+                {
+                    context.AddFailure("La fecha inicial debe ser menor al día actual");
+                }
+            });
+            RuleFor(v => v.FechaHasta.Value.Date).Custom((list, context) =>
+            {
+                if (list.Date >= DateTime.Now.Date)
+                {
+                    context.AddFailure("La fecha final debe ser menor al día actual");
+                }
+            });
+        });
+
+
+
+
         //When(v => v.FechaDesde != null && v.FechaHasta != null, () =>
         //{
         //    RuleFor(v => v.FechaDesde > v.FechaHasta)

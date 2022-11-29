@@ -77,6 +77,8 @@ public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, Respon
                     {
                         listaSubturno.Add(new SubturnoType
                         {
+                            Id = subturno_.Id,
+                            IdTurnoPadre = subturno_.IdTurnoPadre,
                             TotalHoras = subturno_.TotalHoras,
                             Descripcion = subturno_.Descripcion,
                             Entrada = subturno_.Entrada,
@@ -88,7 +90,8 @@ public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, Respon
                             TipoTurno = subturno_.IdTipoTurno.ToString(),
                             MargenEntradaPosterior = subturno_.MargenEntradaPosterior,
                             MargenEntradaPrevio = subturno_.MargenEntradaPrevio,
-                            MargenSalidaPosterior = subturno_.MargenSalidaPosterior
+                            MargenSalidaPosterior = subturno_.MargenSalidaPosterior,
+                            MargenSalidaPrevio = subturno_.MargenSalidaPrevio
                         });
                     }
                 }

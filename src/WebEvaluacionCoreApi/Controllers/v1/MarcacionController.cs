@@ -26,9 +26,18 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         [HttpGet("GetBitacoraMarcacion")]
         [EnableCors("AllowOrigin")]
         [ProducesResponseType(typeof(ResponseType<List<BitacoraMarcacionType>>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetBitacoraMarcacion(string CodUdn, string CodArea, string CodSubcentro, string FechaDesde, string FechaHasta, CancellationToken cancellationToken, string? Suscriptor)
+        public async Task<IActionResult> GetBitacoraMarcacion(string CodUdn, string? CodArea, string? CodSubcentro, string? CodMarcacion, string FechaDesde, string FechaHasta, CancellationToken cancellationToken, string? Suscriptor)
         {
-            var request = new GetBitacoraMarcacionRequest() { Suscriptor = Suscriptor, CodUdn = CodUdn, CodArea = CodArea, CodSubcentro = CodSubcentro, FechaDesde = FechaDesde, FechaHasta = FechaHasta };
+            var request = new GetBitacoraMarcacionRequest()
+            {
+                Suscriptor = string.IsNullOrEmpty(Suscriptor) ? string.Empty : Suscriptor,
+                CodUdn = CodUdn,
+                CodArea = string.IsNullOrEmpty(CodArea) ? string.Empty : CodArea,
+                CodSubcentro = string.IsNullOrEmpty(CodSubcentro) ? "0" : CodSubcentro,
+                CodMarcacion = string.IsNullOrEmpty(CodMarcacion) ? string.Empty: CodMarcacion,
+                FechaDesde = FechaDesde,
+                FechaHasta = FechaHasta
+            };
 
             var objResult = await Mediator.Send(new GetBitacoraMarcacionCommand(request), cancellationToken);
             return Ok(objResult);

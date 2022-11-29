@@ -35,6 +35,7 @@ public class LocalidadController : ApiControllerBase
     /// Obtener el listado de las locacilidades (opcional el id)
     /// </summary>
     /// <param name="IdLocalidad"></param>
+    /// <param name="Identificacion"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet("GetLocalidad")]
