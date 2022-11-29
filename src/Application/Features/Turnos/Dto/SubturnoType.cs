@@ -9,7 +9,7 @@ namespace EvaluacionCore.Application.Features.Turnos.Dto
         public Guid Id { get; set; }
 
         [JsonPropertyName("idTurnoPadre")]
-        public Guid IdTurnoPadre { get; set; }
+        public Guid? IdTurnoPadre { get; set; }
 
         [JsonPropertyName("idTipoTurno")]
         public Guid IdTipoTurno { get; set; }
