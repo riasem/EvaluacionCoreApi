@@ -61,6 +61,10 @@ public class GetTurnosColaboradorAsyncHandler : IRequestHandler<GetTurnosColabor
                 {
                     Id = item.Id,
                     IdTurno = item.IdTurno,
+                    HoraEntrada = turno.Entrada,
+                    HoraSalida = turno.Salida,
+                    CodigoTurno = turno.CodigoTurno,
+                    CodigoIntegracion = turno.CodigoIntegracion,
                     IdColaborador = item.IdColaborador,
                     FechaAsignacion = item.FechaAsignacion,
                     IdTurnoPadre = turno.IdTurnoPadre,

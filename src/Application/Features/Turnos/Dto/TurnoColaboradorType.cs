@@ -29,5 +29,17 @@ namespace EvaluacionCore.Application.Features.Turnos.Dto
         [JsonPropertyName("fechaAsignacion")]
         public DateTime FechaAsignacion { get; set; }
 
+        [JsonPropertyName("horaEntrada")]
+        public DateTime HoraEntrada { get; set; }
+
+        [JsonPropertyName("horaSalida")]
+        public DateTime HoraSalida { get; set; }
+
+        [JsonPropertyName("codigoTurno")]
+        public string CodigoTurno { get; set; }
+
+        [JsonPropertyName("codigoIntegracion")]
+        public string CodigoIntegracion { get; set; }
+
     }
 }
