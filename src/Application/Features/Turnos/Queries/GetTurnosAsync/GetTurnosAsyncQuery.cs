@@ -7,7 +7,7 @@ using EvaluacionCore.Domain.Entities.Asistencia;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 
-namespace EvaluacionCore.Application.Features.Turnos.Queries.GetTurnoById;
+namespace EvaluacionCore.Application.Features.Turnos.Queries.GetTurnosAsync;
 
 public record GetTurnosAsyncQuery() : IRequest<ResponseType<List<TurnoResponseType>>>;
 

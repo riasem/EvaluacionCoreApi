@@ -2,7 +2,9 @@
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurno;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoColaborador;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoSubTurno;
-using EvaluacionCore.Application.Features.Turnos.Queries.GetTurnoById;
+using EvaluacionCore.Application.Features.Turnos.Queries.GetMaestrosTurnoAsync;
+using EvaluacionCore.Application.Features.Turnos.Queries.GetTurnosAsync;
+using EvaluacionCore.Application.Features.Turnos.Queries.GetTurnosColaborador;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -96,6 +98,25 @@ public class TurnosController : ApiControllerBase
     public async Task<IActionResult> GetMaestrosTurnos(CancellationToken cancellationToken)
     {
         var objResult = await Mediator.Send(new GetMaestrosTurnoAsyncQuery(), cancellationToken);
+        return Ok(objResult);
+    }
+
+
+    /// <summary>
+    /// Retorna el listado de turnos asignados al colaborador en un rango de fechas 
+    /// </summary>
+    /// <param name="identificacion"></param>
+    /// <param name="fechaDesde"></param>
+    /// <param name="fechaHasta"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpGet("GetTurnosAsignados")]
+    [EnableCors("AllowOrigin")]
+    [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
+    [Authorize]
+    public async Task<IActionResult> GetMaestrosTurnos(string identificacion, DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken)
+    {
+        var objResult = await Mediator.Send(new GetTurnosColaboradorAsyncQuery(identificacion, fechaDesde, fechaHasta), cancellationToken);
         return Ok(objResult);
     }
     
