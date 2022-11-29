@@ -88,7 +88,8 @@ public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, Respon
                             TipoTurno = subturno_.IdTipoTurno.ToString(),
                             MargenEntradaPosterior = subturno_.MargenEntradaPosterior,
                             MargenEntradaPrevio = subturno_.MargenEntradaPrevio,
-                            MargenSalidaPosterior = subturno_.MargenSalidaPosterior
+                            MargenSalidaPosterior = subturno_.MargenSalidaPosterior,
+                            MargenSalidaPrevio = subturno_.MargenSalidaPrevio
                         });
                     }
                 }
