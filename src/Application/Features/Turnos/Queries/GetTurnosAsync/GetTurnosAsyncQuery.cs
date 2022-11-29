@@ -77,6 +77,8 @@ public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, Respon
                     {
                         listaSubturno.Add(new SubturnoType
                         {
+                            Id = subturno_.Id,
+                            IdTurnoPadre = subturno_.IdTurnoPadre,
                             TotalHoras = subturno_.TotalHoras,
                             Descripcion = subturno_.Descripcion,
                             Entrada = subturno_.Entrada,
