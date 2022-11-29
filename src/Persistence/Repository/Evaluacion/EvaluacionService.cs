@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Data;
 using Dapper;
+using EvaluacionCore.Application.Features.EvalCore.Commands.Specifications;
 
 namespace EvaluacionCore.Persistence.Repository.Employees;
 
@@ -78,24 +79,33 @@ public class EvaluacionService : IEvaluacion
             var objLocalidad = await _repositoryLocalidadColAsync.FirstOrDefaultAsync(new GetLocalidadColaByIdentificacionSpec(identificacion));
             if (objLocalidad == null) return ("No tiene Localidad asignada", 0);
 
-            var objTurno = await _repoTurnoColAsync.ListAsync(new TurnosByIdClienteSpec(objLocalidad.Colaborador.Id));
-            if (!objTurno.Any()) return ("No tiene turnos asignados", 0);
+            //var objTurno = await _repoTurnoColAsync.ListAsync(new TurnosByIdClienteSpec(objLocalidad.Colaborador.Id));
+            //if (!objTurno.Any()) return ("No tiene turnos asignados", 0);
 
-            var codigoConviviencia = objLocalidad.Colaborador.CodigoConvivencia;
+            //var codigoConviviencia = ;
 
-            using IDbConnection con = new SqlConnection(ConnectionString_Marc);
-            if (con.State == ConnectionState.Closed) con.Open();
-            var objMarcacionBase = await con.ExecuteAsync(sql: (" Select * from [GRIAMSE].[dbo].[CHECKINOUT] where USERID = "+ codigoConviviencia +" and CHECKTIME BETWEEN " + fechaDesde +  " AND "+ fechaHasta +" ORDER BY CHECKTIME;"), commandType: CommandType.Text);
-            con.Close();
+            var userInfo = await _repoUserInfoAsync.FirstOrDefaultAsync(new UserMarcacionByCodigoSpec(objLocalidad.Colaborador.CodigoConvivencia));
 
+            var objMarcacionBase = await _repoCheckInOutAsync.ListAsync(new GetMarcacionesByRangeDateSpec(userInfo.UserId,fechaDesde,fechaHasta));
 
             var objMarcacion = await _repoMarcaColAsync.ListAsync(new MarcacionByColaborador(objLocalidad.Colaborador.Id));
             if (!objMarcacion.Any()) return ("No posee marcaciones el colaborador", 0);
 
+            //valiamos el rango de margen de marcaciones
+
+
+
+
+
+
+
+
+
+
 
             return ("",1);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
 
             throw;

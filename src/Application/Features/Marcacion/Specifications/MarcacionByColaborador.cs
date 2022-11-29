@@ -8,9 +8,12 @@ public class MarcacionByColaborador: Specification<MarcacionColaborador>
     public MarcacionByColaborador(Guid? identificacion)
     {
         Query
-            .Where(p => p.TurnoColaborador.Colaborador.Id == identificacion)
+            .Where(p => p.TurnoColaborador.Colaborador.Id == identificacion && p.EstadoProcesado == false)
             .Include(p => p.TurnoColaborador)
-            .ThenInclude(p => p.Colaborador);
+            .ThenInclude(p => p.Colaborador)
+            .Include(p => p.TurnoColaborador)
+            .ThenInclude(p => p.Turno);
 
     }
 }
+
