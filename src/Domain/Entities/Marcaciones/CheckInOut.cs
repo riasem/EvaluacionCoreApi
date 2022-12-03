@@ -29,7 +29,7 @@ public class CheckInOut
     public string SensorId { get; set; }
 
     [Column("LOGID", TypeName = "int")]
-    public int? LogId { get; set; }
+    public int? LogId { get; set; } = 0;
 
     [Column("MachineId", TypeName = "int")]
     public int? MachineId { get; set; }
