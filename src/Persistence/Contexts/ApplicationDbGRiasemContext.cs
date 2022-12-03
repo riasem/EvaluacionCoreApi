@@ -1,4 +1,5 @@
 ﻿using EnrolApp.Domain.Entities.Horario;
+using EvaluacionCore.Domain.Entities.Marcaciones;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,9 @@ namespace Workflow.Persistence.Contexts
 
         public DbSet<CheckInOut> CheckInOut { get; set; }
         public DbSet<UserInfo> UserInfo { get; set; }
+
+        public DbSet<AccMonitorLog> AccMonitorLog { get; set; }
+        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) =>
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbGRiasemContext).Assembly);

@@ -1,4 +1,5 @@
 ﻿
+using Ardalis.Specification;
 using Dapper;
 using EnrolApp.Application.Features.Marcacion.Commands.CreateMarcacion;
 using EnrolApp.Application.Features.Marcacion.Specifications;
@@ -9,6 +10,7 @@ using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.Marcacion.Interfaces;
 using EvaluacionCore.Application.Features.Marcacion.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
+using EvaluacionCore.Domain.Entities.Marcaciones;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -22,6 +24,7 @@ public class MarcacionService : IMarcacion
     private readonly ILogger<MarcacionColaborador> _log;
     private readonly IRepositoryGRiasemAsync<UserInfo> _repoUserInfoAsync;
     private readonly IRepositoryGRiasemAsync<CheckInOut> _repoCheckInOutAsync;
+    private readonly IRepositoryGRiasemAsync<AccMonitorLog> _repoMonitorLogAsync;
     private readonly IRepositoryAsync<Localidad> _repoLocalidad;
     private readonly IRepositoryAsync<TurnoColaborador> _repoTurnoCola;
     private readonly IRepositoryAsync<MarcacionColaborador> _repoMarcacionCola;
@@ -31,7 +34,9 @@ public class MarcacionService : IMarcacion
 
 
     public MarcacionService(IRepositoryGRiasemAsync<UserInfo> repoUserInfoAsync, IRepositoryGRiasemAsync<CheckInOut> repoCheckInOutAsync,
-        IRepositoryAsync<Localidad> repoLocalidad,ILogger<MarcacionColaborador> log,IRepositoryAsync<TurnoColaborador> repoTurnoCola, IConfiguration config, IRepositoryAsync<MarcacionColaborador> repoMarcacionCola)
+        IRepositoryAsync<Localidad> repoLocalidad,ILogger<MarcacionColaborador> log, 
+        IRepositoryAsync<TurnoColaborador> repoTurnoCola, IConfiguration config, 
+        IRepositoryAsync<MarcacionColaborador> repoMarcacionCola, IRepositoryGRiasemAsync<AccMonitorLog> repoMonitorLogAsync)
     {
         _repoUserInfoAsync = repoUserInfoAsync;
         _repoCheckInOutAsync = repoCheckInOutAsync;
@@ -41,6 +46,7 @@ public class MarcacionService : IMarcacion
         _repoMarcacionCola = repoMarcacionCola;
         ConnectionString_Marc = _config.GetConnectionString("Bd_Marcaciones_GRIAMSE");
         _repoTurnoCola = repoTurnoCola;
+        _repoMonitorLogAsync = repoMonitorLogAsync;
     }
 
     public async Task<ResponseType<string>> CreateMarcacion(CreateMarcacionRequest Request, CancellationToken cancellationToken)
@@ -60,6 +66,7 @@ public class MarcacionService : IMarcacion
             if (!objTurno.Any()) return new ResponseType<string>(){ Message = "No tiene turnos asignados", StatusCode = "101", Succeeded = true };
             var idturnovalidado = Guid.Empty;
             var tipoMarcacion = string.Empty;
+            var codigoMarcacion = string.Empty;
             var estadoMarcacion = string.Empty;
             var countMarcacion = 0;
 
@@ -78,7 +85,7 @@ public class MarcacionService : IMarcacion
                 {
                     idturnovalidado = itemTurno.Id;
                     tipoMarcacion = "E";
-
+                    codigoMarcacion = "10";
                     estadoMarcacion = marcacionColaborador < turnoEntrada && marcacionColaborador <= mEntrada ? "C" : "A";
                     countMarcacion = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(margenEPre, margenEPos, tipoMarcacion), cancellationToken);
                     break;
@@ -88,7 +95,7 @@ public class MarcacionService : IMarcacion
                 {
                     idturnovalidado = itemTurno.Id;
                     tipoMarcacion = "S";
-
+                    codigoMarcacion = "11";
                     estadoMarcacion = marcacionColaborador > turnoSalida && marcacionColaborador <= mSalida ? "C" : "";
                     countMarcacion = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(margenSPre, margenSPos, tipoMarcacion), cancellationToken);
 
@@ -116,31 +123,43 @@ public class MarcacionService : IMarcacion
             }
             if (Request.DispositivoId == objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.DispositivoId)
             {
-                var countMarcacionCheck = await _repoCheckInOutAsync.CountAsync(new MarcacionByUserIdSpec(userInfo.UserId), cancellationToken);
+                var countMarcacionCheck = await _repoMonitorLogAsync.CountAsync(new MarcacionByUserIdSpec(objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.CodigoConvivencia), cancellationToken);
+
+                //CheckInOut entityCheck = new()
+                //{
+                //    UserId = userInfo.UserId,
+                //    CheckTime = DateTime.Now,
+                //    CheckType = countMarcacionCheck == 0 ? "I" : "O",
+                //    Sn = Request.DispositivoId
+                //};
 
 
-                CheckInOut entityCheck = new()
-                {
-                    UserId = userInfo.UserId,
-                    CheckTime = DateTime.Now,
-                    CheckType = countMarcacionCheck == 0 ? "I" : "O",
-                    Sn = Request.DispositivoId
-                };
-
-
-                var objResult = await _repoCheckInOutAsync.AddAsync(entityCheck,cancellationToken);
+                //var objResult = await _repoCheckInOutAsync.AddAsync(entityCheck,cancellationToken);
 
                 //using IDbConnection con = new SqlConnection(ConnectionString_Marc);
                 //if (con.State == ConnectionState.Closed) con.Open();
                 //var objResult = await con.ExecuteAsync(sql: (" INSERT INTO [GRIAMSE].[dbo].[CHECKINOUT] (USERID,CHECKTYPE) VALUES (" + entityCheck.UserId + ",'" + entityCheck.CheckType + "')"), commandType: CommandType.Text);
                 //con.Close();
 
+                var objMonitorLog = await _repoMonitorLogAsync.ListAsync();
+
+                AccMonitorLog accMonitorLog = new()
+                {
+                    Id = objMonitorLog.Select(x => x.Id).Max() + 1,
+                    Status = Convert.ToInt32(codigoMarcacion),
+                    Time = DateTime.Now,
+                    Pin = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.CodigoConvivencia,
+                    Device_Id = 1
+                };
+
+                if (countMarcacion >= 1)
+                {
+                    return new ResponseType<string>() { Message = "Ya tiene una marcación registrada", StatusCode = "101", Succeeded = true };
+                }
+                var objResult = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
+
                 if (objResult is not null)
                 {
-                    if (countMarcacion >= 1)
-                    {
-                        return new ResponseType<string>() { Message = "Ya tiene una marcación registrada", StatusCode = "101", Succeeded = true };
-                    }
                     MarcacionColaborador objMarcacionColaborador = new()
                     {
                         IdTurnoColaborador = idturnovalidado,
@@ -161,6 +180,7 @@ public class MarcacionService : IMarcacion
                         return new ResponseType<string>() { Message = "Marcación registrada correctamente", StatusCode = "100", Succeeded = true };
                     }
                 }
+
 
                 return new ResponseType<string>() { Message = "No se ha registrado la marcación", Succeeded = true, StatusCode = "101" };
             }
