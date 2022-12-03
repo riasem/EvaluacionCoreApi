@@ -122,16 +122,20 @@ public class MarcacionService : IMarcacion
                 CheckInOut entityCheck = new()
                 {
                     UserId = userInfo.UserId,
+                    CheckTime = DateTime.Now,
                     CheckType = countMarcacionCheck == 0 ? "I" : "O",
                     Sn = Request.DispositivoId
                 };
 
-                using IDbConnection con = new SqlConnection(ConnectionString_Marc);
-                if (con.State == ConnectionState.Closed) con.Open();
-                var objResult = await con.ExecuteAsync(sql: (" INSERT INTO [GRIAMSE].[dbo].[CHECKINOUT] (USERID,CHECKTYPE) VALUES (" + entityCheck.UserId + ",'" + entityCheck.CheckType + "')"), commandType: CommandType.Text);
-                con.Close();
 
-                if (objResult == 1)
+                var objResult = await _repoCheckInOutAsync.AddAsync(entityCheck,cancellationToken);
+
+                //using IDbConnection con = new SqlConnection(ConnectionString_Marc);
+                //if (con.State == ConnectionState.Closed) con.Open();
+                //var objResult = await con.ExecuteAsync(sql: (" INSERT INTO [GRIAMSE].[dbo].[CHECKINOUT] (USERID,CHECKTYPE) VALUES (" + entityCheck.UserId + ",'" + entityCheck.CheckType + "')"), commandType: CommandType.Text);
+                //con.Close();
+
+                if (objResult is not null)
                 {
                     if (countMarcacion >= 1)
                     {

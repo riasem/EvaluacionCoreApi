@@ -20,6 +20,10 @@ public class EvaluarAsistenciasCommandValidator : AbstractValidator<EvaluarAsist
 
         When(v => v.FechaDesde != null || v.FechaHasta != null , () =>
         {
+
+            RuleFor(v => v.FechaHasta)
+            .GreaterThanOrEqualTo(v => v.FechaDesde).WithMessage("{PropertyName} debe ser mayor o igual que {ComparisonProperty}");
+
             RuleFor(v => v.FechaDesde.Value.Date).Custom((list, context) =>
             {
                 if (list.Date >=  DateTime.Now.Date)
@@ -34,6 +38,7 @@ public class EvaluarAsistenciasCommandValidator : AbstractValidator<EvaluarAsist
                     context.AddFailure("La fecha final debe ser menor al día actual");
                 }
             });
+
         });
 
 
