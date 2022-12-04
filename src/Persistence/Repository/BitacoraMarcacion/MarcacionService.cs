@@ -178,12 +178,20 @@ public class MarcacionService : IMarcacion
                             
                             var marcacionid = marcacionColaboradorS.SalidaEntrada == "SI" ? marcacionColaboradorS.Id.ToString() : null;
 
-                            MarcacionResponseType objResultFinal = new()
+                            MarcacionResponseType objResultFinal = new();
+                            if (marcacionid != null)
                             {
-                                MarcacionId = Guid.Parse(marcacionid),
-                                TipoMarcacion = tipoMarcacion,
-                                EstadoMarcacion = estadoMarcacion
-                            };
+                                objResultFinal = new()
+                                {
+                                    MarcacionId = Guid.Parse(marcacionid),
+                                    TipoMarcacion = tipoMarcacion,
+                                    EstadoMarcacion = estadoMarcacion
+                                };
+                            }
+                            else
+                            {
+                                objResultFinal = null;
+                            }
 
                             return new ResponseType<MarcacionResponseType>() {Data = objResultFinal,  Message = "Marcación de Salida registrada correctamente", StatusCode = "100", Succeeded = true };
                         }
@@ -208,13 +216,21 @@ public class MarcacionService : IMarcacion
                     {
                         var tipoMarcaciontexto = tipoMarcacion == "S" ? "Salida" : "Entrada";
                         var marcacionid = objMarcacion.EstadoMarcacionEntrada == "AI" || objMarcacion.SalidaEntrada == "SI" || objMarcacion.EstadoMarcacionEntrada == null ? objMarcacion.Id.ToString() : null;
-
-                        MarcacionResponseType objResultFinal = new()
+                        MarcacionResponseType objResultFinal = new();
+                        if (marcacionid != null)
                         {
-                            MarcacionId = Guid.Parse(marcacionid),
-                            TipoMarcacion = tipoMarcacion,
-                            EstadoMarcacion = estadoMarcacion
-                        };
+                            objResultFinal = new()
+                            {
+                                MarcacionId = Guid.Parse(marcacionid),
+                                TipoMarcacion = tipoMarcacion,
+                                EstadoMarcacion = estadoMarcacion
+                            };
+                        }
+                        else
+                        {
+                            objResultFinal = null;
+                        }
+
 
                         return new ResponseType<MarcacionResponseType>() { Data = objResultFinal, Message = "Marcación de "+ tipoMarcaciontexto + " registrada correctamente", StatusCode = "100", Succeeded = true };
                     }
