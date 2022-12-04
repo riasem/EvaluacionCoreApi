@@ -4,6 +4,7 @@ using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetBitacora
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetComboBitacoraMarcacion;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Dto;
 using EvaluacionCore.Application.Features.Marcacion.Commands.GetBitacoraMarcacion;
+using EvaluacionCore.Application.Features.Marcacion.Dto;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
@@ -68,7 +69,7 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpPost("GenerarMarcacion")]
-        [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ResponseType<MarcacionResponseType>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateMarcacion([FromBody] CreateMarcacionRequest request, CancellationToken cancellationToken)
         {
