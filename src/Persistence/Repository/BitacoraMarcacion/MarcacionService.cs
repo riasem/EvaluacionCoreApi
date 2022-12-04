@@ -69,6 +69,8 @@ public class MarcacionService : IMarcacion
             var codigoMarcacion = string.Empty;
             var estadoMarcacion = string.Empty;
             var countMarcacion = 0;
+            var countMarcacionEntrada = 0;
+            MarcacionColaborador marcacionColaboradorS = new();
 
             foreach (var itemTurno in objTurno)
             {
@@ -86,8 +88,8 @@ public class MarcacionService : IMarcacion
                     idturnovalidado = itemTurno.Id;
                     tipoMarcacion = "E";
                     codigoMarcacion = "10";
-                    estadoMarcacion = marcacionColaborador < turnoEntrada && marcacionColaborador <= mEntrada ? "C" : "A";
-                    countMarcacion = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(margenEPre, margenEPos, tipoMarcacion), cancellationToken);
+                    estadoMarcacion = marcacionColaborador < turnoEntrada && marcacionColaborador <= mEntrada ? "C" : "AI";
+                    countMarcacion = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(margenEPre, margenEPos, tipoMarcacion, objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
                     break;
 
                 }
@@ -96,9 +98,10 @@ public class MarcacionService : IMarcacion
                     idturnovalidado = itemTurno.Id;
                     tipoMarcacion = "S";
                     codigoMarcacion = "11";
-                    estadoMarcacion = marcacionColaborador > turnoSalida && marcacionColaborador <= mSalida ? "C" : "";
-                    countMarcacion = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(margenSPre, margenSPos, tipoMarcacion), cancellationToken);
-
+                    estadoMarcacion = marcacionColaborador > turnoSalida ? "C" : "SI";
+                    countMarcacion = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(margenSPre, margenSPos, tipoMarcacion, objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
+                    countMarcacionEntrada = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(margenEPre, margenEPos, tipoMarcacion, objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
+                    marcacionColaboradorS = await _repoMarcacionCola.FirstOrDefaultAsync(new MarcacionByColaborador(objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id, marcacionColaborador), cancellationToken);
                     break;
                 }
             }
@@ -123,7 +126,7 @@ public class MarcacionService : IMarcacion
             }
             if (Request.DispositivoId == objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.DispositivoId)
             {
-                var countMarcacionCheck = await _repoMonitorLogAsync.CountAsync(new MarcacionByUserIdSpec(objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.CodigoConvivencia), cancellationToken);
+                //var countMarcacionCheck = await _repoMonitorLogAsync.CountAsync(new MarcacionByUserIdSpec(objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.CodigoConvivencia), cancellationToken);
 
                 //CheckInOut entityCheck = new()
                 //{
@@ -160,6 +163,22 @@ public class MarcacionService : IMarcacion
 
                 if (objResult is not null)
                 {
+
+
+                    if (tipoMarcacion == "S")
+                    {
+                        if (countMarcacionEntrada >= 1)
+                        {
+                            marcacionColaboradorS.SalidaEntrada = tipoMarcacion == "S" ? estadoMarcacion : null;
+                            marcacionColaboradorS.UsuarioModificacion = "SYSTEM";
+                            marcacionColaboradorS.FechaModificacion = DateTime.Now;
+                            marcacionColaboradorS.MarcacionSalida = tipoMarcacion == "S" ? marcacionColaborador : null;
+                            await _repoMarcacionCola.UpdateAsync(marcacionColaboradorS);
+
+                            return new ResponseType<string>() { Message = "Marcación de Salida registrada correctamente", StatusCode = "100", Succeeded = true };
+                        }
+                    }
+
                     MarcacionColaborador objMarcacionColaborador = new()
                     {
                         IdTurnoColaborador = idturnovalidado,
@@ -177,7 +196,8 @@ public class MarcacionService : IMarcacion
 
                     if (objMarcacion is not null)
                     {
-                        return new ResponseType<string>() { Message = "Marcación registrada correctamente", StatusCode = "100", Succeeded = true };
+                        var tipoMarcaciontexto = tipoMarcacion == "S" ? "Salida" : "Entrada";
+                        return new ResponseType<string>() { Message = "Marcación de "+ tipoMarcaciontexto + " registrada correctamente", StatusCode = "100", Succeeded = true };
                     }
                 }
 
