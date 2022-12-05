@@ -12,7 +12,7 @@ public class TurnosByIdClienteSpec : Specification<TurnoColaborador>
 {
     public TurnosByIdClienteSpec(Guid idCliente)
     {
-        Query.Where(p => p.IdColaborador == idCliente && p.FechaAsignacion.Date == DateTime.Now.Date)
+        Query.Where(p => p.IdColaborador == idCliente && p.FechaAsignacion.Date == DateTime.Now.Date && p.Estado == "A")
             .Include(p => p.Turno);
     }
 }
