@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 
 namespace EnrolApp.Application.Features.Marcacion.Specifications;
 
-public class MarcacionByUserIdSpec : Specification<AccMonitorLog>
+public class MarcacionByMaxIdSpec : Specification<AccMonitorLog>
 {
-    public MarcacionByUserIdSpec(string codigo)
+    public MarcacionByMaxIdSpec()
     {
-        Query.Where(p => p.Pin == codigo && p.Time.Date == DateTime.Now.Date);
+        Query.OrderByDescending(x => x.Id).Take(1);
     }
 }

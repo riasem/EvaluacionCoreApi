@@ -145,11 +145,11 @@ public class MarcacionService : IMarcacion
                 //var objResult = await con.ExecuteAsync(sql: (" INSERT INTO [GRIAMSE].[dbo].[CHECKINOUT] (USERID,CHECKTYPE) VALUES (" + entityCheck.UserId + ",'" + entityCheck.CheckType + "')"), commandType: CommandType.Text);
                 //con.Close();
 
-                var objMonitorLog = await _repoMonitorLogAsync.ListAsync();
+                var objMonitorLog =  await _repoMonitorLogAsync.FirstOrDefaultAsync(new MarcacionByMaxIdSpec());
 
                 AccMonitorLog accMonitorLog = new()
                 {
-                    Id = objMonitorLog.Select(x => x.Id).Max() + 1,
+                    Id = objMonitorLog.Id + 1,
                     Status = Convert.ToInt32(codigoMarcacion),
                     Time = DateTime.Now,
                     Pin = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.CodigoConvivencia,
