@@ -53,7 +53,7 @@ public class GetTurnosColaboradorAsyncHandler : IRequestHandler<GetTurnosColabor
 
             foreach (var item in objTurnoColaborador)
             {
-                var turno = objTurno.Where(x => x.Id == item.IdTurno && x.Estado == "A").FirstOrDefault();
+                var turno = objTurno.Where(x => x.Id == item.IdTurno).FirstOrDefault();
                 var colaborador = objColaborador.Where(x => x.Id == item.IdColaborador).FirstOrDefault();
 
 
