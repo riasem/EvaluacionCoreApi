@@ -11,7 +11,7 @@ public class MarcacionColaborador
     public Guid Id { get; set; } = Guid.NewGuid();
 
     [Column("idTurnoCliente", Order = 1, TypeName = "uniqueidentifier")]
-    public Guid IdTurnoColaborador { get; set; }
+    public Guid? IdTurnoColaborador { get; set; }
     public virtual TurnoColaborador TurnoColaborador { get; set; }
 
     [Column("idLocalidadColaborador", Order = 2, TypeName = "uniqueidentifier")]

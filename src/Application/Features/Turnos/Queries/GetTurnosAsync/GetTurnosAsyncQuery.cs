@@ -2,7 +2,6 @@
 using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.Turnos.Dto;
-using EvaluacionCore.Application.Features.Turnos.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using MediatR;
 using Microsoft.Extensions.Configuration;

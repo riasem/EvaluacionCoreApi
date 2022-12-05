@@ -35,7 +35,6 @@ public class UpdateTurnoColaboradorCommandHandler : IRequestHandler<UpdateTurnoC
                 foreach (var item in request.TurnoRequest.ClienteSubturnos)
                 {
 
-                    var consulta = await _repoTurnoAsync.ListAsync(cancellationToken);
                     //var filtro = consulta.Where(e => e.FechaAsignacion == fechaDesde.AddDays(i) && e.IdColaborador == item.IdCliente).ToList();
 
                     //if (filtro.Count > 0)

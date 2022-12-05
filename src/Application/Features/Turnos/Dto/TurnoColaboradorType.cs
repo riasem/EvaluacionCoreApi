@@ -6,7 +6,7 @@ namespace EvaluacionCore.Application.Features.Turnos.Dto
     public class TurnoColaboradorType
     {
         [JsonPropertyName("id")]
-        public Guid Id { get; set; }
+        public Guid? Id { get; set; }
 
         [JsonPropertyName("idTurno")]
         public Guid IdTurno { get; set; }

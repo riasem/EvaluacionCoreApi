@@ -65,7 +65,7 @@ public class MarcacionService : IMarcacion
             var objTurno = await _repoTurnoCola.ListAsync(new TurnosByIdClienteSpec(objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
 
             if (!objTurno.Any()) return new ResponseType<MarcacionResponseType>(){ Message = "No tiene turnos asignados", StatusCode = "101", Succeeded = true };
-            var idturnovalidado = Guid.Empty;
+            Guid? idturnovalidado = Guid.Empty;
             var tipoMarcacion = string.Empty;
             var codigoMarcacion = string.Empty;
             var estadoMarcacion = string.Empty;

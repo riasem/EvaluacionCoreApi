@@ -2,6 +2,7 @@
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurno;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoColaborador;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoSubTurno;
+using EvaluacionCore.Application.Features.Turnos.Commands.InactivaTurnoColaborador;
 using EvaluacionCore.Application.Features.Turnos.Commands.UpdateTurnoColaborador;
 using EvaluacionCore.Application.Features.Turnos.Queries.GetMaestrosTurnoAsync;
 using EvaluacionCore.Application.Features.Turnos.Queries.GetTurnosAsync;
@@ -136,6 +137,24 @@ public class TurnosController : ApiControllerBase
     public async Task<IActionResult> CreaeteTurnoSubturno([FromBody] UpdateTurnoColaboradorRequest request, CancellationToken cancellationToken)
     {
         var objResult = await Mediator.Send(new UpdateTurnoColaboradorCommand(request), cancellationToken);
+        return Ok(objResult);
+    }
+
+
+
+    /// <summary>
+    /// Inactiva Turnos Asignados al usuario
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpPut("InactivateTurnoSubturno")]
+    [EnableCors("AllowOrigin")]
+    [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
+    [Authorize]
+    public async Task<IActionResult> InactivateTurno(List<InactivaTurnoColaboradorRequest> request, CancellationToken cancellationToken)
+    {
+        var objResult = await Mediator.Send(new InactivaTurnoColaboradorCommand(request), cancellationToken);
         return Ok(objResult);
     }
 
