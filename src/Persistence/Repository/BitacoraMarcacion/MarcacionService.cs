@@ -145,15 +145,18 @@ public class MarcacionService : IMarcacion
                 //var objResult = await con.ExecuteAsync(sql: (" INSERT INTO [GRIAMSE].[dbo].[CHECKINOUT] (USERID,CHECKTYPE) VALUES (" + entityCheck.UserId + ",'" + entityCheck.CheckType + "')"), commandType: CommandType.Text);
                 //con.Close();
 
-                var objMonitorLog =  await _repoMonitorLogAsync.FirstOrDefaultAsync(new MarcacionByMaxIdSpec());
+                //var objMonitorLog =  await _repoMonitorLogAsync.FirstOrDefaultAsync(new MarcacionByMaxIdSpec());
 
                 AccMonitorLog accMonitorLog = new()
                 {
-                    Id = objMonitorLog.Id + 1,
-                    Status = Convert.ToInt32(codigoMarcacion),
+                    //Id = objMonitorLog.Id + 1,
+                    State = Convert.ToInt32(codigoMarcacion),
                     Time = DateTime.Now,
                     Pin = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.CodigoConvivencia,
-                    Device_Id = 1
+                    Device_Id = 1,
+                    Verified = 1,
+                    Device_Name = "EnrolApp",
+                    Status = 1
                 };
 
                 if (countMarcacion >= 1)
