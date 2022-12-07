@@ -56,77 +56,100 @@ public class MarcacionService : IMarcacion
         {
             var marcacionColaborador = DateTime.Now;
             var objLocalidad = await _repoLocalidad.FirstOrDefaultAsync(new GetLocalidadByIdSpec(Request.LocalidadId, Request.CodigoEmpleado), cancellationToken);
-            //var objLocalidad = await _repoLocalidadCola.FirstOrDefaultAsync(new GetLocalidadByIdSpec(Request.LocalidadId, Request.CodigoEmpleado), cancellationToken);
-            //LocalidadColaborador objLocalidad = new();
 
             if (objLocalidad == null) return new ResponseType<MarcacionResponseType>(){ Message = "Localidad incorrecta", Succeeded = true, StatusCode = "101" };
 
             //Validación de turno que corresponde
             var objTurno = await _repoTurnoCola.ListAsync(new TurnosByIdClienteSpec(objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
 
-            if (!objTurno.Any()) return new ResponseType<MarcacionResponseType>(){ Message = "No tiene turnos asignados", StatusCode = "101", Succeeded = true };
-            Guid? idturnovalidado = Guid.Empty;
-            var tipoMarcacion = string.Empty;
-            var codigoMarcacion = string.Empty;
-            var estadoMarcacion = string.Empty;
-            var countMarcacion = 0;
-            var countMarcacionEntrada = 0;
-            MarcacionColaborador marcacionColaboradorS = new();
-
-            foreach (var itemTurno in objTurno)
-            {
-                var turnoEntrada = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.Entrada.TimeOfDay.ToString());
-                var mEntrada = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenEntrada.TimeOfDay.ToString());
-                var mSalida = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenSalida.TimeOfDay.ToString());
-                var margenEPre = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenEntradaPrevio);
-                var margenEPos = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenEntradaPosterior);
-                var margenSPre = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenSalidaPrevio);
-                var margenSPos = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenSalidaPosterior);
-                var turnoSalida = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.Salida.TimeOfDay.ToString());
-
-                if (marcacionColaborador >= margenEPre && marcacionColaborador <= margenEPos)
-                {
-                    idturnovalidado = itemTurno.Id;
-                    tipoMarcacion = "E";
-                    codigoMarcacion = "10";
-                    estadoMarcacion = marcacionColaborador < turnoEntrada && marcacionColaborador <= mEntrada ? "C" : "AI";
-                    countMarcacion = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(margenEPre, margenEPos, tipoMarcacion, objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
-                    break;
-
-                }
-                else if (marcacionColaborador >= margenSPre && marcacionColaborador <= margenSPos)
-                {
-                    idturnovalidado = itemTurno.Id;
-                    tipoMarcacion = "S";
-                    codigoMarcacion = "11";
-                    estadoMarcacion = marcacionColaborador > turnoSalida ? "C" : "SI";
-                    countMarcacion = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(margenSPre, margenSPos, tipoMarcacion, objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
-                    countMarcacionEntrada = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(margenEPre, margenEPos, tipoMarcacion, objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
-                    marcacionColaboradorS = await _repoMarcacionCola.FirstOrDefaultAsync(new MarcacionByColaborador(objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id, marcacionColaborador), cancellationToken);
-                    break;
-                }
-            }
-
-            if (idturnovalidado == Guid.Empty && tipoMarcacion == string.Empty && estadoMarcacion == string.Empty) return new ResponseType<MarcacionResponseType>() { Message = "Actualmente no tiene turno de Entrada/Salida", StatusCode = "101", Succeeded = true };
-
-            var userInfo = await _repoUserInfoAsync.FirstOrDefaultAsync(new UserMarcacionByCodigoSpec(Request.CodigoEmpleado), cancellationToken);
-            if (userInfo is null)
-            {
-                UserInfo objUserInfo = new()
-                {
-                    Badgenumber = Request.CodigoEmpleado,
-                    Ssn = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Identificacion,
-                    Name = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Nombres,
-                    LastName = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Apellidos,
-                    //DefaultDeptId = ObjClient.Cargo.DepartamentoId.ToString(),
-                    CreateOperator = "Admin",
-                    CreateTime = DateTime.Now
-                };
-
-                userInfo = await _repoUserInfoAsync.AddAsync(objUserInfo, cancellationToken);
-            }
             if (Request.DispositivoId == objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.DispositivoId)
             {
+
+                AccMonitorLog accMonitorLog = new()
+                {
+                    //Id = objMonitorLog.Id + 1,
+                    State = 0,
+                    Time = DateTime.Now,
+                    Pin = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.CodigoConvivencia,
+                    Device_Id = 999,
+                    Verified = 1,
+                    Device_Name = "EnrolApp",
+                    Status = 1
+                };
+
+                if (!objTurno.Any())
+                {
+                    var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
+                    if (objResultado is null)
+                    {
+                        return new ResponseType<MarcacionResponseType>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
+                    }
+
+                    return new ResponseType<MarcacionResponseType>() { Message = "Su marcación se ingreso correctamente, por el momento no tiene turno asignado por favor comunicar a su superior que le asigne", StatusCode = "100", Succeeded = true };
+                }
+
+                Guid? idturnovalidado = Guid.Empty;
+                var tipoMarcacion = string.Empty;
+                var codigoMarcacion = string.Empty;
+                var estadoMarcacion = string.Empty;
+                var countMarcacion = 0;
+                var countMarcacionEntrada = 0;
+                MarcacionColaborador marcacionColaboradorS = new();
+
+                foreach (var itemTurno in objTurno)
+                {
+                    var turnoEntrada = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.Entrada.TimeOfDay.ToString());
+                    var mEntrada = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenEntrada.TimeOfDay.ToString());
+                    var mSalida = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenSalida.TimeOfDay.ToString());
+                    var margenEPre = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenEntradaPrevio);
+                    var margenEPos = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenEntradaPosterior);
+                    var margenSPre = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenSalidaPrevio);
+                    var margenSPos = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenSalidaPosterior);
+                    var turnoSalida = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.Salida.TimeOfDay.ToString());
+
+                    if (marcacionColaborador >= margenEPre && marcacionColaborador <= margenEPos)
+                    {
+                        idturnovalidado = itemTurno.Id;
+                        tipoMarcacion = "E";
+                        codigoMarcacion = "10";
+                        estadoMarcacion = marcacionColaborador < turnoEntrada && marcacionColaborador <= mEntrada ? "C" : "AI";
+                        countMarcacion = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(margenEPre, margenEPos, tipoMarcacion, objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
+                        break;
+
+                    }
+                    else if (marcacionColaborador >= margenSPre && marcacionColaborador <= margenSPos)
+                    {
+                        idturnovalidado = itemTurno.Id;
+                        tipoMarcacion = "S";
+                        codigoMarcacion = "11";
+                        estadoMarcacion = marcacionColaborador > turnoSalida ? "C" : "SI";
+                        countMarcacion = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(margenSPre, margenSPos, tipoMarcacion, objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
+                        countMarcacionEntrada = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(margenEPre, margenEPos, tipoMarcacion, objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
+                        marcacionColaboradorS = await _repoMarcacionCola.FirstOrDefaultAsync(new MarcacionByColaborador(objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id, marcacionColaborador), cancellationToken);
+                        break;
+                    }
+                }
+
+                if (idturnovalidado == Guid.Empty && tipoMarcacion == string.Empty && estadoMarcacion == string.Empty) return new ResponseType<MarcacionResponseType>() { Message = "Actualmente no tiene turno de Entrada/Salida", StatusCode = "101", Succeeded = true };
+
+                #region "Codigo Comentado"
+                //var userInfo = await _repoUserInfoAsync.FirstOrDefaultAsync(new UserMarcacionByCodigoSpec(Request.CodigoEmpleado), cancellationToken);
+                //if (userInfo is null)
+                //{
+                //    UserInfo objUserInfo = new()
+                //    {
+                //        Badgenumber = Request.CodigoEmpleado,
+                //        Ssn = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Identificacion,
+                //        Name = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Nombres,
+                //        LastName = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Apellidos,
+                //        //DefaultDeptId = ObjClient.Cargo.DepartamentoId.ToString(),
+                //        CreateOperator = "Admin",
+                //        CreateTime = DateTime.Now
+                //    };
+
+                //    userInfo = await _repoUserInfoAsync.AddAsync(objUserInfo, cancellationToken);
+                //}
+
                 //var countMarcacionCheck = await _repoMonitorLogAsync.CountAsync(new MarcacionByUserIdSpec(objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.CodigoConvivencia), cancellationToken);
 
                 //CheckInOut entityCheck = new()
@@ -140,29 +163,15 @@ public class MarcacionService : IMarcacion
 
                 //var objResult = await _repoCheckInOutAsync.AddAsync(entityCheck,cancellationToken);
 
-                //using IDbConnection con = new SqlConnection(ConnectionString_Marc);
-                //if (con.State == ConnectionState.Closed) con.Open();
-                //var objResult = await con.ExecuteAsync(sql: (" INSERT INTO [GRIAMSE].[dbo].[CHECKINOUT] (USERID,CHECKTYPE) VALUES (" + entityCheck.UserId + ",'" + entityCheck.CheckType + "')"), commandType: CommandType.Text);
-                //con.Close();
-
                 //var objMonitorLog =  await _repoMonitorLogAsync.FirstOrDefaultAsync(new MarcacionByMaxIdSpec());
 
-                AccMonitorLog accMonitorLog = new()
-                {
-                    //Id = objMonitorLog.Id + 1,
-                    State = Convert.ToInt32(codigoMarcacion),
-                    Time = DateTime.Now,
-                    Pin = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.CodigoConvivencia,
-                    Device_Id = 1,
-                    Verified = 1,
-                    Device_Name = "EnrolApp",
-                    Status = 1
-                };
+                #endregion
 
                 if (countMarcacion >= 1)
                 {
                     return new ResponseType<MarcacionResponseType>() { Message = "Ya tiene una marcación registrada", StatusCode = "101", Succeeded = true };
                 }
+                accMonitorLog.State = Convert.ToInt32(codigoMarcacion);
                 var objResult = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
 
                 if (objResult is not null)
