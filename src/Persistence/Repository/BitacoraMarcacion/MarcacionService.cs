@@ -263,4 +263,13 @@ public class MarcacionService : IMarcacion
 
 
     }
+
+
+    public  async Task<ResponseType<string>> ConsultarRecursos(string Identificacion, DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken)
+    {
+        //var objMarcaciones = await _repoMarcacionCola.ListAsync();
+
+
+        return await Task.FromResult(new ResponseType<string>());
+    }
 }

@@ -5,6 +5,7 @@ using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetComboBit
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Dto;
 using EvaluacionCore.Application.Features.Marcacion.Commands.GetBitacoraMarcacion;
 using EvaluacionCore.Application.Features.Marcacion.Dto;
+using EvaluacionCore.Application.Features.Marcacion.Queries.GetRecurso;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
@@ -77,5 +78,22 @@ namespace WebEvaluacionCoreApi.Controllers.v1
             var objResult = await Mediator.Send(query, cancellationToken);
             return Ok(objResult);
         }
+
+
+
+        //[HttpGet("ConsultaRecursos")]
+        //[ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
+        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+        //public async Task<IActionResult> ConsultaRecursos(string Identificacion,DateTime fechaDesde, DateTime fechasHasta, CancellationToken cancellationToken)
+        //{
+        //    var query = new GetRecursoQueries(Identificacion);
+        //    var objResult = await Mediator.Send(query, cancellationToken);
+        //    return Ok(objResult);
+        //}
+
+
+
+
+
     }
 }
