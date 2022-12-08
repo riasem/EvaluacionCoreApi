@@ -7,8 +7,6 @@ jobs:
     steps:
       - name: Encriptacion de configuracion
         run: |
-          gpg -c appsettings.json
-          mv appsettings.json.gpg .env
-          
-        
-    
+            echo "::group::My title"
+            echo "Inside group"
+            echo "::endgroup::"
