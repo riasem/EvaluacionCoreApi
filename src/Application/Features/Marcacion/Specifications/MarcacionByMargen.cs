@@ -10,15 +10,19 @@ namespace EvaluacionCore.Application.Features.Marcacion.Specifications;
 
 public class MarcacionByMargen : Specification<MarcacionColaborador>
 {
-    public MarcacionByMargen(DateTime mPrevio, DateTime mPosterior, string tipoMarcacion)
+    public MarcacionByMargen(DateTime mPrevio, DateTime mPosterior, string tipoMarcacion, Guid idColaborador)
     {
         if (tipoMarcacion == "E")
         {
-            Query.Where(p => p.MarcacionEntrada >= mPrevio && p.MarcacionEntrada <= mPosterior);
+            Query.Where(p => p.MarcacionEntrada >= mPrevio && p.MarcacionEntrada <= mPosterior 
+            && p.LocalidadColaborador.Colaborador.Id == idColaborador)
+                .Include(x => x.LocalidadColaborador).ThenInclude(x => x.Colaborador);
         }
         else
         {
-            Query.Where(p => p.MarcacionSalida >= mPrevio && p.MarcacionSalida <= mPosterior);
+            Query.Where(p => p.MarcacionSalida >= mPrevio && p.MarcacionSalida <= mPosterior
+            && p.LocalidadColaborador.Colaborador.Id == idColaborador)
+                .Include(x => x.LocalidadColaborador).ThenInclude(x => x.Colaborador);
         }
 
     }

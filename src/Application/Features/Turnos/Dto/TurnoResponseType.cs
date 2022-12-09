@@ -12,6 +12,12 @@ namespace EvaluacionCore.Application.Features.Turnos.Dto
 
         [JsonPropertyName("tipoJornada")]
         public string TipoJornada { get; set; }
+        
+        [JsonPropertyName("logoTipoJornada")]
+        public string LogoTipoJornada { get; set; }
+
+        [JsonPropertyName("colorTipoJornada")]
+        public string ColorTipoJornada { get; set; }
 
         [JsonPropertyName("turnoType")]
         public List<TurnoType> TurnoType { get; set; }

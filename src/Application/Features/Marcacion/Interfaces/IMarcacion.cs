@@ -1,5 +1,6 @@
 ﻿using EnrolApp.Application.Features.Marcacion.Commands.CreateMarcacion;
 using EvaluacionCore.Application.Common.Wrappers;
+using EvaluacionCore.Application.Features.Marcacion.Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,8 @@ namespace EvaluacionCore.Application.Features.Marcacion.Interfaces;
 
 public interface IMarcacion
 {
-    Task<ResponseType<string>> CreateMarcacion(CreateMarcacionRequest Request, CancellationToken cancellationToken);
+    Task<ResponseType<MarcacionResponseType>> CreateMarcacion(CreateMarcacionRequest Request, CancellationToken cancellationToken);
+
+    Task<ResponseType<ConsultaRecursoType>> ConsultarRecursos(string Identificacion, DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken);
 
 }

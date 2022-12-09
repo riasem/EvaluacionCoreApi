@@ -6,6 +6,7 @@ using EvaluacionCore.Application.Features.Localidads.Dto;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurno;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoColaborador;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoSubTurno;
+using EvaluacionCore.Application.Features.Turnos.Commands.UpdateTurnoColaborador;
 using EvaluacionCore.Application.Features.Turnos.Dto;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using System.Reflection;
@@ -19,6 +20,7 @@ public class MappingProfile : Profile
         CreateMap<CreateTurnoCommand, Turno>(MemberList.None).ReverseMap();
         CreateMap<CreateTurnoRequest, Turno>(MemberList.None).ReverseMap();
         CreateMap<CreateTurnoColaboradorRequest, TurnoColaborador>(MemberList.None).ReverseMap();
+        CreateMap<UpdateTurnoColaboradorRequest, TurnoColaborador>(MemberList.None).ReverseMap();
         CreateMap<Turno, CreateTurnoCommand>().ReverseMap();
         CreateMap<Turno, CreateTurnoSubTurnoRequest>().ReverseMap();
         CreateMap<Localidad, CreateLocalidadRequest>().ReverseMap();

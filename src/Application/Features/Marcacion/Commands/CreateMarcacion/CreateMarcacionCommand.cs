@@ -1,14 +1,15 @@
 ﻿using AutoMapper;
 using EvaluacionCore.Application.Common.Wrappers;
+using EvaluacionCore.Application.Features.Marcacion.Dto;
 using EvaluacionCore.Application.Features.Marcacion.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace EnrolApp.Application.Features.Marcacion.Commands.CreateMarcacion;
 
-public record CreateMarcacionCommand(CreateMarcacionRequest CreateMarcacion) : IRequest<ResponseType<string>>;
+public record CreateMarcacionCommand(CreateMarcacionRequest CreateMarcacion) : IRequest<ResponseType<MarcacionResponseType>>;
 
-public class CreateMarcacionCommandHandler : IRequestHandler<CreateMarcacionCommand, ResponseType<string>>
+public class CreateMarcacionCommandHandler : IRequestHandler<CreateMarcacionCommand, ResponseType<MarcacionResponseType>>
 {
 
     private readonly IMarcacion _repository;
@@ -22,7 +23,7 @@ public class CreateMarcacionCommandHandler : IRequestHandler<CreateMarcacionComm
         _log = log;
     }
 
-    public async Task<ResponseType<string>> Handle(CreateMarcacionCommand request, CancellationToken cancellationToken)
+    public async Task<ResponseType<MarcacionResponseType>> Handle(CreateMarcacionCommand request, CancellationToken cancellationToken)
     {
         var objResult = await _repository.CreateMarcacion(request.CreateMarcacion, cancellationToken);
 

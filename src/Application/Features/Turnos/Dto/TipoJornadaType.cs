@@ -14,6 +14,12 @@ namespace EvaluacionCore.Application.Features.Turnos.Dto
         [JsonPropertyName("descripcion")]
         public string Descripcion { get; set; }
 
+        [JsonPropertyName("logo")]
+        public string Logo { get; set; }
+
+        [JsonPropertyName("color")]
+        public string Color { get; set; }
+
         //[JsonPropertyName("estado")]
         //public string Estado { get; set; }
 

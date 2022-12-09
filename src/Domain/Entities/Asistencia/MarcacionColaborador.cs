@@ -11,7 +11,7 @@ public class MarcacionColaborador
     public Guid Id { get; set; } = Guid.NewGuid();
 
     [Column("idTurnoCliente", Order = 1, TypeName = "uniqueidentifier")]
-    public Guid IdTurnoColaborador { get; set; }
+    public Guid? IdTurnoColaborador { get; set; }
     public virtual TurnoColaborador TurnoColaborador { get; set; }
 
     [Column("idLocalidadColaborador", Order = 2, TypeName = "uniqueidentifier")]
@@ -24,10 +24,10 @@ public class MarcacionColaborador
     [Column("marcacionSalida", Order = 4, TypeName = "datetime2")]
     public DateTime? MarcacionSalida { get; set; }
     
-    [Column("estadoMarcacionEntrada", Order = 5, TypeName = "varchar")] // J = JUSTIFICADA    I= INJUSTIFICADA   A=ATRASO   C= CORRECTO
+    [Column("estadoMarcacionEntrada", Order = 5, TypeName = "varchar")] // AI=ATRASO INJUSTIFICADO   C= CORRECTO     AJ= ATRASO JUSTIFICADO      FJ = FALTA JUSTIFICADO      FI = FALTA INJUSTIFICADA    SJ = SALIDA JUSTIFICADA     SI = SALIDA INJUSTIFICADA
     public string EstadoMarcacionEntrada { get; set; }
 
-    [Column("estadoMarcacionSalida", Order = 6, TypeName = "varchar")] // J = JUSTIFICADA    I= INJUSTIFICADA   A=ATRASO   C= CORRECTO
+    [Column("estadoMarcacionSalida", Order = 6, TypeName = "varchar")] // AI=ATRASO INJUSTIFICADO   C= CORRECTO     AJ= ATRASO JUSTIFICADO      FJ = FALTA JUSTIFICADO      FI = FALTA INJUSTIFICADA    SJ = SALIDA JUSTIFICADA     SI = SALIDA INJUSTIFICADA
     public string SalidaEntrada { get; set; }
 
     [Column("totalAtraso", Order = 7, TypeName = "datetime2")]

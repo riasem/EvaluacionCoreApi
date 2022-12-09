@@ -11,6 +11,8 @@ using Microsoft.Extensions.Logging;
 using System.Data;
 using Dapper;
 using EvaluacionCore.Application.Features.EvalCore.Commands.Specifications;
+using EvaluacionCore.Domain.Entities.Permisos;
+using EvaluacionCore.Domain.Entities.Vacaciones;
 
 namespace EvaluacionCore.Persistence.Repository.Employees;
 
@@ -22,6 +24,8 @@ public class EvaluacionService : IEvaluacion
     private readonly IRepositoryAsync<TurnoColaborador> _repoTurnoColAsync;
     private readonly IRepositoryAsync<LocalidadColaborador> _repositoryLocalidadColAsync;
     private readonly IRepositoryAsync<Turno> _repositoryTurnoAsync;
+    private readonly IRepositoryAsync<SolicitudPermiso> _repositorySoliPermisoAsync;
+    private readonly IRepositoryAsync<SolicitudVacacion> _repositorySoliVacacionAsync;
     private readonly IRepositoryGRiasemAsync<UserInfo> _repoUserInfoAsync;
     private readonly IRepositoryGRiasemAsync<CheckInOut> _repoCheckInOutAsync;
     private string ConnectionString_Marc { get; }
@@ -30,7 +34,8 @@ public class EvaluacionService : IEvaluacion
     public EvaluacionService(IRepositoryGRiasemAsync<UserInfo> repoUserInfoAsync, IRepositoryGRiasemAsync<CheckInOut> repoCheckInOutAsync, 
         ILogger<EvaluacionService> log, IConfiguration config, IRepositoryAsync<MarcacionColaborador> repositoryMarcaCol,  
         IRepositoryAsync<TurnoColaborador> repositoryTurnoCol, IRepositoryAsync<LocalidadColaborador> repositoryLocalidadCol,
-        IRepositoryAsync<Turno> repositoryTurno)
+        IRepositoryAsync<Turno> repositoryTurno, IRepositoryAsync<SolicitudPermiso> repositorySoliPermisoAsync,
+        IRepositoryAsync<SolicitudVacacion> repositorySoliVacacionAsync)
     {
         _repoUserInfoAsync = repoUserInfoAsync;
         _repoCheckInOutAsync = repoCheckInOutAsync;
@@ -42,6 +47,8 @@ public class EvaluacionService : IEvaluacion
         _repoTurnoColAsync = repositoryTurnoCol;
         _repositoryLocalidadColAsync = repositoryLocalidadCol;
         _repositoryTurnoAsync = repositoryTurno;
+        _repositorySoliPermisoAsync = repositorySoliPermisoAsync;
+        _repositorySoliVacacionAsync = repositorySoliVacacionAsync;
     }
 
     public async Task<(string response, int success)> EvaluateAsistencias(string identificacion, DateTime? fechaDesde, DateTime? fechaHasta)
@@ -82,16 +89,56 @@ public class EvaluacionService : IEvaluacion
             //var objTurno = await _repoTurnoColAsync.ListAsync(new TurnosByIdClienteSpec(objLocalidad.Colaborador.Id));
             //if (!objTurno.Any()) return ("No tiene turnos asignados", 0);
 
-            //var codigoConviviencia = ;
+            var codigoConviviencia = objLocalidad.Colaborador.CodigoConvivencia;
 
-            var userInfo = await _repoUserInfoAsync.FirstOrDefaultAsync(new UserMarcacionByCodigoSpec(objLocalidad.Colaborador.CodigoConvivencia));
+            var userInfo = await _repoUserInfoAsync.FirstOrDefaultAsync(new UserMarcacionByCodigoSpec(codigoConviviencia));
 
             var objMarcacionBase = await _repoCheckInOutAsync.ListAsync(new GetMarcacionesByRangeDateSpec(userInfo.UserId,fechaDesde,fechaHasta));
 
-            var objMarcacion = await _repoMarcaColAsync.ListAsync(new MarcacionByColaborador(objLocalidad.Colaborador.Id));
-            if (!objMarcacion.Any()) return ("No posee marcaciones el colaborador", 0);
+            
+            //if (!objMarcacion.Any()) return ("No posee marcaciones el colaborador", 0);
+            TimeSpan difFechas = DateTime.Parse(fechaHasta.ToString()) - DateTime.Parse(fechaDesde.ToString());
 
-            //valiamos el rango de margen de marcaciones
+            for (int i = 0; i <= difFechas.Days; i++)
+            {
+                var fechanueva = DateTime.Parse(fechaDesde.ToString()).AddDays(i);
+
+                var objMarcacion = await _repoMarcaColAsync.FirstOrDefaultAsync(new MarcacionByColaborador(objLocalidad.Colaborador.Id, fechanueva));
+
+                if (objMarcacion is not null)
+                {
+                    var objPermiso = await _repositorySoliPermisoAsync.ListAsync(new GetPermisoRangeDateSpec(Convert.ToInt32(codigoConviviencia), fechanueva));
+
+
+
+
+
+
+                    if (objMarcacion.EstadoMarcacionEntrada != "C") // Correcto
+                    {
+                        
+
+
+                    }
+                        
+                    if (objMarcacion.SalidaEntrada != "C")
+                    {
+
+                    }
+                }
+                else
+                {
+                    var objVacacion = _repositorySoliVacacionAsync.FirstOrDefaultAsync(new GetVacacionRangeDateSpec(Convert.ToInt32(codigoConviviencia), fechanueva));
+
+                }
+
+
+                //}
+
+
+            }
+
+
 
 
 

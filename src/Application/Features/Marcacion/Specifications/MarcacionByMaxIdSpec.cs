@@ -1,5 +1,6 @@
 ﻿using Ardalis.Specification;
 using EnrolApp.Domain.Entities.Horario;
+using EvaluacionCore.Domain.Entities.Marcaciones;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,10 +9,10 @@ using System.Threading.Tasks;
 
 namespace EnrolApp.Application.Features.Marcacion.Specifications;
 
-public class MarcacionByUserIdSpec : Specification<CheckInOut>
+public class MarcacionByMaxIdSpec : Specification<AccMonitorLog>
 {
-    public MarcacionByUserIdSpec(int userId)
+    public MarcacionByMaxIdSpec()
     {
-        Query.Where(p => p.UserId == userId && p.CheckTime.Date == DateTime.Now.Date);
+        Query.OrderByDescending(x => x.Id).Take(1);
     }
 }

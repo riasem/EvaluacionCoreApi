@@ -6,7 +6,7 @@ using EvaluacionCore.Domain.Entities.Asistencia;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 
-namespace EvaluacionCore.Application.Features.Turnos.Queries.GetTurnoById;
+namespace EvaluacionCore.Application.Features.Turnos.Queries.GetMaestrosTurnoAsync;
 
 public record GetMaestrosTurnoAsyncQuery() : IRequest<ResponseType<MaestrosTurnoResponseType>>;
 
@@ -46,14 +46,14 @@ public class GetMaestrosTurnoAsyncHandler : IRequestHandler<GetMaestrosTurnoAsyn
             var modalidadJornadaTypes = _config.GetSection("modalidadJornada").Get<List<ModalidadJornadaType>>();
             var tipoJornadaTypes = _config.GetSection("tipoJornada").Get<List<TipoJornadaType>>();
 
-            MaestrosTurnoResponseType listaMaestrosTurno =new()
+            MaestrosTurnoResponseType listaMaestrosTurno = new()
             {
-                    ClaseTurnoType = _mapper.Map<List<ClaseTurnoType>>(objClaseTurno),
-                    TipoTurnoType = _mapper.Map<List<TipoTurnoType>>(objTipoTurno),
-                    SubclaseTurnoType = _mapper.Map<List<SubclaseTurnoType>>(objSubclaseTurno),
-                    TipoJornadaType = tipoJornadaTypes,
-                    ModalidadJornadaType = modalidadJornadaTypes
-            }; 
+                ClaseTurnoType = _mapper.Map<List<ClaseTurnoType>>(objClaseTurno),
+                TipoTurnoType = _mapper.Map<List<TipoTurnoType>>(objTipoTurno),
+                SubclaseTurnoType = _mapper.Map<List<SubclaseTurnoType>>(objSubclaseTurno),
+                TipoJornadaType = tipoJornadaTypes,
+                ModalidadJornadaType = modalidadJornadaTypes
+            };
 
             return new ResponseType<MaestrosTurnoResponseType>() { Data = listaMaestrosTurno, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
         }
@@ -62,6 +62,6 @@ public class GetMaestrosTurnoAsyncHandler : IRequestHandler<GetMaestrosTurnoAsyn
             return new ResponseType<MaestrosTurnoResponseType>() { Data = null, Succeeded = false, StatusCode = "002", Message = "Ocurrió un error durante la consulta" };
             //insertar logs
         }
-        
+
     }
 }

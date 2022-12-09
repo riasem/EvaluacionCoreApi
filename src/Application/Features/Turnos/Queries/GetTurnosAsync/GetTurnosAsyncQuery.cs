@@ -2,12 +2,11 @@
 using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.Turnos.Dto;
-using EvaluacionCore.Application.Features.Turnos.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 
-namespace EvaluacionCore.Application.Features.Turnos.Queries.GetTurnoById;
+namespace EvaluacionCore.Application.Features.Turnos.Queries.GetTurnosAsync;
 
 public record GetTurnosAsyncQuery() : IRequest<ResponseType<List<TurnoResponseType>>>;
 
@@ -58,13 +57,18 @@ public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, Respon
 
             var agr = objTurno.GroupBy(x => x.IdTipoJornada).ToList();
 
+            var tipoTurno_ = await _repositoryTurnoAsync.ListAsync(cancellationToken);
+            var claseTurno_ = await _repositoryClaseAsync.ListAsync(cancellationToken);
+            var subClaseTurno_ = await _repositorySubClaseAsync.ListAsync(cancellationToken);
+            
+
             foreach (var item in obtTurnosPadre)
             {
                 List<SubturnoType> listaSubturno = new();
 
-                var tipoTurno = await _repositoryTurnoAsync.FirstOrDefaultAsync(new TipoTurnoByIdSpec(item.IdTipoTurno), cancellationToken);
-                var claseTurno = await _repositoryClaseAsync.GetByIdAsync(item.IdClaseTurno, cancellationToken);
-                var subClaseTurno = await _repositorySubClaseAsync.GetByIdAsync(item.IdSubclaseTurno, cancellationToken);
+                var tipoTurno = tipoTurno_.Where(e => e.Id == item.IdTipoTurno).FirstOrDefault();
+                var claseTurno = claseTurno_.Where(e => e.Id == item.IdClaseTurno).FirstOrDefault();
+                var subClaseTurno = subClaseTurno_.Where(e => e.Id == item.IdSubclaseTurno).FirstOrDefault();
                 var modalidadJornada = modalidadJornadaTypes.Where(e => e.Id == item.IdModalidadJornada).FirstOrDefault();
                 var tipoJornada = tipoJornadaTypes.Where(e => e.Id == item.IdTipoJornada).FirstOrDefault();
 
@@ -136,11 +140,13 @@ public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, Respon
             for (int i = 0; i < prev.Count; i++)
             {
                 var tipoJ = prev[i].Key.ToString();
-                var idTipoJ = tipoJornadaTypes.Where(e => e.Descripcion == tipoJ).FirstOrDefault().Id;
+                var objTipoJ = tipoJornadaTypes.Where(e => e.Descripcion == tipoJ).FirstOrDefault();
                 lista.Add(new TurnoResponseType
                 {
-                    IdTipoJornada = idTipoJ.ToString(),
+                    IdTipoJornada = objTipoJ.Id.ToString(),
                     TipoJornada = tipoJ,
+                    LogoTipoJornada = objTipoJ.Logo,
+                    ColorTipoJornada = objTipoJ.Color,
                     TurnoType = _mapper.Map<List<TurnoType>>(prev[i])
                 });
             }

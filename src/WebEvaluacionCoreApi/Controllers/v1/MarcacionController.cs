@@ -4,6 +4,8 @@ using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetBitacora
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetComboBitacoraMarcacion;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Dto;
 using EvaluacionCore.Application.Features.Marcacion.Commands.GetBitacoraMarcacion;
+using EvaluacionCore.Application.Features.Marcacion.Dto;
+using EvaluacionCore.Application.Features.Marcacion.Queries.GetRecurso;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
@@ -68,7 +70,7 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpPost("GenerarMarcacion")]
-        [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ResponseType<MarcacionResponseType>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateMarcacion([FromBody] CreateMarcacionRequest request, CancellationToken cancellationToken)
         {
@@ -76,5 +78,22 @@ namespace WebEvaluacionCoreApi.Controllers.v1
             var objResult = await Mediator.Send(query, cancellationToken);
             return Ok(objResult);
         }
+
+
+
+        [HttpGet("ConsultaRecursos")]
+        [ProducesResponseType(typeof(ResponseType<ConsultaRecursoType>), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ConsultaRecursos(string Identificacion, DateTime fechaDesde, DateTime fechasHasta, CancellationToken cancellationToken)
+        {
+            var query = new GetRecursoQueries(Identificacion, fechaDesde,fechasHasta);
+            var objResult = await Mediator.Send(query, cancellationToken);
+            return Ok(objResult);
+        }
+
+
+
+
+
     }
 }

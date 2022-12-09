@@ -58,7 +58,8 @@ public class UserInfo
     [NotMapped]
     public int? VERIFICATIONMETHOD { get; set; }
 
-    [Column("DEFAULTDEPTID", TypeName = "varchar")]
+    [NotMapped]
+    //[Column("DEFAULTDEPTID", TypeName = "varchar")]
     public string DefaultDeptId { get; set; }
 
     [NotMapped]

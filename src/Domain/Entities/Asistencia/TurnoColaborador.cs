@@ -9,7 +9,7 @@ public partial class TurnoColaborador
 {
     [Key]
     [Column("id", Order = 0, TypeName = "uniqueidentifier")]
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid? Id { get; set; } = Guid.NewGuid();
 
     [Column("idTurno", Order = 1, TypeName = "uniqueidentifier")]
     public Guid IdTurno { get; set; }

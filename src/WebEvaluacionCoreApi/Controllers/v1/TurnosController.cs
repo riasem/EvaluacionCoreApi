@@ -2,7 +2,11 @@
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurno;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoColaborador;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoSubTurno;
-using EvaluacionCore.Application.Features.Turnos.Queries.GetTurnoById;
+using EvaluacionCore.Application.Features.Turnos.Commands.InactivaTurnoColaborador;
+using EvaluacionCore.Application.Features.Turnos.Commands.UpdateTurnoColaborador;
+using EvaluacionCore.Application.Features.Turnos.Queries.GetMaestrosTurnoAsync;
+using EvaluacionCore.Application.Features.Turnos.Queries.GetTurnosAsync;
+using EvaluacionCore.Application.Features.Turnos.Queries.GetTurnosColaborador;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -35,7 +39,7 @@ public class TurnosController : ApiControllerBase
     }
 
     /// <summary>
-    /// Crea un nuveo turno con sus respectivos turnos
+    /// Crea un nuevo turno con sus respectivos turnos
     /// </summary>
     /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
@@ -98,5 +102,77 @@ public class TurnosController : ApiControllerBase
         var objResult = await Mediator.Send(new GetMaestrosTurnoAsyncQuery(), cancellationToken);
         return Ok(objResult);
     }
-    
+
+
+    /// <summary>
+    /// Retorna el listado de turnos asignados al colaborador en un rango de fechas 
+    /// </summary>
+    /// <param name="identificacion"></param>
+    /// <param name="fechaDesde"></param>
+    /// <param name="fechaHasta"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpGet("GetTurnosAsignados")]
+    [EnableCors("AllowOrigin")]
+    [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
+    [Authorize]
+    public async Task<IActionResult> GetTurnosColaborador(string identificacion, DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken)
+    {
+        var objResult = await Mediator.Send(new GetTurnosColaboradorAsyncQuery(identificacion, fechaDesde, fechaHasta), cancellationToken);
+        return Ok(objResult);
+    }
+
+
+
+    /// <summary>
+    /// Crea un nuveo turno con sus respectivos turnos
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpPut("UpdateTurnoSubturno")]
+    [EnableCors("AllowOrigin")]
+    [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
+    [Authorize]
+    public async Task<IActionResult> CreaeteTurnoSubturno([FromBody] UpdateTurnoColaboradorRequest request, CancellationToken cancellationToken)
+    {
+        var objResult = await Mediator.Send(new UpdateTurnoColaboradorCommand(request), cancellationToken);
+        return Ok(objResult);
+    }
+
+
+
+    /// <summary>
+    /// Inactiva Turnos Asignados al usuario
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpPut("InactivateTurnoSubturno")]
+    [EnableCors("AllowOrigin")]
+    [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
+    [Authorize]
+    public async Task<IActionResult> InactivateTurno(List<InactivaTurnoColaboradorRequest> request, CancellationToken cancellationToken)
+    {
+        var objResult = await Mediator.Send(new InactivaTurnoColaboradorCommand(request), cancellationToken);
+        return Ok(objResult);
+    }
+
+    ///// <summary>
+    ///// Actualiza los turnos a un colaborador
+    ///// </summary>
+    ///// <param name="request"></param>
+    ///// <param name="cancellationToken"></param>
+    ///// <returns></returns>
+    //[HttpPut("ActualizarTurnoColaborador")]
+    //[EnableCors("AllowOrigin")]
+    //[ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
+    //[Authorize]
+    //public async Task<IActionResult> ActualizarTurnoColaborador([FromBody] UpdateTurnoColaboradorRequest request, CancellationToken cancellationToken)
+    //{
+    //    var objResult = await Mediator.Send(new UpdateTurnoColaboradorCommand(request), cancellationToken);
+    //    return Ok(objResult);
+    //}
+
+
 }
