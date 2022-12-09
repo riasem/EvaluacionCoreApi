@@ -47,44 +47,61 @@ public class Turno
     [Column("salida", Order = 11, TypeName = "datetime")]
     public DateTime Salida { get; set; }
 
-    [Column("margenEntrada", Order = 12, TypeName = "datetime")]
-    public DateTime MargenEntrada { get; set; }
-
-    [Column("margenSalida", Order = 13, TypeName = "datetime")]
-    public DateTime MargenSalida { get; set; }
-
-    [Column("margenEntradaPrevio", Order = 14, TypeName = "varchar")]
-    [StringLength(4)] public string MargenEntradaPrevio { get; set; }
-
-    [Column("margenEntradaPosterior", Order = 15, TypeName = "varchar")]
-    [StringLength(4)] public string MargenEntradaPosterior { get; set; }
-
-    [Column("margenSalidaPrevio", Order = 16, TypeName = "varchar")]
-    [StringLength(4)] public string MargenSalidaPrevio { get; set; }
-
-    [Column("margenSalidaPosterior", Order = 17, TypeName = "varchar")]
-    [StringLength(4)] public string MargenSalidaPosterior { get; set; }
-
-    [Column("totalHoras", Order = 18, TypeName = "varchar")]
+    [Column("totalHoras", Order = 12, TypeName = "varchar")]
     [StringLength(2)] public string TotalHoras { get; set; } = string.Empty;
 
-    [Column("estado", Order = 19, TypeName = "varchar")]
+    [Column("estado", Order = 13, TypeName = "varchar")]
     public string Estado { get; set; } = "A";
 
-
-
     //AUDITORIA
-    [Column("usuarioCreacion", Order = 20, TypeName = "varchar")]
+    [Column("usuarioCreacion", Order = 14, TypeName = "varchar")]
     [StringLength(20)] public string UsuarioCreacion { get; set; } = string.Empty;
 
-    [Column("fechaCreacion", Order = 21, TypeName = "datetime2")]
+    [Column("fechaCreacion", Order = 15, TypeName = "datetime2")]
     public DateTime FechaCreacion { get; set; } = DateTime.Now;
 
-    [Column("usuarioModificacion", Order = 22, TypeName = "varchar")]
+    [Column("usuarioModificacion", Order = 16, TypeName = "varchar")]
     [StringLength(20)] public string UsuarioModificacion { get; set; } = string.Empty;
 
-    [Column("fechaModificacion", Order = 23, TypeName = "datetime2")]
+    [Column("fechaModificacion", Order = 17, TypeName = "datetime2")]
     public DateTime? FechaModificacion { get; set; }
+
+
+
+
+    [Column("margenEntradaPrevio", Order = 18, TypeName = "int")]
+    public int? MargenEntradaPrevio { get; set; }
+
+    [Column("margenSalidaPosterior", Order = 19, TypeName = "int")]
+    public int? MargenSalidaPosterior { get; set; }
+
+    [Column("margenEntradaGracia", Order = 20, TypeName = "int")]
+    public int? MargenEntradaGracia { get; set; }
+
+    [Column("margenSalidaGracia", Order = 21, TypeName = "int")]
+    public int? MargenSalidaGracia { get; set; }
+
+
+
+    [Column("codigoEntrada", Order = 22, TypeName = "int")]
+    public int? CodigoEntrada { get; set; }
+
+    [Column("codigoSalida", Order = 23, TypeName = "int")]
+    public int? CodigoSalida { get; set; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     public virtual ICollection<TurnoColaborador> TurnoColaboradores { get; set; }

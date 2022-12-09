@@ -86,16 +86,16 @@ public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, Respon
                             TotalHoras = subturno_.TotalHoras,
                             Descripcion = subturno_.Descripcion,
                             Entrada = subturno_.Entrada,
-                            MargenEntrada = subturno_.MargenEntrada,
-                            MargenSalida = subturno_.MargenSalida,
                             Salida = subturno_.Salida,
                             IdTipoTurno = subturno_.IdTipoTurno,
                             CodigoTurno = subturno_.CodigoTurno,
                             TipoTurno = subturno_.IdTipoTurno.ToString(),
-                            MargenEntradaPosterior = subturno_.MargenEntradaPosterior,
                             MargenEntradaPrevio = subturno_.MargenEntradaPrevio,
                             MargenSalidaPosterior = subturno_.MargenSalidaPosterior,
-                            MargenSalidaPrevio = subturno_.MargenSalidaPrevio
+                            MargenEntradaGracia = subturno_.MargenEntradaGracia,
+                            MargenSalidaGracia = subturno_.MargenSalidaGracia,
+                            CodigoEntrada = subturno_.CodigoEntrada,
+                            CodigoSalida = subturno_.CodigoSalida
                         });
                     }
                 }
@@ -120,14 +120,15 @@ public class GetTurnosAsyncHandler : IRequestHandler<GetTurnosAsyncQuery, Respon
                     Descripcion = item.Descripcion,
                     CodigoTurno = item.CodigoTurno,
                     Entrada = item.Entrada,
-                    MargenEntrada = item.MargenEntrada,
                     Salida = item.Salida,
-                    MargenSalida = item.MargenSalida,
-                    MargenEntradaPosterior = item.MargenEntradaPosterior,
+                    CodigoIntegracion = item.CodigoIntegracion,
                     MargenEntradaPrevio = item.MargenEntradaPrevio,
                     MargenSalidaPosterior = item.MargenSalidaPosterior,
-                    MargenSalidaPrevio = item.MargenSalidaPrevio,
-                    CodigoIntegracion = item.CodigoIntegracion,
+                    MargenEntradaGracia = item.MargenEntradaGracia,
+                    MargenSalidaGracia = item.MargenSalidaGracia,
+                    CodigoEntrada = item.CodigoEntrada,
+                    CodigoSalida = item.CodigoSalida,
+                    
 
                     TotalHoras = item.TotalHoras,
                     SubturnoType = listaSubturno

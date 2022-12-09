@@ -25,14 +25,14 @@ namespace EnrolApp.Persistence.Configurations
               .IsRequired();
 
 
-            builder.Property(x => x.MargenEntradaPosterior)
-              .HasMaxLength(4)
-              .IsRequired();
+            //builder.Property(x => x.MargenEntradaPosterior)
+            //  .HasMaxLength(4)
+            //  .IsRequired();
 
 
-            builder.Property(x => x.MargenSalidaPrevio)
-              .HasMaxLength(4)
-              .IsRequired();
+            //builder.Property(x => x.MargenSalidaPrevio)
+            //  .HasMaxLength(4)
+            //  .IsRequired();
 
 
             builder.Property(x => x.MargenSalidaPosterior)
