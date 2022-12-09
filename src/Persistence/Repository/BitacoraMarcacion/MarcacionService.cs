@@ -10,6 +10,7 @@ using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.Marcacion.Dto;
 using EvaluacionCore.Application.Features.Marcacion.Interfaces;
 using EvaluacionCore.Application.Features.Marcacion.Specifications;
+using EvaluacionCore.Application.Features.Turnos.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using EvaluacionCore.Domain.Entities.Marcaciones;
 using Microsoft.Data.SqlClient;
@@ -99,13 +100,18 @@ public class MarcacionService : IMarcacion
                 foreach (var itemTurno in objTurno)
                 {
                     var turnoEntrada = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.Entrada.TimeOfDay.ToString());
-                    var mEntrada = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenEntrada.TimeOfDay.ToString());
+                    var turnoSalida = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.Salida.TimeOfDay.ToString());
+
+                    var mEntradaPre = DateTime.Now.AddMinutes(- Convert.ToDouble(itemTurno.Turno.MargenEntradaPrevio));
+                    var mSalidaPos = DateTime.Now.AddMinutes(Convert.ToDouble(itemTurno.Turno.MargenSalidaPosterior));
+                    //var mEntrada
+                    //var mEntrada = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenEntradaPrevio.TimeOfDay.ToString());
                     var mSalida = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenSalida.TimeOfDay.ToString());
                     var margenEPre = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenEntradaPrevio);
                     var margenEPos = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenEntradaPosterior);
                     var margenSPre = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenSalidaPrevio);
                     var margenSPos = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenSalidaPosterior);
-                    var turnoSalida = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.Salida.TimeOfDay.ToString());
+                    
 
                     if (marcacionColaborador >= margenEPre && marcacionColaborador <= margenEPos)
                     {
@@ -265,11 +271,24 @@ public class MarcacionService : IMarcacion
     }
 
 
-    public  async Task<ResponseType<string>> ConsultarRecursos(string Identificacion, DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken)
+    public  async Task<ResponseType<ConsultaRecursoType>> ConsultarRecursos(string Identificacion, DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken)
     {
+        var objTurnoColaborador = await _repoTurnoCola.ListAsync(new TurnoColaboradorByIdentificacionSpec(Identificacion,fechaDesde,fechaHasta), cancellationToken);
+
+        var totalHoras = objTurnoColaborador.Sum(x => Convert.ToInt32(x.Turno.TotalHoras));
+
+
+
+
+
+
+
+
         //var objMarcaciones = await _repoMarcacionCola.ListAsync();
 
 
-        return await Task.FromResult(new ResponseType<string>());
+
+
+        return await Task.FromResult(new ResponseType<ConsultaRecursoType>());
     }
 }

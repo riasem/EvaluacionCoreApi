@@ -29,26 +29,53 @@ namespace EvaluacionCore.Application.Features.Turnos.Dto
         [JsonPropertyName("salida")]
         public DateTime Salida { get; set; }
 
-        [JsonPropertyName("margenEntrada")]
-        public DateTime MargenEntrada { get; set; }
-
-        [JsonPropertyName("margenSalida")]
-        public DateTime MargenSalida { get; set; }
-
-        [JsonPropertyName("margenEntradaPrevio")]
-        public string MargenEntradaPrevio { get; set; } = string.Empty;
-
-        [JsonPropertyName("margenEntradaPosterior")]
-        public string MargenEntradaPosterior { get; set; } = string.Empty;
-
-        [JsonPropertyName("margenSalidaPrevio")]
-        public string MargenSalidaPrevio { get; set; } = string.Empty;
-
-        [JsonPropertyName("margenSalidaPosterior")]
-        public string MargenSalidaPosterior { get; set; } = string.Empty;
-
         [JsonPropertyName("totalHoras")]
         public string TotalHoras { get; set; } = string.Empty;
+
+        [JsonPropertyName("margenEntradaPrevio")]
+        public int? MargenEntradaPrevio { get; set; }
+
+        [JsonPropertyName("margenSalidaPosterior")]
+        public int? MargenSalidaPosterior { get; set; }
+
+        [JsonPropertyName("margenEntradaGracia")]
+        public int? MargenEntradaGracia { get; set; }
+
+        [JsonPropertyName("margenSalidaGracia")]
+        public int? MargenSalidaGracia { get; set; }
+
+
+
+        [JsonPropertyName("codigoEntrada")]
+        public int? CodigoEntrada { get; set; }
+
+        [JsonPropertyName("codigoSalida")]
+        public int? CodigoSalida { get; set; }
+
+
+
+
+
+
+        //[JsonPropertyName("margenEntrada")]
+        //public DateTime MargenEntrada { get; set; }
+
+        //[JsonPropertyName("margenSalida")]
+        //public DateTime MargenSalida { get; set; }
+
+        //[JsonPropertyName("margenEntradaPrevio")]
+        //public string MargenEntradaPrevio { get; set; } = string.Empty;
+
+        //[JsonPropertyName("margenEntradaPosterior")]
+        //public string MargenEntradaPosterior { get; set; } = string.Empty;
+
+        //[JsonPropertyName("margenSalidaPrevio")]
+        //public string MargenSalidaPrevio { get; set; } = string.Empty;
+
+        //[JsonPropertyName("margenSalidaPosterior")]
+        //public string MargenSalidaPosterior { get; set; } = string.Empty;
+
+
 
     }
 

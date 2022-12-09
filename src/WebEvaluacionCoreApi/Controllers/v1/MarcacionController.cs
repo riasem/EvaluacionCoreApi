@@ -81,15 +81,15 @@ namespace WebEvaluacionCoreApi.Controllers.v1
 
 
 
-        //[HttpGet("ConsultaRecursos")]
-        //[ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
-        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
-        //public async Task<IActionResult> ConsultaRecursos(string Identificacion,DateTime fechaDesde, DateTime fechasHasta, CancellationToken cancellationToken)
-        //{
-        //    var query = new GetRecursoQueries(Identificacion);
-        //    var objResult = await Mediator.Send(query, cancellationToken);
-        //    return Ok(objResult);
-        //}
+        [HttpGet("ConsultaRecursos")]
+        [ProducesResponseType(typeof(ResponseType<ConsultaRecursoType>), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ConsultaRecursos(string Identificacion, DateTime fechaDesde, DateTime fechasHasta, CancellationToken cancellationToken)
+        {
+            var query = new GetRecursoQueries(Identificacion, fechaDesde,fechasHasta);
+            var objResult = await Mediator.Send(query, cancellationToken);
+            return Ok(objResult);
+        }
 
 
 
