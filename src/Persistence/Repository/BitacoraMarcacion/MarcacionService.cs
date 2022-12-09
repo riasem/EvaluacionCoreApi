@@ -132,7 +132,7 @@ public class MarcacionService : IMarcacion
                         codigoMarcacion = "11";
                         estadoMarcacion = marcacionColaborador > turnoSalida && marcacionColaborador > mSalidaGra ? "C" : "SI";
                         countMarcacion = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(mSalidaGra, mSalidaPos, tipoMarcacion, objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
-                        //countMarcacionEntrada = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(margenEPre, margenEPos, tipoMarcacion, objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
+                        countMarcacionEntrada = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(mEntradaPre, mEntradaGra, tipoMarcacion, objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
                         marcacionColaboradorS = await _repoMarcacionCola.FirstOrDefaultAsync(new MarcacionByColaborador(objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id, marcacionColaborador), cancellationToken);
                         break;
                     }
