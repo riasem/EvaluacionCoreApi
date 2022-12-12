@@ -298,8 +298,8 @@ public class MarcacionService : IMarcacion
                 var turnoAsig = objTurnoColaborador.Where(x => x.FechaAsignacion.Date == fechanueva.Date && x.Turno.ClaseTurno.CodigoClaseturno == "LABORA").FirstOrDefault();
                 var turnoAsigReceso = objTurnoColaborador.Where(x => x.FechaAsignacion.Date == fechanueva.Date && x.Turno.ClaseTurno.CodigoClaseturno == "RECESO").FirstOrDefault();
                 var marcacionCliente = marcacionesColaborador.Where(x => x.FechaCreacion.Date == fechanueva.Date && x.EstadoProcesado == true).FirstOrDefault();
-                //var marcacionMonitor = marcaMonitor.Where(x => x.Time.Date == fechanueva.Date).ToList();
-                var tHPendiente = string.Empty;
+                var marcacionMonitor = marcaMonitor.Where(x => x.Time.Date == fechanueva.Date).ToList();
+                var localidadDescripcion = string.Empty;
                 var tHAsignada = string.Empty;
                 var tHTrabajadas = string.Empty;
                 if (turnoAsig == null) { tHAsignada = "0"; } else { tHAsignada = turnoAsig.Turno.TotalHoras; };
@@ -317,9 +317,9 @@ public class MarcacionService : IMarcacion
                     Dias newDias = new()
                     {
                         Fecha = fechanueva,
-                        HorasAsignadas = tHAsignada,
-                        HorasPendiente = marcacionCliente.TotalAtraso == null ? TimeSpan.Zero.TotalHours.ToString() : marcacionCliente.TotalAtraso.Value.TimeOfDay.TotalHours.ToString(),
-                        HorasTrabajada = tHTrabajadas,
+                        HorasAsignadas = Math.Round(Convert.ToDouble(tHAsignada),2).ToString(),
+                        HorasPendiente = marcacionCliente.TotalAtraso == null ? TimeSpan.Zero.TotalHours.ToString() : Math.Round(marcacionCliente.TotalAtraso.Value.TimeOfDay.TotalHours,2).ToString(),
+                        HorasTrabajada = Math.Round(Convert.ToDouble(tHTrabajadas),2).ToString(),
                         LocalidadDescripcion = marcacionCliente.LocalidadColaborador.Localidad.Descripcion,
                         
 
@@ -330,11 +330,20 @@ public class MarcacionService : IMarcacion
                 }
                 // no tiene marcacion en tabla principal
                 var hTTrabajadas = string.Empty;
-                if (marcaMonitor.Any())
+
+                if (marcacionMonitor.Any())
                 {
-                    var mEntrada = marcaMonitor.Where(x => x.Time.Date == fechanueva.Date && x.State == 10).OrderBy(x => x.Time).FirstOrDefault().Time;
-                    var mSalida = marcaMonitor.Where(x => x.Time.Date == fechanueva.Date && x.State == 11).OrderByDescending(x => x.Time).FirstOrDefault().Time;
-                    hTTrabajadas = (mSalida.TimeOfDay - mEntrada.TimeOfDay).TotalHours.ToString();
+                    var mEntrada = marcacionMonitor.Where(x => x.Time.Date == fechanueva.Date && x.State == 10).OrderBy(x => x.Time).FirstOrDefault();
+                    var mSalida = marcacionMonitor.Where(x => x.Time.Date == fechanueva.Date && x.State == 11).OrderByDescending(x => x.Time).FirstOrDefault();
+                    if (mEntrada != null && mSalida != null)
+                    {
+                        hTTrabajadas = (mSalida.Time.TimeOfDay - mEntrada.Time.TimeOfDay).TotalHours.ToString();
+                    }
+                    else
+                    {
+                        hTTrabajadas = "0";
+                    }
+                    
 
                 }
                 else
@@ -345,8 +354,8 @@ public class MarcacionService : IMarcacion
                 Dias newDiasSturno = new()
                 {
                     Fecha = fechanueva,
-                    HorasAsignadas = tHAsignada,
-                    HorasTrabajada = hTTrabajadas
+                    HorasAsignadas = Math.Round(Convert.ToDouble(tHAsignada),2).ToString(),
+                    HorasTrabajada = Math.Round(Convert.ToDouble(hTTrabajadas),2).ToString()
 
                 };
 
@@ -360,9 +369,9 @@ public class MarcacionService : IMarcacion
             {
                 Colaborador = itemCliente.Nombres + " " + itemCliente.Apellidos,
                 Identificacion = itemCliente.Identificacion,
-                HTotalAsignadas = dias.Sum(x => Convert.ToDouble(x.HorasAsignadas)).ToString(),
-                HTotalPendiente = dias.Sum(x => Convert.ToDouble(x.HorasPendiente)).ToString(),
-                HTotalTrabajadas = dias.Sum(x => Convert.ToDouble(x.HorasTrabajada)).ToString(),
+                HTotalAsignadas = Math.Round(dias.Sum(x => Convert.ToDouble(x.HorasAsignadas)),2).ToString(),
+                HTotalPendiente = Math.Round(dias.Sum(x => Convert.ToDouble(x.HorasPendiente)),2).ToString(),
+                HTotalTrabajadas = Math.Round(dias.Sum(x => Convert.ToDouble(x.HorasTrabajada)),2).ToString(),
                 Dias = dias
             });
 
