@@ -277,9 +277,9 @@ public class MarcacionService : IMarcacion
     }
 
 
-    public  async Task<ResponseType<List<ConsultaRecursoType>>> ConsultarRecursos(string Identificacion, DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken)
+    public  async Task<ResponseType<List<ConsultaRecursoType>>> ConsultarRecursos(Guid Identificacion, DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken)
     {
-        var objClienteCargo = await _repoCliente.ListAsync(new ClientePadreById(Guid.Parse(Identificacion)), cancellationToken);
+        var objClienteCargo = await _repoCliente.ListAsync(new ClientePadreById(Identificacion), cancellationToken);
 
         if (objClienteCargo == null) return new ResponseType<List<ConsultaRecursoType>>() { Message = "No tiene personal a cargo", StatusCode = "001", Succeeded = true};
 

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace EvaluacionCore.Application.Features.Marcacion.Queries.GetRecurso;
 
-public record GetRecursoQueries(string Identificacion, DateTime FechaDesde, DateTime FechaHasta) : IRequest<ResponseType<List<ConsultaRecursoType>>>;
+public record GetRecursoQueries(Guid IdCliente, DateTime FechaDesde, DateTime FechaHasta) : IRequest<ResponseType<List<ConsultaRecursoType>>>;
 
 public class GetRecursoQueriesHandler : IRequestHandler<GetRecursoQueries, ResponseType<List<ConsultaRecursoType>>>
 {
@@ -26,7 +26,7 @@ public class GetRecursoQueriesHandler : IRequestHandler<GetRecursoQueries, Respo
 
     public async Task<ResponseType<List<ConsultaRecursoType>>> Handle(GetRecursoQueries request, CancellationToken cancellationToken)
     {
-        var objResult = await _repositoryAsync.ConsultarRecursos(request.Identificacion, request.FechaDesde, request.FechaHasta, cancellationToken);
+        var objResult = await _repositoryAsync.ConsultarRecursos(request.IdCliente, request.FechaDesde, request.FechaHasta, cancellationToken);
 
         return objResult;
 

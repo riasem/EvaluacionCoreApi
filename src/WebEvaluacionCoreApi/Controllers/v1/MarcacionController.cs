@@ -80,13 +80,20 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         }
 
 
-
+        /// <summary>
+        /// Obtener datos de horas trabajadas, horas asignadas y horas pendientes
+        /// </summary>
+        /// <param name="IdCliente"></param>
+        /// <param name="fechaDesde"></param>
+        /// <param name="fechasHasta"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet("ConsultaRecursos")]
         [ProducesResponseType(typeof(ResponseType<List<ConsultaRecursoType>>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> ConsultaRecursos(string Identificacion, DateTime fechaDesde, DateTime fechasHasta, CancellationToken cancellationToken)
+        public async Task<IActionResult> ConsultaRecursos(Guid IdCliente, DateTime fechaDesde, DateTime fechasHasta, CancellationToken cancellationToken)
         {
-            var query = new GetRecursoQueries(Identificacion, fechaDesde,fechasHasta);
+            var query = new GetRecursoQueries(IdCliente, fechaDesde,fechasHasta);
             var objResult = await Mediator.Send(query, cancellationToken);
             return Ok(objResult);
         }

@@ -13,6 +13,6 @@ public interface IMarcacion
 {
     Task<ResponseType<MarcacionResponseType>> CreateMarcacion(CreateMarcacionRequest Request, CancellationToken cancellationToken);
 
-    Task<ResponseType<List<ConsultaRecursoType>>> ConsultarRecursos(string Identificacion, DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken);
+    Task<ResponseType<List<ConsultaRecursoType>>> ConsultarRecursos(Guid IdCliente, DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken);
 
 }
