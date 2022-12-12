@@ -3,18 +3,14 @@
 public class ConsultaRecursoType
 {
     public string Identificacion { get; set; }
-    
-    public string Cedula { get; set; }
 
     public string Colaborador { get; set; }
-
-    public Guid IdTurno { get; set; }
 
     public string HTotalAsignadas { get; set; }
     public string HTotalTrabajadas { get; set; }
     public string HTotalPendiente { get; set; }
 
-    public Dias Dias { get; set; }
+    public List<Dias> Dias { get; set; }
 }
 
 public class Dias
@@ -26,4 +22,6 @@ public class Dias
     public string HorasAsignadas { get; set; }
 
     public string HorasPendiente { get; set; }
+
+    public string LocalidadDescripcion { get; set; }
 }
