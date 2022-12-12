@@ -12,6 +12,7 @@ using EvaluacionCore.Application.Features.Marcacion.Interfaces;
 using EvaluacionCore.Application.Features.Marcacion.Specifications;
 using EvaluacionCore.Application.Features.Turnos.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
+using EvaluacionCore.Domain.Entities.Common;
 using EvaluacionCore.Domain.Entities.Marcaciones;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
@@ -28,6 +29,7 @@ public class MarcacionService : IMarcacion
     private readonly IRepositoryGRiasemAsync<CheckInOut> _repoCheckInOutAsync;
     private readonly IRepositoryGRiasemAsync<AccMonitorLog> _repoMonitorLogAsync;
     private readonly IRepositoryAsync<Localidad> _repoLocalidad;
+    private readonly IRepositoryAsync<Cliente> _repoCliente;
     private readonly IRepositoryAsync<TurnoColaborador> _repoTurnoCola;
     private readonly IRepositoryAsync<MarcacionColaborador> _repoMarcacionCola;
     private readonly IConfiguration _config;
@@ -38,7 +40,8 @@ public class MarcacionService : IMarcacion
     public MarcacionService(IRepositoryGRiasemAsync<UserInfo> repoUserInfoAsync, IRepositoryGRiasemAsync<CheckInOut> repoCheckInOutAsync,
         IRepositoryAsync<Localidad> repoLocalidad,ILogger<MarcacionColaborador> log, 
         IRepositoryAsync<TurnoColaborador> repoTurnoCola, IConfiguration config, 
-        IRepositoryAsync<MarcacionColaborador> repoMarcacionCola, IRepositoryGRiasemAsync<AccMonitorLog> repoMonitorLogAsync)
+        IRepositoryAsync<MarcacionColaborador> repoMarcacionCola, IRepositoryGRiasemAsync<AccMonitorLog> repoMonitorLogAsync,
+        IRepositoryAsync<Cliente> repoCliente)
     {
         _repoUserInfoAsync = repoUserInfoAsync;
         _repoCheckInOutAsync = repoCheckInOutAsync;
@@ -49,6 +52,7 @@ public class MarcacionService : IMarcacion
         ConnectionString_Marc = _config.GetConnectionString("Bd_Marcaciones_GRIAMSE");
         _repoTurnoCola = repoTurnoCola;
         _repoMonitorLogAsync = repoMonitorLogAsync;
+        _repoCliente = repoCliente;
     }
 
     public async Task<ResponseType<MarcacionResponseType>> CreateMarcacion(CreateMarcacionRequest Request, CancellationToken cancellationToken)
@@ -68,7 +72,7 @@ public class MarcacionService : IMarcacion
 
                 AccMonitorLog accMonitorLog = new()
                 {
-                    //Id = objMonitorLog.Id + 1,
+                    Id = 8983877 + 1,
                     State = 0,
                     Time = DateTime.Now,
                     Pin = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.CodigoConvivencia,
@@ -273,24 +277,96 @@ public class MarcacionService : IMarcacion
     }
 
 
-    public  async Task<ResponseType<ConsultaRecursoType>> ConsultarRecursos(string Identificacion, DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken)
+    public  async Task<ResponseType<List<ConsultaRecursoType>>> ConsultarRecursos(string Identificacion, DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken)
     {
-        var objTurnoColaborador = await _repoTurnoCola.ListAsync(new TurnoColaboradorByIdentificacionSpec(Identificacion,fechaDesde,fechaHasta), cancellationToken);
+        var objClienteCargo = await _repoCliente.ListAsync(new ClientePadreById(Guid.Parse(Identificacion)), cancellationToken);
 
-        var totalHoras = objTurnoColaborador.Sum(x => Convert.ToInt32(x.Turno.TotalHoras));
+        if (objClienteCargo == null) return new ResponseType<List<ConsultaRecursoType>>() { Message = "No tiene personal a cargo", StatusCode = "001", Succeeded = true};
 
+        List<ConsultaRecursoType> listRecursos = new();
 
+        foreach (var itemCliente in objClienteCargo)
+        {
+            var objTurnoColaborador = await _repoTurnoCola.ListAsync(new TurnoColaboradorByIdentificacionSpec(itemCliente.Identificacion, fechaDesde, fechaHasta), cancellationToken);
+            var marcacionesColaborador = await _repoMarcacionCola.ListAsync(new MarcacionByRangeFechaSpec(itemCliente.Identificacion, fechaDesde, fechaHasta), cancellationToken);
+            var marcaMonitor = await _repoMonitorLogAsync.ListAsync(new MarMonitorByRangeFechaSpec(itemCliente.CodigoConvivencia, fechaDesde, fechaHasta), cancellationToken);
+            TimeSpan difFechas = fechaHasta - fechaDesde;
+            List<Dias> dias = new();
+            for (int i = 0; i <= difFechas.Days; i++)
+            {
+                var fechanueva = DateTime.Parse(fechaDesde.ToString()).AddDays(i);
+                var turnoAsig = objTurnoColaborador.Where(x => x.FechaAsignacion.Date == fechanueva.Date && x.Turno.ClaseTurno.CodigoClaseturno == "LABORA").FirstOrDefault();
+                var turnoAsigReceso = objTurnoColaborador.Where(x => x.FechaAsignacion.Date == fechanueva.Date && x.Turno.ClaseTurno.CodigoClaseturno == "RECESO").FirstOrDefault();
+                var marcacionCliente = marcacionesColaborador.Where(x => x.FechaCreacion.Date == fechanueva.Date && x.EstadoProcesado == true).FirstOrDefault();
+                //var marcacionMonitor = marcaMonitor.Where(x => x.Time.Date == fechanueva.Date).ToList();
+                var tHPendiente = string.Empty;
+                var tHAsignada = string.Empty;
+                var tHTrabajadas = string.Empty;
+                if (turnoAsig == null) { tHAsignada = "0"; } else { tHAsignada = turnoAsig.Turno.TotalHoras; };
+                if (marcacionCliente != null)
+                {
+                    if (marcacionCliente.MarcacionSalida != null && marcacionCliente.MarcacionEntrada != null)
+                    {
+                        //var hReceso = turnoAsigReceso.Turno.TotalHoras;
+                        tHTrabajadas = ((marcacionCliente.MarcacionSalida.Value.TimeOfDay - marcacionCliente.MarcacionEntrada.Value.TimeOfDay).TotalHours - Convert.ToDouble(turnoAsigReceso.Turno.TotalHoras)).ToString();
+                    }else /*if (marcacionCliente.MarcacionEntrada != null && marcacionCliente.MarcacionSalida == null)*/
+                    {
+                        tHTrabajadas = "0";
+                    }
 
+                    Dias newDias = new()
+                    {
+                        Fecha = fechanueva,
+                        HorasAsignadas = tHAsignada,
+                        HorasPendiente = marcacionCliente.TotalAtraso == null ? TimeSpan.Zero.TotalHours.ToString() : marcacionCliente.TotalAtraso.Value.TimeOfDay.TotalHours.ToString(),
+                        HorasTrabajada = tHTrabajadas,
+                        LocalidadDescripcion = marcacionCliente.LocalidadColaborador.Localidad.Descripcion,
+                        
 
+                    };
 
+                    dias.Add(newDias);
+                    continue;
+                }
+                // no tiene marcacion en tabla principal
+                var hTTrabajadas = string.Empty;
+                if (marcaMonitor.Any())
+                {
+                    var mEntrada = marcaMonitor.Where(x => x.Time.Date == fechanueva.Date && x.State == 10).OrderBy(x => x.Time).FirstOrDefault().Time;
+                    var mSalida = marcaMonitor.Where(x => x.Time.Date == fechanueva.Date && x.State == 11).OrderByDescending(x => x.Time).FirstOrDefault().Time;
+                    hTTrabajadas = (mSalida.TimeOfDay - mEntrada.TimeOfDay).TotalHours.ToString();
 
+                }
+                else
+                {
+                    hTTrabajadas = "0";
+                }
 
+                Dias newDiasSturno = new()
+                {
+                    Fecha = fechanueva,
+                    HorasAsignadas = tHAsignada,
+                    HorasTrabajada = hTTrabajadas
 
-        //var objMarcaciones = await _repoMarcacionCola.ListAsync();
+                };
 
+                dias.Add(newDiasSturno);
 
+                continue;
 
+            }
 
-        return await Task.FromResult(new ResponseType<ConsultaRecursoType>());
+            listRecursos.Add(new ConsultaRecursoType()
+            {
+                Colaborador = itemCliente.Nombres + " " + itemCliente.Apellidos,
+                Identificacion = itemCliente.Identificacion,
+                HTotalAsignadas = dias.Sum(x => Convert.ToDouble(x.HorasAsignadas)).ToString(),
+                HTotalPendiente = dias.Sum(x => Convert.ToDouble(x.HorasPendiente)).ToString(),
+                HTotalTrabajadas = dias.Sum(x => Convert.ToDouble(x.HorasTrabajada)).ToString(),
+                Dias = dias
+            });
+
+        }
+        return await Task.FromResult(new ResponseType<List<ConsultaRecursoType>>() { Data = listRecursos, Message = "Consulta Correcta", StatusCode = "000", Succeeded = true});
     }
 }

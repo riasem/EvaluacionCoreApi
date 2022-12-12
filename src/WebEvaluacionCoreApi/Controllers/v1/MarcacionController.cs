@@ -82,7 +82,7 @@ namespace WebEvaluacionCoreApi.Controllers.v1
 
 
         [HttpGet("ConsultaRecursos")]
-        [ProducesResponseType(typeof(ResponseType<ConsultaRecursoType>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ResponseType<List<ConsultaRecursoType>>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> ConsultaRecursos(string Identificacion, DateTime fechaDesde, DateTime fechasHasta, CancellationToken cancellationToken)
         {
