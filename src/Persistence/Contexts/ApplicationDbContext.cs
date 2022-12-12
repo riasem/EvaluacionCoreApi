@@ -1,6 +1,6 @@
-﻿using EnrolApp.Domain.Entities.Common;
-using EnrolApp.Domain.Entities.Horario;
+﻿using EnrolApp.Domain.Entities.Horario;
 using EvaluacionCore.Domain.Entities.Asistencia;
+using EvaluacionCore.Domain.Entities.Calendario;
 using EvaluacionCore.Domain.Entities.Common;
 using EvaluacionCore.Domain.Entities.Justificacion;
 using EvaluacionCore.Domain.Entities.Permisos;
@@ -26,6 +26,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<TipoTurno> TipoTurnos { get; set; }
     public DbSet<Cliente> Clientes { get; set; }
     public DbSet<Turno> Turnos { get; set; }
+    public DbSet<Calendario> Calendarios { get; set; }
+    public DbSet<CiudadPais> CiudadPais { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>

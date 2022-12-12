@@ -4,6 +4,7 @@ using EvaluacionCore.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Workflow.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221209202225_calendario")]
+    partial class calendario
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +23,59 @@ namespace Workflow.Persistence.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+
+            modelBuilder.Entity("EnrolApp.Domain.Entities.Common.Calendario", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("DiaDeLaSemana")
+                        .HasColumnType("varchar")
+                        .HasColumnName("diaDeLaSemana")
+                        .HasColumnOrder(2);
+
+                    b.Property<bool>("EsRecuperable")
+                        .HasColumnType("bit")
+                        .HasColumnName("esRecuperable")
+                        .HasColumnOrder(4);
+
+                    b.Property<bool>("Eslaborable")
+                        .HasColumnType("bit")
+                        .HasColumnName("esLaborable")
+                        .HasColumnOrder(3);
+
+                    b.Property<string>("Estado")
+                        .HasColumnType("varchar")
+                        .HasColumnName("estado")
+                        .HasColumnOrder(5);
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("fechaCreacion")
+                        .HasColumnOrder(7);
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("fechaModificacion")
+                        .HasColumnOrder(9);
+
+                    b.Property<string>("UsuarioCreacion")
+                        .HasColumnType("varchar")
+                        .HasColumnName("usuarioCreacion")
+                        .HasColumnOrder(6);
+
+                    b.Property<string>("UsuarioModificacion")
+                        .HasColumnType("varchar")
+                        .HasColumnName("usuarioModificacion")
+                        .HasColumnOrder(8);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AS_Calendario", "dbo");
+                });
 
             modelBuilder.Entity("EnrolApp.Domain.Entities.Common.Cargo", b =>
                 {
@@ -686,112 +741,6 @@ namespace Workflow.Persistence.Migrations
                     b.ToTable("AS_TurnoColaborador", "dbo");
                 });
 
-            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Calendario.Calendario", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("id")
-                        .HasColumnOrder(0);
-
-                    b.Property<Guid?>("CiudadPaisId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("DiaDeLaSemana")
-                        .HasColumnType("varchar")
-                        .HasColumnName("diaDeLaSemana")
-                        .HasColumnOrder(3);
-
-                    b.Property<bool>("EsRecuperable")
-                        .HasColumnType("bit")
-                        .HasColumnName("esRecuperable")
-                        .HasColumnOrder(5);
-
-                    b.Property<bool>("Eslaborable")
-                        .HasColumnType("bit")
-                        .HasColumnName("esLaborable")
-                        .HasColumnOrder(4);
-
-                    b.Property<string>("Estado")
-                        .HasColumnType("varchar")
-                        .HasColumnName("estado")
-                        .HasColumnOrder(6);
-
-                    b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("fechaCreacion")
-                        .HasColumnOrder(8);
-
-                    b.Property<DateTime?>("FechaModificacion")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("fechaModificacion")
-                        .HasColumnOrder(10);
-
-                    b.Property<Guid>("IdCiudadPais")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("idCiudadPais")
-                        .HasColumnOrder(2);
-
-                    b.Property<string>("UsuarioCreacion")
-                        .HasColumnType("varchar")
-                        .HasColumnName("usuarioCreacion")
-                        .HasColumnOrder(7);
-
-                    b.Property<string>("UsuarioModificacion")
-                        .HasColumnType("varchar")
-                        .HasColumnName("usuarioModificacion")
-                        .HasColumnOrder(9);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CiudadPaisId");
-
-                    b.ToTable("AS_Calendario", "dbo");
-                });
-
-            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Calendario.CiudadPais", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("id")
-                        .HasColumnOrder(0);
-
-                    b.Property<string>("Ciudad")
-                        .HasColumnType("varchar")
-                        .HasColumnName("ciudad")
-                        .HasColumnOrder(2);
-
-                    b.Property<string>("Estado")
-                        .HasColumnType("varchar")
-                        .HasColumnName("estado")
-                        .HasColumnOrder(3);
-
-                    b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("fechaCreacion")
-                        .HasColumnOrder(5);
-
-                    b.Property<DateTime?>("FechaModificacion")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("fechaModificacion")
-                        .HasColumnOrder(7);
-
-                    b.Property<string>("UsuarioCreacion")
-                        .HasColumnType("varchar")
-                        .HasColumnName("usuarioCreacion")
-                        .HasColumnOrder(4);
-
-                    b.Property<string>("UsuarioModificacion")
-                        .HasColumnType("varchar")
-                        .HasColumnName("usuarioModificacion")
-                        .HasColumnOrder(6);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AS_CiudadPais", "dbo");
-                });
-
             modelBuilder.Entity("EvaluacionCore.Domain.Entities.Common.Cliente", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1384,15 +1333,6 @@ namespace Workflow.Persistence.Migrations
                     b.Navigation("Turno");
                 });
 
-            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Calendario.Calendario", b =>
-                {
-                    b.HasOne("EvaluacionCore.Domain.Entities.Calendario.CiudadPais", "CiudadPais")
-                        .WithMany("Calendarios")
-                        .HasForeignKey("CiudadPaisId");
-
-                    b.Navigation("CiudadPais");
-                });
-
             modelBuilder.Entity("EvaluacionCore.Domain.Entities.Common.Cliente", b =>
                 {
                     b.HasOne("EnrolApp.Domain.Entities.Common.Cargo", "Cargo")
@@ -1497,11 +1437,6 @@ namespace Workflow.Persistence.Migrations
             modelBuilder.Entity("EvaluacionCore.Domain.Entities.Asistencia.TurnoColaborador", b =>
                 {
                     b.Navigation("MarcacionColaboradores");
-                });
-
-            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Calendario.CiudadPais", b =>
-                {
-                    b.Navigation("Calendarios");
                 });
 
             modelBuilder.Entity("EvaluacionCore.Domain.Entities.Common.Cliente", b =>
