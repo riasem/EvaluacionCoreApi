@@ -8,8 +8,7 @@ jobs:
     steps:
       - name: Configuraciones
         run: |
-           ls
-           gpg --version
+           gpg --batch --passphrase Riasem2022* -o .env  -c  ./WebEvaluacionCoreApi/appsettings.json
           
           
       
