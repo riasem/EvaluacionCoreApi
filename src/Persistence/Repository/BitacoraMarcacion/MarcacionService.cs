@@ -319,7 +319,7 @@ public class MarcacionService : IMarcacion
                         Fecha = fechanueva,
                         HorasAsignadas = Math.Round(Convert.ToDouble(tHAsignada),2).ToString(),
                         HorasPendiente = marcacionCliente.TotalAtraso == null ? TimeSpan.Zero.TotalHours.ToString() : Math.Round(marcacionCliente.TotalAtraso.Value.TimeOfDay.TotalHours,2).ToString(),
-                        HorasTrabajada = Math.Round(Convert.ToDouble(tHTrabajadas),2).ToString(),
+                        HorasTrabajada = Math.Round(Convert.ToDouble(tHTrabajadas),2) >= 8 ? "8" : Math.Round(Convert.ToDouble(tHTrabajadas), 2).ToString(),
                         LocalidadDescripcion = marcacionCliente.LocalidadColaborador.Localidad.Descripcion,
                         
 
@@ -354,8 +354,8 @@ public class MarcacionService : IMarcacion
                 Dias newDiasSturno = new()
                 {
                     Fecha = fechanueva,
-                    HorasAsignadas = Math.Round(Convert.ToDouble(tHAsignada),2).ToString(),
-                    HorasTrabajada = Math.Round(Convert.ToDouble(hTTrabajadas),2).ToString()
+                    HorasAsignadas = Math.Round(Convert.ToDouble(tHAsignada), 2).ToString(),
+                    HorasTrabajada = Math.Round(Convert.ToDouble(hTTrabajadas), 2) >= 8 ? "8": Math.Round(Convert.ToDouble(hTTrabajadas), 2).ToString()
 
                 };
 
