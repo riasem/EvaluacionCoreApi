@@ -8,8 +8,8 @@ jobs:
     steps:
       - name: Configuraciones
         run: |
-          echo ls
-          echo gpg --version
+           ls
+           gpg --version
           
           
       
