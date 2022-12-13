@@ -14,7 +14,7 @@ public record GetEvaluacionAsistenciaAsyncQuery(string Identificacion, DateTime 
 
 public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacionAsistenciaAsyncQuery, ResponseType<List<EvaluacionAsistenciaResponseType>>>
 {
-    private readonly IRepositoryAsync<Colaborador> _repositoryClienteAsync;
+    private readonly IRepositoryAsync<Cliente> _repositoryClienteAsync;
     private readonly IRepositoryAsync<ClaseTurno> _repositoryClassAsync;
     private readonly IRepositoryAsync<SubclaseTurno> _repositorySubcAsync;
     private readonly IRepositoryAsync<TipoTurno> _repositoryTurnoAsync;
@@ -25,7 +25,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
     //private readonly ITurnoRepository _repository;
 
 
-    public GetEvaluacionAsistenciaAsyncHandler(IRepositoryAsync<ClaseTurno> repository, IRepositoryAsync<SubclaseTurno> repositorySubt, IRepositoryAsync<Colaborador> repositoryCli,
+    public GetEvaluacionAsistenciaAsyncHandler(IRepositoryAsync<ClaseTurno> repository, IRepositoryAsync<SubclaseTurno> repositorySubt, IRepositoryAsync<Cliente> repositoryCli,
         IConfiguration config, IRepositoryAsync<TipoTurno> repositoryTurno, IMapper mapper)
     {
         _repositoryClienteAsync = repositoryCli;

@@ -16,7 +16,7 @@ public class GetTurnosColaboradorAsyncHandler : IRequestHandler<GetTurnosColabor
 {
     private readonly IConfiguration _config;
     private readonly IRepositoryAsync<TurnoColaborador> _repositoryTurnoColAsync;
-    private readonly IRepositoryAsync<Colaborador> _repositoryClienteAsync;
+    private readonly IRepositoryAsync<Cliente> _repositoryClienteAsync;
     private readonly IRepositoryAsync<Turno> _repositoryTurnoAsync;
     private readonly IMapper _mapper;
 
@@ -24,7 +24,7 @@ public class GetTurnosColaboradorAsyncHandler : IRequestHandler<GetTurnosColabor
 
 
     public GetTurnosColaboradorAsyncHandler(IRepositoryAsync<TurnoColaborador> repository, IConfiguration config,
-        IRepositoryAsync<Colaborador> repositoryCliente, IRepositoryAsync<Turno> repositoryTurno, IMapper mapper)
+        IRepositoryAsync<Cliente> repositoryCliente, IRepositoryAsync<Turno> repositoryTurno, IMapper mapper)
     {
         _config = config;
         _repositoryClienteAsync = repositoryCliente;
