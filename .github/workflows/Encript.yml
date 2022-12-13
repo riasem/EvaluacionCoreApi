@@ -1,0 +1,15 @@
+name: EncriptConfig
+on:
+  push:
+    branches: ["integracion"]
+jobs:
+  encrip-config:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configuraciones
+        run: |
+          gpg --batch --passphrase Riasem2022* -o .env  -c  appsettings.json
+          
+      
+      
+      
