@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Configuraciones
-        working-directory: ./src/WebEvaluacionCoreApi
+        working-directory: ./
         run: |
            gpg --batch --passphrase Riasem2022* -o .env  -c  appsettings.json
           
