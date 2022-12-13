@@ -72,9 +72,9 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
             Solicitud solicitud = new()
             {
                 IdSolicitud = Guid.Parse("e44ef4e9-2a45-4bdd-9ade-654d4e73f756"),
-                IdTipoSolicitud =  Guid.Parse("de4d17bd-9f03-4ccb-a3c0-3f37629cea6a"),
+                IdTipoSolicitud = Guid.Parse("de4d17bd-9f03-4ccb-a3c0-3f37629cea6a"),
                 TipoSolicitud = "JUS"
-                
+
             };
 
             listaEvaluacionAsistencia.Add(new EvaluacionAsistenciaResponseType()
@@ -89,11 +89,23 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                 Novedad = "ATRASO DE 20 MINUTOS",
                 TurnoLaboral = turnoLaboral,
                 TurnoReceso = turnoReceso,
-                Solicitudes = new Solicitud()
+                Solicitudes = new List<Solicitud>()
                 {
+                    new Solicitud() {
                     IdSolicitud = Guid.Parse("C4F73AC0-22B2-468D-8FAA-9B0C3FA4630E"),
                     IdTipoSolicitud = Guid.Parse("26a08ec8-40fe-435c-8655-3f570278879e"),
                     TipoSolicitud = "VAC"
+                    },
+                    new Solicitud {
+                    IdSolicitud = Guid.Parse("8f687fd0-35fe-4073-afb0-b30727ba92cc"),
+                    IdTipoSolicitud = Guid.Parse("de4d17bd-9f03-4ccb-a3c0-3f37629cea6a"),
+                    TipoSolicitud = "PER"
+                    },
+                    new Solicitud {
+                    IdSolicitud = Guid.Parse("50df8f46-cb38-4218-8853-54dd2e0dfde3"),
+                    IdTipoSolicitud = Guid.Parse("16d8e575-51a2-442d-889c-1e93e9f786b2"),
+                    TipoSolicitud = "JUS"
+                    }
                 }
             });
 
@@ -109,11 +121,18 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                 Novedad = "ATRASO DE 20 MINUTOS",
                 TurnoLaboral = turnoLaboral,
                 TurnoReceso = turnoReceso,
-                Solicitudes = new Solicitud()
+                Solicitudes = new List<Solicitud>()
                 {
+                    new Solicitud {
                     IdSolicitud = Guid.Parse("FCD3DA80-038C-4718-8A53-0A086072D34A"),
                     IdTipoSolicitud = Guid.Parse("de4d17bd-9f03-4ccb-a3c0-3f37629cea6a"),
                     TipoSolicitud = "PER"
+                    },
+                    new Solicitud {
+                    IdSolicitud = Guid.Parse("d4cea4c0-7a85-4a87-a866-8fcfbbc97ea3"),
+                    IdTipoSolicitud = Guid.Parse("16d8e575-51a2-442d-889c-1e93e9f786b2"),
+                    TipoSolicitud = "JUS"
+                    }
                 }
             });
 
@@ -129,7 +148,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                 Novedad = "ATRASO DE 20 MINUTOS",
                 TurnoLaboral = turnoLaboral,
                 TurnoReceso = turnoReceso,
-                Solicitudes = solicitud
+                Solicitudes = new List<Solicitud>() { solicitud }
             });
 
             listaEvaluacionAsistencia.Add(new EvaluacionAsistenciaResponseType()
@@ -144,7 +163,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                 Novedad = "ATRASO DE 20 MINUTOS",
                 TurnoLaboral = turnoLaboral,
                 TurnoReceso = turnoReceso,
-                Solicitudes = solicitud
+                Solicitudes = new List<Solicitud>() { solicitud }
             });
 
             return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = listaEvaluacionAsistencia, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
