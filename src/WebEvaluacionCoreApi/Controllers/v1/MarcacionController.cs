@@ -71,6 +71,7 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpPost("GenerarMarcacion")]
+        [EnableCors("AllowOrigin")]
         [ProducesResponseType(typeof(ResponseType<MarcacionResponseType>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateMarcacion([FromBody] CreateMarcacionRequest request, CancellationToken cancellationToken)
@@ -90,6 +91,7 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpGet("ConsultaRecursos")]
+        [EnableCors("AllowOrigin")]
         [ProducesResponseType(typeof(ResponseType<List<ConsultaRecursoType>>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> ConsultaRecursos(Guid IdCliente, DateTime fechaDesde, DateTime fechasHasta, CancellationToken cancellationToken)
