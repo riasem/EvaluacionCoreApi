@@ -72,7 +72,7 @@ public class MarcacionService : IMarcacion
 
                 AccMonitorLog accMonitorLog = new()
                 {
-                    Id = 8983877 + 1,
+                    //Id = 8983877 + 1,
                     State = 0,
                     Time = DateTime.Now,
                     Pin = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.CodigoConvivencia,
@@ -106,10 +106,10 @@ public class MarcacionService : IMarcacion
                     var turnoEntrada = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.Entrada.TimeOfDay.ToString());
                     var turnoSalida = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.Salida.TimeOfDay.ToString());
 
-                    var mEntradaPre = DateTime.Now.AddMinutes(- Convert.ToDouble(itemTurno.Turno.MargenEntradaPrevio));
-                    var mSalidaPos = DateTime.Now.AddMinutes(Convert.ToDouble(itemTurno.Turno.MargenSalidaPosterior));
-                    var mEntradaGra = DateTime.Now.AddDays(Convert.ToDouble(itemTurno.Turno.MargenEntradaGracia));
-                    var mSalidaGra = DateTime.Now.AddDays(-Convert.ToDouble(itemTurno.Turno.MargenSalidaGracia));
+                    var mEntradaPre = turnoEntrada.AddMinutes(- Convert.ToDouble(itemTurno.Turno.MargenEntradaPrevio));
+                    var mEntradaGra = turnoEntrada.AddDays(Convert.ToDouble(itemTurno.Turno.MargenEntradaGracia));
+                    var mSalidaPos = turnoSalida.AddMinutes(Convert.ToDouble(itemTurno.Turno.MargenSalidaPosterior));
+                    var mSalidaGra = turnoSalida.AddDays(-Convert.ToDouble(itemTurno.Turno.MargenSalidaGracia));
 
                     //var mEntrada = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenEntradaPrevio.TimeOfDay.ToString());
                     //var mSalida = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenSalida.TimeOfDay.ToString());
@@ -123,7 +123,7 @@ public class MarcacionService : IMarcacion
                     {
                         idturnovalidado = itemTurno.Id;
                         tipoMarcacion = "E";
-                        codigoMarcacion = "10";
+                        codigoMarcacion = itemTurno.Turno.ClaseTurno.CodigoClaseturno == "LABORA" ? "10" : "14";
                         estadoMarcacion = marcacionColaborador < turnoEntrada && marcacionColaborador <= mEntradaGra ? "C" : "AI";
                         countMarcacion = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(mEntradaPre, mEntradaGra, tipoMarcacion, objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
                         break;
@@ -133,7 +133,7 @@ public class MarcacionService : IMarcacion
                     {
                         idturnovalidado = itemTurno.Id;
                         tipoMarcacion = "S";
-                        codigoMarcacion = "11";
+                        codigoMarcacion = itemTurno.Turno.ClaseTurno.CodigoClaseturno == "LABORA" ? "11" : "15";
                         estadoMarcacion = marcacionColaborador > turnoSalida && marcacionColaborador > mSalidaGra ? "C" : "SI";
                         countMarcacion = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(mSalidaGra, mSalidaPos, tipoMarcacion, objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
                         countMarcacionEntrada = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(mEntradaPre, mEntradaGra, tipoMarcacion, objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
