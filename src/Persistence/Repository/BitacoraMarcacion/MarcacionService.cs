@@ -140,6 +140,16 @@ public class MarcacionService : IMarcacion
                         marcacionColaboradorS = await _repoMarcacionCola.FirstOrDefaultAsync(new MarcacionByColaborador(objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id, marcacionColaborador), cancellationToken);
                         break;
                     }
+                    else
+                    {
+                        var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
+                        if (objResultado is null)
+                        {
+                            return new ResponseType<MarcacionResponseType>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
+                        }
+
+                        return new ResponseType<MarcacionResponseType>() { Message = "Su marcación se ingreso correctamente.", StatusCode = "100", Succeeded = true };
+                    }
                 }
 
                 if (idturnovalidado == Guid.Empty && tipoMarcacion == string.Empty && estadoMarcacion == string.Empty) return new ResponseType<MarcacionResponseType>() { Message = "Actualmente no tiene turno de Entrada/Salida", StatusCode = "101", Succeeded = true };
