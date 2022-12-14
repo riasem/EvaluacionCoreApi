@@ -28,6 +28,7 @@ public class MarcacionService : IMarcacion
     private readonly IRepositoryGRiasemAsync<UserInfo> _repoUserInfoAsync;
     private readonly IRepositoryGRiasemAsync<CheckInOut> _repoCheckInOutAsync;
     private readonly IRepositoryGRiasemAsync<AccMonitorLog> _repoMonitorLogAsync;
+    private readonly IRepositoryGRiasemAsync<AccMonitoLogRiasem> _repoMonitoLogRiasemAsync;
     private readonly IRepositoryAsync<Localidad> _repoLocalidad;
     private readonly IRepositoryAsync<Cliente> _repoCliente;
     private readonly IRepositoryAsync<TurnoColaborador> _repoTurnoCola;
@@ -41,7 +42,8 @@ public class MarcacionService : IMarcacion
         IRepositoryAsync<Localidad> repoLocalidad,ILogger<MarcacionColaborador> log, 
         IRepositoryAsync<TurnoColaborador> repoTurnoCola, IConfiguration config, 
         IRepositoryAsync<MarcacionColaborador> repoMarcacionCola, IRepositoryGRiasemAsync<AccMonitorLog> repoMonitorLogAsync,
-        IRepositoryAsync<Cliente> repoCliente)
+        IRepositoryAsync<Cliente> repoCliente,
+        IRepositoryGRiasemAsync<AccMonitoLogRiasem> repoMonitoLogRiasemAsync)
     {
         _repoUserInfoAsync = repoUserInfoAsync;
         _repoCheckInOutAsync = repoCheckInOutAsync;
@@ -53,225 +55,251 @@ public class MarcacionService : IMarcacion
         _repoTurnoCola = repoTurnoCola;
         _repoMonitorLogAsync = repoMonitorLogAsync;
         _repoCliente = repoCliente;
+        _repoMonitoLogRiasemAsync = repoMonitoLogRiasemAsync;
     }
-
     public async Task<ResponseType<MarcacionResponseType>> CreateMarcacion(CreateMarcacionRequest Request, CancellationToken cancellationToken)
     {
         try
         {
             var marcacionColaborador = DateTime.Now;
+            MarcacionResponseType objResultFinal = new();
             var objLocalidad = await _repoLocalidad.FirstOrDefaultAsync(new GetLocalidadByIdSpec(Request.LocalidadId, Request.CodigoEmpleado), cancellationToken);
 
-            if (objLocalidad == null) return new ResponseType<MarcacionResponseType>(){ Message = "Localidad incorrecta", Succeeded = true, StatusCode = "101" };
+            if (objLocalidad == null) return new ResponseType<MarcacionResponseType>() { Message = "Localidad incorrecta", Succeeded = true, StatusCode = "101" };
 
             //Validación de turno que corresponde
-            var objTurno = await _repoTurnoCola.ListAsync(new TurnosByIdClienteSpec(objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
+            //var objTurno = await _repoTurnoCola.ListAsync(new TurnosByIdClienteSpec(objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
 
             if (Request.DispositivoId == objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.DispositivoId)
             {
 
                 AccMonitorLog accMonitorLog = new()
                 {
-                    //Id = 8983877 + 1,
+                    //Id = objMonitorLog.Id + 1,
                     State = 0,
-                    Time = DateTime.Now,
+                    Time = marcacionColaborador,
                     Pin = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.CodigoConvivencia,
                     Device_Id = 999,
-                    Verified = 1,
+                    Verified = 0,
                     Device_Name = "EnrolApp",
                     Status = 1
                 };
 
-                if (!objTurno.Any())
+                var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
+                if (objResultado is null)
                 {
-                    var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
-                    if (objResultado is null)
-                    {
-                        return new ResponseType<MarcacionResponseType>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
-                    }
-
-                    return new ResponseType<MarcacionResponseType>() { Message = "Su marcación se ingreso correctamente, por el momento no tiene turno asignado por favor comunicar a su superior que le asigne", StatusCode = "100", Succeeded = true };
+                    return new ResponseType<MarcacionResponseType>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true, };
                 }
 
-                Guid? idturnovalidado = Guid.Empty;
-                var tipoMarcacion = string.Empty;
-                var codigoMarcacion = string.Empty;
-                var estadoMarcacion = string.Empty;
-                var countMarcacion = 0;
-                var countMarcacionEntrada = 0;
-                MarcacionColaborador marcacionColaboradorS = new();
+                var objMarcacion = await _repoMonitoLogRiasemAsync.ListAsync(cancellationToken);
 
-                foreach (var itemTurno in objTurno)
+                var marcacionEmpl = objMarcacion.Where(e => e.Time == marcacionColaborador && e.Device_Id == 999 && e.Device_Name.Contains("EnrolApp")).FirstOrDefault();
+
+                if (marcacionEmpl is not null)
                 {
-                    var turnoEntrada = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.Entrada.TimeOfDay.ToString());
-                    var turnoSalida = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.Salida.TimeOfDay.ToString());
+                    string tipoMarcacion = EvaluaTipoMarcacion(marcacionEmpl.State);
+                    string estadoMarcacion = EvaluaEstadoMarcacion(marcacionEmpl.Description);
 
-                    var mEntradaPre = turnoEntrada.AddMinutes(- Convert.ToDouble(itemTurno.Turno.MargenEntradaPrevio));
-                    var mEntradaGra = turnoEntrada.AddDays(Convert.ToDouble(itemTurno.Turno.MargenEntradaGracia));
-                    var mSalidaPos = turnoSalida.AddMinutes(Convert.ToDouble(itemTurno.Turno.MargenSalidaPosterior));
-                    var mSalidaGra = turnoSalida.AddDays(-Convert.ToDouble(itemTurno.Turno.MargenSalidaGracia));
-
-                    //var mEntrada = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenEntradaPrevio.TimeOfDay.ToString());
-                    //var mSalida = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenSalida.TimeOfDay.ToString());
-                    //var margenEPre = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenEntradaPrevio);
-                    //var margenEPos = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenEntradaPosterior);
-                    //var margenSPre = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenSalidaPrevio);
-                    //var margenSPos = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenSalidaPosterior);
-                    
-
-                    if (marcacionColaborador >= mEntradaPre && marcacionColaborador <= mEntradaGra)
+                    objResultFinal = new()
                     {
-                        idturnovalidado = itemTurno.Id;
-                        tipoMarcacion = "E";
-                        codigoMarcacion = itemTurno.Turno.ClaseTurno.CodigoClaseturno == "LABORA" ? "10" : "14";
-                        estadoMarcacion = marcacionColaborador < turnoEntrada && marcacionColaborador <= mEntradaGra ? "C" : "AI";
-                        countMarcacion = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(mEntradaPre, mEntradaGra, tipoMarcacion, objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
-                        break;
-
-                    }
-                    else if (marcacionColaborador >= mSalidaGra && marcacionColaborador <= mSalidaPos)
-                    {
-                        idturnovalidado = itemTurno.Id;
-                        tipoMarcacion = "S";
-                        codigoMarcacion = itemTurno.Turno.ClaseTurno.CodigoClaseturno == "LABORA" ? "11" : "15";
-                        estadoMarcacion = marcacionColaborador > turnoSalida && marcacionColaborador > mSalidaGra ? "C" : "SI";
-                        countMarcacion = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(mSalidaGra, mSalidaPos, tipoMarcacion, objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
-                        countMarcacionEntrada = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(mEntradaPre, mEntradaGra, tipoMarcacion, objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
-                        marcacionColaboradorS = await _repoMarcacionCola.FirstOrDefaultAsync(new MarcacionByColaborador(objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id, marcacionColaborador), cancellationToken);
-                        break;
-                    }
-                    else
-                    {
-                        var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
-                        if (objResultado is null)
-                        {
-                            return new ResponseType<MarcacionResponseType>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
-                        }
-
-                        return new ResponseType<MarcacionResponseType>() { Message = "Su marcación se ingreso correctamente.", StatusCode = "100", Succeeded = true };
-                    }
+                        //MarcacionId = Guid.Parse(marcacionid),  TEMPORAL SE COMENTA HASTA REGULARIZAR 
+                        MarcacionId = marcacionEmpl.Id,
+                        TipoMarcacion = tipoMarcacion,
+                        EstadoMarcacion = estadoMarcacion
+                    };
+                }
+                else
+                {
+                    objResultFinal = null;
                 }
 
-                if (idturnovalidado == Guid.Empty && tipoMarcacion == string.Empty && estadoMarcacion == string.Empty) return new ResponseType<MarcacionResponseType>() { Message = "Actualmente no tiene turno de Entrada/Salida", StatusCode = "101", Succeeded = true };
 
-                #region "Codigo Comentado"
-                //var userInfo = await _repoUserInfoAsync.FirstOrDefaultAsync(new UserMarcacionByCodigoSpec(Request.CodigoEmpleado), cancellationToken);
-                //if (userInfo is null)
+                return new ResponseType<MarcacionResponseType>() { Data = objResultFinal, Message = "Marcación registrada correctamente", StatusCode = "100", Succeeded = true };
+
+                //if (!objTurno.Any())
                 //{
-                //    UserInfo objUserInfo = new()
+                //    var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
+                //    if (objResultado is null)
                 //    {
-                //        Badgenumber = Request.CodigoEmpleado,
-                //        Ssn = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Identificacion,
-                //        Name = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Nombres,
-                //        LastName = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Apellidos,
-                //        //DefaultDeptId = ObjClient.Cargo.DepartamentoId.ToString(),
-                //        CreateOperator = "Admin",
-                //        CreateTime = DateTime.Now
-                //    };
+                //        return new ResponseType<MarcacionResponseType>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
+                //    }
 
-                //    userInfo = await _repoUserInfoAsync.AddAsync(objUserInfo, cancellationToken);
+                //    return new ResponseType<MarcacionResponseType>() { Message = "Su marcación se ingreso correctamente, por el momento no tiene turno asignado por favor comunicar a su superior que le asigne", StatusCode = "100", Succeeded = true };
                 //}
 
-                //var countMarcacionCheck = await _repoMonitorLogAsync.CountAsync(new MarcacionByUserIdSpec(objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.CodigoConvivencia), cancellationToken);
+                #region COMENTADO KPI 1412
+                //Guid? idturnovalidado = Guid.Empty;
+                //var tipoMarcacion = string.Empty;
+                //var codigoMarcacion = string.Empty;
+                //var estadoMarcacion = string.Empty;
+                //var countMarcacion = 0;
+                //var countMarcacionEntrada = 0;
+                //MarcacionColaborador marcacionColaboradorS = new();
 
-                //CheckInOut entityCheck = new()
+                //foreach (var itemTurno in objTurno)
                 //{
-                //    UserId = userInfo.UserId,
-                //    CheckTime = DateTime.Now,
-                //    CheckType = countMarcacionCheck == 0 ? "I" : "O",
-                //    Sn = Request.DispositivoId
-                //};
+                //    var turnoEntrada = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.Entrada.TimeOfDay.ToString());
+                //    var turnoSalida = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.Salida.TimeOfDay.ToString());
+
+                //    var mEntradaPre = DateTime.Now.AddMinutes(-Convert.ToDouble(itemTurno.Turno.MargenEntradaPrevio));
+                //    var mSalidaPos = DateTime.Now.AddMinutes(Convert.ToDouble(itemTurno.Turno.MargenSalidaPosterior));
+                //    var mEntradaGra = DateTime.Now.AddDays(Convert.ToDouble(itemTurno.Turno.MargenEntradaGracia));
+                //    var mSalidaGra = DateTime.Now.AddDays(-Convert.ToDouble(itemTurno.Turno.MargenSalidaGracia));
+
+                //    //var mEntrada = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenEntradaPrevio.TimeOfDay.ToString());
+                //    //var mSalida = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenSalida.TimeOfDay.ToString());
+                //    //var margenEPre = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenEntradaPrevio);
+                //    //var margenEPos = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenEntradaPosterior);
+                //    //var margenSPre = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenSalidaPrevio);
+                //    //var margenSPos = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-dd") + " " + itemTurno.Turno.MargenSalidaPosterior);
 
 
-                //var objResult = await _repoCheckInOutAsync.AddAsync(entityCheck,cancellationToken);
+                //    if (marcacionColaborador >= mEntradaPre && marcacionColaborador <= mEntradaGra)
+                //    {
+                //        idturnovalidado = itemTurno.Id;
+                //        tipoMarcacion = "E";
+                //        codigoMarcacion = "10";
+                //        estadoMarcacion = marcacionColaborador < turnoEntrada && marcacionColaborador <= mEntradaGra ? "C" : "AI";
+                //        countMarcacion = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(mEntradaPre, mEntradaGra, tipoMarcacion, objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
+                //        break;
 
-                //var objMonitorLog =  await _repoMonitorLogAsync.FirstOrDefaultAsync(new MarcacionByMaxIdSpec());
+                //    }
+                //    else if (marcacionColaborador >= mSalidaGra && marcacionColaborador <= mSalidaPos)
+                //    {
+                //        idturnovalidado = itemTurno.Id;
+                //        tipoMarcacion = "S";
+                //        codigoMarcacion = "11";
+                //        estadoMarcacion = marcacionColaborador > turnoSalida && marcacionColaborador > mSalidaGra ? "C" : "SI";
+                //        countMarcacion = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(mSalidaGra, mSalidaPos, tipoMarcacion, objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
+                //        countMarcacionEntrada = await _repoMarcacionCola.CountAsync(new MarcacionByMargen(mEntradaPre, mEntradaGra, tipoMarcacion, objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
+                //        marcacionColaboradorS = await _repoMarcacionCola.FirstOrDefaultAsync(new MarcacionByColaborador(objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id, marcacionColaborador), cancellationToken);
+                //        break;
+                //    }
+                //}
 
+                //if (idturnovalidado == Guid.Empty && tipoMarcacion == string.Empty && estadoMarcacion == string.Empty) return new ResponseType<MarcacionResponseType>() { Message = "Actualmente no tiene turno de Entrada/Salida", StatusCode = "101", Succeeded = true };
+
+                //#region "Codigo Comentado"
+                ////var userInfo = await _repoUserInfoAsync.FirstOrDefaultAsync(new UserMarcacionByCodigoSpec(Request.CodigoEmpleado), cancellationToken);
+                ////if (userInfo is null)
+                ////{
+                ////    UserInfo objUserInfo = new()
+                ////    {
+                ////        Badgenumber = Request.CodigoEmpleado,
+                ////        Ssn = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Identificacion,
+                ////        Name = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Nombres,
+                ////        LastName = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Apellidos,
+                ////        //DefaultDeptId = ObjClient.Cargo.DepartamentoId.ToString(),
+                ////        CreateOperator = "Admin",
+                ////        CreateTime = DateTime.Now
+                ////    };
+
+                ////    userInfo = await _repoUserInfoAsync.AddAsync(objUserInfo, cancellationToken);
+                ////}
+
+                ////var countMarcacionCheck = await _repoMonitorLogAsync.CountAsync(new MarcacionByUserIdSpec(objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.CodigoConvivencia), cancellationToken);
+
+                ////CheckInOut entityCheck = new()
+                ////{
+                ////    UserId = userInfo.UserId,
+                ////    CheckTime = DateTime.Now,
+                ////    CheckType = countMarcacionCheck == 0 ? "I" : "O",
+                ////    Sn = Request.DispositivoId
+                ////};
+
+
+                ////var objResult = await _repoCheckInOutAsync.AddAsync(entityCheck,cancellationToken);
+
+                ////var objMonitorLog =  await _repoMonitorLogAsync.FirstOrDefaultAsync(new MarcacionByMaxIdSpec());
+
+                //#endregion
+
+                //if (countMarcacion >= 1)
+                //{
+                //    return new ResponseType<MarcacionResponseType>() { Message = "Ya tiene una marcación registrada", StatusCode = "101", Succeeded = true };
+                //}
+                //accMonitorLog.State = Convert.ToInt32(codigoMarcacion);
+                //var objResult = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
+
+                //if (objResult is not null)
+                //{
+
+
+                //    if (tipoMarcacion == "S")
+                //    {
+                //        if (countMarcacionEntrada >= 1)
+                //        {
+                //            marcacionColaboradorS.SalidaEntrada = tipoMarcacion == "S" ? estadoMarcacion : null;
+                //            marcacionColaboradorS.UsuarioModificacion = "SYSTEM";
+                //            marcacionColaboradorS.FechaModificacion = DateTime.Now;
+                //            marcacionColaboradorS.MarcacionSalida = tipoMarcacion == "S" ? marcacionColaborador : null;
+                //            await _repoMarcacionCola.UpdateAsync(marcacionColaboradorS);
+
+                //            var marcacionid = marcacionColaboradorS.SalidaEntrada == "SI" ? marcacionColaboradorS.Id.ToString() : null;
+
+                //            MarcacionResponseType objResultFinal = new();
+                //            if (marcacionid != null)
+                //            {
+                //                objResultFinal = new()
+                //                {
+                //                    MarcacionId = Guid.Parse(marcacionid),
+                //                    TipoMarcacion = tipoMarcacion,
+                //                    EstadoMarcacion = estadoMarcacion
+                //                };
+                //            }
+                //            else
+                //            {
+                //                objResultFinal = null;
+                //            }
+
+                //            return new ResponseType<MarcacionResponseType>() { Data = objResultFinal, Message = "Marcación de Salida registrada correctamente", StatusCode = "100", Succeeded = true };
+                //        }
+                //    }
+
+                //    MarcacionColaborador objMarcacionColaborador = new()
+                //    {
+                //        IdTurnoColaborador = idturnovalidado,
+                //        IdLocalidadColaborador = objLocalidad.LocalidadColaboradores.ElementAt(0).Id,
+                //        MarcacionEntrada = tipoMarcacion == "E" ? marcacionColaborador : null,
+                //        MarcacionSalida = tipoMarcacion == "S" ? marcacionColaborador : null,
+                //        EstadoMarcacionEntrada = tipoMarcacion == "E" ? estadoMarcacion : null,
+                //        SalidaEntrada = tipoMarcacion == "S" ? estadoMarcacion : null,
+                //        EstadoProcesado = false,
+                //        UsuarioCreacion = "Admin",
+                //        FechaCreacion = DateTime.Now,
+                //    };
+
+                //    var objMarcacion = await _repoMarcacionCola.AddAsync(objMarcacionColaborador, cancellationToken);
+
+                //    if (objMarcacion is not null)
+                //    {
+                //        var tipoMarcaciontexto = tipoMarcacion == "S" ? "Salida" : "Entrada";
+                //        var marcacionid = objMarcacion.EstadoMarcacionEntrada == "AI" || objMarcacion.SalidaEntrada == "SI" || objMarcacion.EstadoMarcacionEntrada == null ? objMarcacion.Id.ToString() : null;
+                //        MarcacionResponseType objResultFinal = new();
+                //        if (marcacionid != null)
+                //        {
+                //            objResultFinal = new()
+                //            {
+                //                MarcacionId = Guid.Parse(marcacionid),
+                //                TipoMarcacion = tipoMarcacion,
+                //                EstadoMarcacion = estadoMarcacion
+                //            };
+                //        }
+                //        else
+                //        {
+                //            objResultFinal = null;
+                //        }
+
+
+                //        return new ResponseType<MarcacionResponseType>() { Data = objResultFinal, Message = "Marcación de " + tipoMarcaciontexto + " registrada correctamente", StatusCode = "100", Succeeded = true };
+                //    }
+                //}
+
+
+                //return new ResponseType<MarcacionResponseType>() { Message = "No se ha registrado la marcación", Succeeded = true, StatusCode = "101" };
                 #endregion
 
-                if (countMarcacion >= 1)
-                {
-                    return new ResponseType<MarcacionResponseType>() { Message = "Ya tiene una marcación registrada", StatusCode = "101", Succeeded = true };
-                }
-                accMonitorLog.State = Convert.ToInt32(codigoMarcacion);
-                var objResult = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
 
-                if (objResult is not null)
-                {
-
-
-                    if (tipoMarcacion == "S")
-                    {
-                        if (countMarcacionEntrada >= 1)
-                        {
-                            marcacionColaboradorS.SalidaEntrada = tipoMarcacion == "S" ? estadoMarcacion : null;
-                            marcacionColaboradorS.UsuarioModificacion = "SYSTEM";
-                            marcacionColaboradorS.FechaModificacion = DateTime.Now;
-                            marcacionColaboradorS.MarcacionSalida = tipoMarcacion == "S" ? marcacionColaborador : null;
-                            await _repoMarcacionCola.UpdateAsync(marcacionColaboradorS);
-                            
-                            var marcacionid = marcacionColaboradorS.SalidaEntrada == "SI" ? marcacionColaboradorS.Id.ToString() : null;
-
-                            MarcacionResponseType objResultFinal = new();
-                            if (marcacionid != null)
-                            {
-                                objResultFinal = new()
-                                {
-                                    MarcacionId = Guid.Parse(marcacionid),
-                                    TipoMarcacion = tipoMarcacion,
-                                    EstadoMarcacion = estadoMarcacion
-                                };
-                            }
-                            else
-                            {
-                                objResultFinal = null;
-                            }
-
-                            return new ResponseType<MarcacionResponseType>() {Data = objResultFinal,  Message = "Marcación de Salida registrada correctamente", StatusCode = "100", Succeeded = true };
-                        }
-                    }
-
-                    MarcacionColaborador objMarcacionColaborador = new()
-                    {
-                        IdTurnoColaborador = idturnovalidado,
-                        IdLocalidadColaborador = objLocalidad.LocalidadColaboradores.ElementAt(0).Id,
-                        MarcacionEntrada = tipoMarcacion == "E" ? marcacionColaborador : null,
-                        MarcacionSalida = tipoMarcacion == "S" ? marcacionColaborador : null,
-                        EstadoMarcacionEntrada = tipoMarcacion == "E" ? estadoMarcacion : null,
-                        SalidaEntrada = tipoMarcacion == "S" ? estadoMarcacion : null,
-                        EstadoProcesado = false,
-                        UsuarioCreacion = "Admin",
-                        FechaCreacion = DateTime.Now,
-                    };
-
-                    var objMarcacion = await _repoMarcacionCola.AddAsync(objMarcacionColaborador, cancellationToken);
-
-                    if (objMarcacion is not null)
-                    {
-                        var tipoMarcaciontexto = tipoMarcacion == "S" ? "Salida" : "Entrada";
-                        var marcacionid = objMarcacion.EstadoMarcacionEntrada == "AI" || objMarcacion.SalidaEntrada == "SI" || objMarcacion.EstadoMarcacionEntrada == null ? objMarcacion.Id.ToString() : null;
-                        MarcacionResponseType objResultFinal = new();
-                        if (marcacionid != null)
-                        {
-                            objResultFinal = new()
-                            {
-                                MarcacionId = Guid.Parse(marcacionid),
-                                TipoMarcacion = tipoMarcacion,
-                                EstadoMarcacion = estadoMarcacion
-                            };
-                        }
-                        else
-                        {
-                            objResultFinal = null;
-                        }
-
-
-                        return new ResponseType<MarcacionResponseType>() { Data = objResultFinal, Message = "Marcación de "+ tipoMarcaciontexto + " registrada correctamente", StatusCode = "100", Succeeded = true };
-                    }
-                }
-
-
-                return new ResponseType<MarcacionResponseType>() { Message = "No se ha registrado la marcación", Succeeded = true, StatusCode = "101" };
             }
             return new ResponseType<MarcacionResponseType>() { Message = "Debe marcar desde su dispositivo movil.", Succeeded = true, StatusCode = "101" };
 
@@ -279,13 +307,12 @@ public class MarcacionService : IMarcacion
         catch (Exception ex)
         {
             _log.LogError(ex, string.Empty);
-            return new ResponseType<MarcacionResponseType>(){ Message = CodeMessageResponse.GetMessageByCode("102"), StatusCode = "102", Succeeded = false };
-            
+            return new ResponseType<MarcacionResponseType>() { Message = CodeMessageResponse.GetMessageByCode("102"), StatusCode = "102", Succeeded = false };
+
         }
 
 
     }
-
 
     public  async Task<ResponseType<List<ConsultaRecursoType>>> ConsultarRecursos(Guid Identificacion, DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken)
     {
@@ -387,5 +414,49 @@ public class MarcacionService : IMarcacion
 
         }
         return await Task.FromResult(new ResponseType<List<ConsultaRecursoType>>() { Data = listRecursos, Message = "Consulta Correcta", StatusCode = "000", Succeeded = true});
+    }
+
+    public static string EvaluaTipoMarcacion(int state)
+    {
+        string tipoMarcacion = "";
+
+        switch (state)
+        {
+            case 10:
+                tipoMarcacion = "ENTRADA";
+                break;
+            case 11:
+                tipoMarcacion = "SALIDA";
+                break;
+            case 14:
+                tipoMarcacion = "ENTRADA RECESO";
+                break;
+            case 15:
+                tipoMarcacion = "RETORNO DEL RECESO";
+                break;
+            default:
+                break;
+        }
+        return tipoMarcacion;
+    }
+
+
+    public static string EvaluaEstadoMarcacion(string desciption)
+    {
+        string estadoMarcacion = "";
+
+        if (desciption.Contains("EXCEDIDO"))
+        {
+            estadoMarcacion = "ER";
+        }
+        else if(desciption.Contains("ATRASO"))
+        {
+            estadoMarcacion = "AI";
+        }
+        else if(desciption.Contains("SALIDA"))
+        {
+            estadoMarcacion = "SI";
+        }
+        return estadoMarcacion;
     }
 }

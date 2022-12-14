@@ -2,8 +2,8 @@
 
 namespace EvaluacionCore.Domain.Entities.Marcaciones;
 
-[Table("acc_monitor_log", Schema = "dbo")]
-public class AccMonitorLog
+[Table("acc_monito_log_riasem", Schema = "dbo")]
+public class AccMonitoLogRiasem
 {
     [Column("id",Order = 0, TypeName = "int")]
     public int Id { get; set; }
@@ -54,7 +54,7 @@ public class AccMonitorLog
     public int? Verified { get; set; }
 
     [Column("state", Order = 16)]
-    public int? State { get; set; }
+    public int State { get; set; }
 
     [Column("event_type", Order = 17)]
     public int? Event_Type { get; set; }
