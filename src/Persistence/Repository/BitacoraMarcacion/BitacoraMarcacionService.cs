@@ -9,7 +9,7 @@ using Dapper;
 using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetComboBitacoraMarcacion;
 
-namespace Workflow.Persistence.Repository.BitacoraMarcacion
+namespace EvaluacionCore.Persistence.Repository.BitacoraMarcacion
 {
     public class BitacoraMarcacionService : IBitacoraMarcacion
     {

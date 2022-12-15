@@ -18,8 +18,9 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Data;
+using EvaluacionCore.Application.Common.Interfaces;
 
-namespace Workflow.Persistence.Repository.BitacoraMarcacion;
+namespace EvaluacionCore.Persistence.Repository.BitacoraMarcacion;
 
 
 public class MarcacionService : IMarcacion

@@ -9,9 +9,9 @@ using EvaluacionCore.Persistence.Repository.Employees;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Workflow.Persistence.Contexts;
-using Workflow.Persistence.Repository;
-using Workflow.Persistence.Repository.BitacoraMarcacion;
+using EvaluacionCore.Persistence.Contexts;
+using EvaluacionCore.Persistence.Repository;
+using EvaluacionCore.Persistence.Repository.BitacoraMarcacion;
 using Workflow.Persistence.Repository.TurnosAsignadosExcel;
 
 namespace EvaluacionCore.Persistence;

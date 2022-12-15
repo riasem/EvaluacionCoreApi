@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Workflow.Persistence.Contexts
+namespace EvaluacionCore.Persistence.Contexts
 {
     public class ApplicationDbGRiasemContext : DbContext
     {

@@ -92,17 +92,17 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                 Solicitudes = new List<Solicitud>()
                 {
                     new Solicitud() {
-                    IdSolicitud = Guid.Parse("C4F73AC0-22B2-468D-8FAA-9B0C3FA4630E"),
+                    IdSolicitud = Guid.Parse("25BFCA79-A1B9-4EBD-8246-E92C08309047"),
                     IdTipoSolicitud = Guid.Parse("26a08ec8-40fe-435c-8655-3f570278879e"),
                     TipoSolicitud = "VAC"
                     },
                     new Solicitud {
-                    IdSolicitud = Guid.Parse("8f687fd0-35fe-4073-afb0-b30727ba92cc"),
+                    IdSolicitud = Guid.Parse("4FEE69CB-3BB1-4809-BF6F-963E7535EE5B"),
                     IdTipoSolicitud = Guid.Parse("de4d17bd-9f03-4ccb-a3c0-3f37629cea6a"),
                     TipoSolicitud = "PER"
                     },
                     new Solicitud {
-                    IdSolicitud = Guid.Parse("50df8f46-cb38-4218-8853-54dd2e0dfde3"),
+                    IdSolicitud = Guid.Parse("659F416C-F753-4000-EB45-08DADE2BEA25"),
                     IdTipoSolicitud = Guid.Parse("16d8e575-51a2-442d-889c-1e93e9f786b2"),
                     TipoSolicitud = "JUS"
                     }
@@ -124,12 +124,12 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                 Solicitudes = new List<Solicitud>()
                 {
                     new Solicitud {
-                    IdSolicitud = Guid.Parse("FCD3DA80-038C-4718-8A53-0A086072D34A"),
+                    IdSolicitud = Guid.Parse("4FEE69CB-3BB1-4809-BF6F-963E7535EE5B"),
                     IdTipoSolicitud = Guid.Parse("de4d17bd-9f03-4ccb-a3c0-3f37629cea6a"),
                     TipoSolicitud = "PER"
                     },
                     new Solicitud {
-                    IdSolicitud = Guid.Parse("d4cea4c0-7a85-4a87-a866-8fcfbbc97ea3"),
+                    IdSolicitud = Guid.Parse("659F416C-F753-4000-EB45-08DADE2BEA25"),
                     IdTipoSolicitud = Guid.Parse("16d8e575-51a2-442d-889c-1e93e9f786b2"),
                     TipoSolicitud = "JUS"
                     }
