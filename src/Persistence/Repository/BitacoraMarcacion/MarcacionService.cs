@@ -88,12 +88,12 @@ public class MarcacionService : IMarcacion
                 var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
                 if (objResultado is null)
                 {
-                    return new ResponseType<MarcacionResponseType>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true, };
+                    return new ResponseType<MarcacionResponseType>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
                 }
 
                 var objMarcacion = await _repoMonitoLogRiasemAsync.ListAsync(cancellationToken);
 
-                var marcacionEmpl = objMarcacion.Where(e => e.Time == marcacionColaborador && e.Device_Id == 999 && e.Device_Name.Contains("EnrolApp")).FirstOrDefault();
+                var marcacionEmpl = objMarcacion.Where(e => e.Device_Id == 999 && e.Pin == accMonitorLog.Pin).OrderByDescending(e => e.Time).FirstOrDefault();
 
                 if (marcacionEmpl is not null)
                 {
@@ -416,7 +416,7 @@ public class MarcacionService : IMarcacion
         return await Task.FromResult(new ResponseType<List<ConsultaRecursoType>>() { Data = listRecursos, Message = "Consulta Correcta", StatusCode = "000", Succeeded = true});
     }
 
-    public static string EvaluaTipoMarcacion(int state)
+    public static string EvaluaTipoMarcacion(int? state)
     {
         string tipoMarcacion = "";
 
