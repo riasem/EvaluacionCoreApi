@@ -2,6 +2,7 @@
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurno;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoColaborador;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoSubTurno;
+using EvaluacionCore.Application.Features.Turnos.Commands.GetTurnosAsignadosExcel;
 using EvaluacionCore.Application.Features.Turnos.Commands.InactivaTurnoColaborador;
 using EvaluacionCore.Application.Features.Turnos.Commands.UpdateTurnoColaborador;
 using EvaluacionCore.Application.Features.Turnos.Queries.GetMaestrosTurnoAsync;
@@ -35,7 +36,7 @@ public class TurnosController : ApiControllerBase
     {
         var objResult = await Mediator.Send(new CreateTurnoCommand(request), cancellationToken);
         return Ok(objResult);
-        
+
     }
 
     /// <summary>
@@ -86,7 +87,7 @@ public class TurnosController : ApiControllerBase
         var objResult = await Mediator.Send(new GetTurnosAsyncQuery(), cancellationToken);
         return Ok(objResult);
     }
-    
+
 
     /// <summary>
     /// Retorna el listado de maestros de turnos
@@ -174,5 +175,23 @@ public class TurnosController : ApiControllerBase
     //    return Ok(objResult);
     //}
 
+    [HttpGet("GetInfoTurnosAsignadosExcel")]
+    [EnableCors("AllowOrigin")]
+    [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetInfoTurnosAsignadosExcel(string codUdn, string codArea, string codScc, string fechaDesde, string fechaHasta, CancellationToken cancellationToken)
+    {
+        GetTurnosAsignadosExcelRequest request = new GetTurnosAsignadosExcelRequest
+        {
+            CodUdn = codUdn,
+            CodArea = codArea,
+            CodScc = codScc,
+            FechaDesde = fechaDesde,
+            FechaHasta = fechaHasta
+        };
+
+        var objResult = await Mediator.Send(new GetTurnosAsignadosExcelCommand(request), cancellationToken);
+        return Ok(objResult);
+    }
 
 }

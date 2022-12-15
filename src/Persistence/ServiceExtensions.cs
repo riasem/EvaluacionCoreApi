@@ -2,6 +2,7 @@
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Interfaces;
 using EvaluacionCore.Application.Features.EvalCore.Interfaces;
 using EvaluacionCore.Application.Features.Marcacion.Interfaces;
+using EvaluacionCore.Application.Features.Turnos.Interfaces;
 using EvaluacionCore.Persistence.Contexts;
 using EvaluacionCore.Persistence.Repository;
 using EvaluacionCore.Persistence.Repository.Employees;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Workflow.Persistence.Contexts;
 using Workflow.Persistence.Repository;
 using Workflow.Persistence.Repository.BitacoraMarcacion;
+using Workflow.Persistence.Repository.TurnosAsignadosExcel;
 
 namespace EvaluacionCore.Persistence;
 public static class ServiceExtensions
@@ -30,6 +32,7 @@ public static class ServiceExtensions
         services.AddTransient(typeof(IRepositoryGRiasemAsync<>), typeof(CustomRepositoryGRiasemAsync<>));
         //services.AddTransient<IAdjuntoService, AdjuntoService>();
         services.AddTransient<IBitacoraMarcacion, BitacoraMarcacionService>();
+        services.AddTransient<ITurnosAsignadosExcel, TurnosAsignadosExcelService>();
         services.AddTransient<IMarcacion, MarcacionService>();
         services.AddTransient<IEvaluacion, EvaluacionService>();
 
