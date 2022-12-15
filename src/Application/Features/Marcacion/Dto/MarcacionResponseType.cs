@@ -10,7 +10,10 @@ namespace EvaluacionCore.Application.Features.Marcacion.Dto;
 public class MarcacionResponseType
 {
     [JsonPropertyName("marcacionId")]
-    public Guid MarcacionId { get; set; }
+    public int MarcacionId { get; set; }
+
+    //[JsonPropertyName("codigoMarcacionId")]
+    //public int CodigoMarcacionId { get; set; }
 
     [JsonPropertyName("tipoMarcacion")]
     public string TipoMarcacion { get; set; }
