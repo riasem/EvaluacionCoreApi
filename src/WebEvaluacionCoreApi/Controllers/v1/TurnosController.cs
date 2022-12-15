@@ -175,17 +175,27 @@ public class TurnosController : ApiControllerBase
     //    return Ok(objResult);
     //}
 
+    /// <summary>
+    /// Consulta información generar archivos turnos asignados
+    /// </summary>
+    /// <param name="codUdn"></param>
+    /// <param name="codArea"></param>
+    /// <param name="codScc"></param>
+    /// <param name="fechaDesde"></param>
+    /// <param name="fechaHasta"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     [HttpGet("GetInfoTurnosAsignadosExcel")]
     [EnableCors("AllowOrigin")]
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
-    [AllowAnonymous]
-    public async Task<IActionResult> GetInfoTurnosAsignadosExcel(string codUdn, string codArea, string codScc, string fechaDesde, string fechaHasta, CancellationToken cancellationToken)
+    [Authorize]
+    public async Task<IActionResult> GetInfoTurnosAsignadosExcel(string codUdn, string codArea, string? codScc, string? fechaDesde, string fechaHasta, CancellationToken cancellationToken)
     {
         GetTurnosAsignadosExcelRequest request = new GetTurnosAsignadosExcelRequest
         {
             CodUdn = codUdn,
-            CodArea = codArea,
-            CodScc = codScc,
+            CodArea = string.IsNullOrEmpty(codArea) ? "" : codArea,
+            CodScc = string.IsNullOrEmpty(codScc) ? "" : codScc,
             FechaDesde = fechaDesde,
             FechaHasta = fechaHasta
         };
