@@ -189,7 +189,7 @@ public class TurnosController : ApiControllerBase
     [EnableCors("AllowOrigin")]
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
     [Authorize]
-    public async Task<IActionResult> GetInfoTurnosAsignadosExcel(string codUdn, string codArea, string? codScc, string? fechaDesde, string fechaHasta, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetInfoTurnosAsignadosExcel(string codUdn, string? codArea, string? codScc, string fechaDesde, string fechaHasta, CancellationToken cancellationToken)
     {
         GetTurnosAsignadosExcelRequest request = new GetTurnosAsignadosExcelRequest
         {
