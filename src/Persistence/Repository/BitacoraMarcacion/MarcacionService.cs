@@ -91,7 +91,7 @@ public class MarcacionService : IMarcacion
                     return new ResponseType<MarcacionResponseType>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
                 }
 
-                var objMarcacion = await _repoMonitoLogRiasemAsync.ListAsync(cancellationToken);
+                var objMarcacion =  _repoMonitoLogRiasemAsync.ListAsync(cancellationToken).Result.Take(1000).OrderByDescending(e => e.Time);
 
                 var marcacionEmpl = objMarcacion.Where(e => e.Device_Id == 999 && e.Pin == accMonitorLog.Pin).OrderByDescending(e => e.Time).FirstOrDefault();
 
