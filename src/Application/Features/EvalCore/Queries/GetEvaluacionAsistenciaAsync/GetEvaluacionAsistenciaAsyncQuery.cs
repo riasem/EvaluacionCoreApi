@@ -2,14 +2,11 @@
 using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetBitacoraMarcacion;
-using EvaluacionCore.Application.Features.BitacoraMarcacion.Dto;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Interfaces;
 using EvaluacionCore.Application.Features.EvalCore.Dto;
-using EvaluacionCore.Application.Features.Marcacion.Commands.GetBitacoraMarcacion;
 using EvaluacionCore.Application.Features.Permisos.Dto;
 using EvaluacionCore.Application.Features.Turnos.Dto;
 using EvaluacionCore.Application.Features.Turnos.Specifications;
-using EvaluacionCore.Application.Features.Vacaciones.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using EvaluacionCore.Domain.Entities.Common;
 using MediatR;
@@ -97,6 +94,11 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
                 var  colaborador = objCliente.Where(e => e.Identificacion == item.Cedula).FirstOrDefault();
 
+                if (colaborador == null)
+                {
+                    continue;
+                }
+
                 var validador = listaEvaluacionAsistencia.Where(e => e.Identificacion == colaborador.Identificacion && e.Fecha == fechaConsulta).FirstOrDefault();
 
                 if (validador != null)
@@ -104,10 +106,6 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                     continue;
                 }
 
-                if (colaborador == null)
-                {
-                    continue;
-                }
 
                 #region consulta y procesamiento de turno laboral
 
@@ -198,8 +196,9 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
                 #region Procesamiento de solicitudes
 
-                    List<Solicitud> solicitudes = new();
-                var solicitudesObj = solicitudGeneralType.Where(e => e.IdBeneficiario == int.Parse(colaborador?.CodigoIntegracion) && e.FechaCreacion == fechaConsulta).ToList();
+                List<Solicitud> solicitudes = new();
+                int codigo = string.IsNullOrEmpty(colaborador?.CodigoConvivencia) ? 0 : int.Parse(colaborador?.CodigoConvivencia);  
+                var solicitudesObj = solicitudGeneralType.Where(e => e.IdBeneficiario == codigo && e.FechaCreacion.ToShortDateString() == fechaConsulta.ToShortDateString()).ToList();
                 if (solicitudesObj.Any())
                 {
                     foreach (var soli in solicitudesObj)
@@ -208,7 +207,8 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                         {
                             IdSolicitud = soli.Id,
                             IdTipoSolicitud = Guid.Parse(soli?.IdFeature),
-                            TipoSolicitud = soli.CodigoFeature
+                            TipoSolicitud = soli.CodigoFeature,
+                            AplicaDescuento = soli.AplicaDescuento
                         });
                     }
                 }
@@ -221,7 +221,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                 {
                     Colaborador = colaborador.Nombres,
                     Identificacion = item.Cedula,
-                    CodBiometrico = colaborador.CodigoIntegracion,
+                    CodBiometrico = colaborador.CodigoConvivencia,
                     Udn = request.Udn,
                     Area = request.Area,
                     SubCentroCosto = request.Departamento,

@@ -103,6 +103,9 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
 
         [JsonPropertyName("tipoSolicitud")]
         public string TipoSolicitud { get; set; }
+
+        [JsonPropertyName("aplicaDescuento")]
+        public bool AplicaDescuento { get; set; }
     }
 
     public class Novedad
