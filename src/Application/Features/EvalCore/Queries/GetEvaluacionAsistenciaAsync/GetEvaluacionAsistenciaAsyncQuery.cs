@@ -7,6 +7,7 @@ using EvaluacionCore.Application.Features.EvalCore.Dto;
 using EvaluacionCore.Application.Features.Permisos.Dto;
 using EvaluacionCore.Application.Features.Turnos.Dto;
 using EvaluacionCore.Application.Features.Turnos.Specifications;
+using EvaluacionCore.Application.Features.Vacaciones.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using EvaluacionCore.Domain.Entities.Common;
 using MediatR;
@@ -58,7 +59,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
             var objTurnoCol = await _repositoryTurnoColAsync.ListAsync(new TurnoColaboradorTreeSpec(), cancellationToken);
             var objSubclaseTurno = await _repositorySubcAsync.ListAsync(cancellationToken);
             var objTipoTurno = await _repositoryTurnoAsync.ListAsync(cancellationToken);
-            var objCliente = await _repositoryClienteAsync.ListAsync(cancellationToken);
+            var objCliente = await _repositoryClienteAsync.ListAsync(new ClientesByEmpresaSpec(), cancellationToken);
             var (Success, Data) = await _ApiConsumoAsync.GetEndPoint(" ", uri, uriEnpoint);
             Guid estadoAprobado = _config.GetSection("Estados:Aprobada").Get<Guid>();
 
@@ -83,55 +84,63 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                 FechaDesde = request.FechaDesde.ToShortDateString(),
                 FechaHasta = request.FechaHasta.ToShortDateString(),
                 CodMarcacion =  "",
-                Suscriptor = request.Identificacion?.ToString(),
+                Suscriptor = request.Identificacion.ToString(),
             };
+
             var bitacora = await  _repoBitMarcacionAsync.GetBitacoraMarcacionAsync(requestMarcacion);
 
+            //objClienteTemp.AddRange(objCliente.Where(e => e.Cargo.Departamento.Nombre == request.Departamento &&
+            //                                         e.Cargo.Departamento.Area.Nombre == request.Area &&
+            //                                         e.Cargo.Departamento.Area.Empresa.RazonSocial == request.Udn).ToList());
 
-            foreach (var item in bitacora)
+            for (DateTime dtm = request.FechaDesde; dtm <= request.FechaHasta; dtm = dtm.AddDays(1))
             {
-                DateTime fechaConsulta = DateTime.Parse(item.Fecha);
 
-                var  colaborador = objCliente.Where(e => e.Identificacion == item.Cedula).FirstOrDefault();
+                foreach (var item in bitacora)
+                {
 
-                if (colaborador == null) continue;
+                    DateTime fechaConsulta = dtm;
 
-                var validador = listaEvaluacionAsistencia.Where(e => e.Identificacion == colaborador.Identificacion && e.Fecha == fechaConsulta).FirstOrDefault();
+                    var colaborador = objCliente.Where(e => e.Identificacion == item.Cedula).FirstOrDefault();
 
-                if (validador != null) continue;
+                    if (colaborador == null) continue;
+
+                    var validador = listaEvaluacionAsistencia.Where(e => e.Identificacion == colaborador.Identificacion && e.Fecha == fechaConsulta).FirstOrDefault();
+
+                    if (validador != null) continue;
 
 
-                #region consulta y procesamiento de turno laboral
+                    #region consulta y procesamiento de turno laboral
 
                     var turnoFiltro = objTurnoCol.Where(e => e.FechaAsignacion == fechaConsulta && e.IdColaborador == colaborador.Id && e.Turno.IdTurnoPadre == null).FirstOrDefault();
 
                     string codMarcacionEntrada = (turnoFiltro?.Turno?.CodigoEntrada?.ToString()) ?? "10";
                     string codMarcacionSalida = (turnoFiltro?.Turno?.CodigoSalida?.ToString()) ?? "11";
 
-                    var marcacionEntradaFiltro = bitacora.Where(e => e.Codigo == colaborador.CodigoConvivencia && e.CodEvento == codMarcacionEntrada).FirstOrDefault();
-                    var marcacionSalidaFiltro = bitacora.Where(e => e.Codigo == colaborador.CodigoConvivencia && e.CodEvento == codMarcacionSalida).OrderByDescending(e => e.Fecha).FirstOrDefault();
+                    var marcacionEntradaFiltro = bitacora.Where(e => e.Codigo == colaborador.CodigoConvivencia && e.CodEvento == codMarcacionEntrada && e.Fecha == dtm.ToShortDateString()).FirstOrDefault();
+                    var marcacionSalidaFiltro = bitacora.Where(e => e.Codigo == colaborador.CodigoConvivencia && e.CodEvento == codMarcacionSalida && e.Fecha == dtm.ToShortDateString()).OrderByDescending(e => e.Fecha).FirstOrDefault();
 
                     TurnoLaboral turnoLaboral = new()
                     {
                         Id = turnoFiltro?.Id,
                         Entrada = turnoFiltro?.Turno?.Entrada == null ? fechaConsulta.AddHours(8) : turnoFiltro?.Turno?.Entrada,
                         Salida = turnoFiltro?.Turno?.Salida == null ? fechaConsulta.AddHours(17) : turnoFiltro?.Turno?.Salida,
-                        TotalHoras = turnoFiltro?.Turno?.TotalHoras != null ? turnoFiltro?.Turno?.TotalHoras : "0",
-                        MarcacionEntrada = marcacionEntradaFiltro.Hora != null ? DateTime.Parse(marcacionEntradaFiltro.Hora) : null,
-                        MarcacionSalida = marcacionSalidaFiltro.Hora != null ? DateTime.Parse(marcacionSalidaFiltro.Hora) : null
+                        TotalHoras = (turnoFiltro?.Turno?.TotalHoras) ?? "0",
+                        MarcacionEntrada = marcacionEntradaFiltro?.Hora != null ? DateTime.Parse(marcacionEntradaFiltro.Hora) : null,
+                        MarcacionSalida = marcacionSalidaFiltro?.Hora != null ? DateTime.Parse(marcacionSalidaFiltro.Hora) : null
                     };
-                #endregion
+                    #endregion
 
 
-                #region consulta y procesamiento de turno de receso
+                    #region consulta y procesamiento de turno de receso
 
-                    var subturnoFiltro = objTurnoCol.Where(e => e.FechaAsignacion == DateTime.Parse(item.Fecha) && e.IdColaborador == colaborador.Id && e.Turno.IdTurnoPadre != null).FirstOrDefault();
+                    var subturnoFiltro = objTurnoCol.Where(e => e.FechaAsignacion == dtm && e.IdColaborador == colaborador.Id && e.Turno.IdTurnoPadre != null).FirstOrDefault();
 
                     string codMarcacionEntradaReceso = (subturnoFiltro?.Turno?.CodigoEntrada?.ToString()) ?? "14";
                     string codMarcacionSalidaReceso = (subturnoFiltro?.Turno?.CodigoEntrada?.ToString()) ?? "15";
 
-                    var marcacionEntradaRecesoFiltro = bitacora.Where(e => e.Codigo == colaborador.CodigoConvivencia && e.CodEvento == codMarcacionEntradaReceso).FirstOrDefault();
-                    var marcacionSalidaRecesoFiltro = bitacora.Where(e => e.Codigo == colaborador.CodigoConvivencia && e.CodEvento == codMarcacionSalidaReceso).OrderByDescending(e => e.Fecha).FirstOrDefault();
+                    var marcacionEntradaRecesoFiltro = bitacora.Where(e => e.Codigo == colaborador.CodigoConvivencia && e.CodEvento == codMarcacionEntradaReceso && e.Fecha == dtm.ToShortDateString()).FirstOrDefault();
+                    var marcacionSalidaRecesoFiltro = bitacora.Where(e => e.Codigo == colaborador.CodigoConvivencia && e.CodEvento == codMarcacionSalidaReceso && e.Fecha == dtm.ToShortDateString()).OrderByDescending(e => e.Fecha).FirstOrDefault();
 
 
                     TurnoReceso turnoReceso = new()
@@ -143,10 +152,10 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                         MarcacionEntrada = marcacionEntradaRecesoFiltro?.Hora != null ? DateTime.Parse(marcacionEntradaRecesoFiltro?.Hora) : null,
                         MarcacionSalida = marcacionSalidaRecesoFiltro?.Hora != null ? DateTime.Parse(marcacionSalidaRecesoFiltro?.Hora) : null
                     };
-                #endregion
+                    #endregion
 
 
-                #region Consulta y procesamiento de novedades
+                    #region Consulta y procesamiento de novedades
 
 
                     if (!string.IsNullOrEmpty(marcacionEntradaFiltro?.Novedad))
@@ -184,48 +193,51 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                             MinutosNovedad = marcacionSalidaRecesoFiltro.Minutos_Novedad
                         });
                     }
-                #endregion
-                    
+                    #endregion
 
-                #region Procesamiento de solicitudes
 
-                int codigo = string.IsNullOrEmpty(colaborador?.CodigoConvivencia) ? 0 : int.Parse(colaborador?.CodigoConvivencia);
-                if (solicitudGeneralType != null)
-                {
-                    var solicitudesObj = solicitudGeneralType.Where(e => e.IdBeneficiario == codigo && e.FechaAfectacion?.ToShortDateString() == fechaConsulta.ToShortDateString() && e.IdEstadoSolicitud == estadoAprobado).ToList();
-                    if (solicitudesObj.Any())
+                    #region Procesamiento de solicitudes
+
+                    int codigo = string.IsNullOrEmpty(colaborador?.CodigoConvivencia) ? 0 : int.Parse(colaborador?.CodigoConvivencia);
+                    if (solicitudGeneralType != null)
                     {
-                        foreach (var soli in solicitudesObj)
+                        var solicitudesObj = solicitudGeneralType.Where(e => e.IdBeneficiario == codigo && e.FechaAfectacion?.ToShortDateString() == fechaConsulta.ToShortDateString() && e.IdEstadoSolicitud == estadoAprobado).ToList();
+                        if (solicitudesObj.Any())
                         {
-                            solicitudes.Add(new Solicitud()
+                            foreach (var soli in solicitudesObj)
                             {
-                                IdSolicitud = soli.Id,
-                                IdTipoSolicitud = Guid.Parse(soli?.IdFeature),
-                                TipoSolicitud = soli.CodigoFeature,
-                                AplicaDescuento = soli.AplicaDescuento
-                            });
+                                solicitudes.Add(new Solicitud()
+                                {
+                                    IdSolicitud = soli.Id,
+                                    IdTipoSolicitud = Guid.Parse(soli?.IdFeature),
+                                    TipoSolicitud = soli.CodigoFeature,
+                                    AplicaDescuento = soli.AplicaDescuento
+                                });
+                            }
                         }
                     }
+
+
+                    #endregion
+
+
+                    listaEvaluacionAsistencia.Add(new EvaluacionAsistenciaResponseType()
+                    {
+                        Colaborador = colaborador.Nombres,
+                        Identificacion = item.Cedula,
+                        CodBiometrico = colaborador.CodigoConvivencia,
+                        Udn = request.Udn,
+                        Area = request.Area,
+                        SubCentroCosto = request.Departamento,
+                        Fecha = dtm,
+                        Novedades = novedades,
+                        TurnoLaboral = turnoLaboral,
+                        TurnoReceso = turnoReceso,
+                        Solicitudes = solicitudes
+                    });
+
                 }
-
-
-                #endregion
-
-
-                listaEvaluacionAsistencia.Add(new EvaluacionAsistenciaResponseType()
-                {
-                    Colaborador = colaborador.Nombres,
-                    Identificacion = item.Cedula,
-                    CodBiometrico = colaborador.CodigoConvivencia,
-                    Udn = request.Udn,
-                    Area = request.Area,
-                    SubCentroCosto = request.Departamento,
-                    Fecha = DateTime.Parse(item.Fecha),
-                    Novedades = novedades,
-                    TurnoLaboral = turnoLaboral,
-                    TurnoReceso = turnoReceso,
-                    Solicitudes = solicitudes
-                });
+                
             }
 
             return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = listaEvaluacionAsistencia, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };

@@ -5,7 +5,7 @@ namespace EvaluacionCore.Application.Features.Vacaciones.Specifications;
 
 public class ClientesByEmpresaSpec : Specification<Cliente>
 {
-    public ClientesByEmpresaSpec(string Udn, string Departamento, string Area)
+    public ClientesByEmpresaSpec()
     {
         Query
             .Include(e => e.Cargo)
