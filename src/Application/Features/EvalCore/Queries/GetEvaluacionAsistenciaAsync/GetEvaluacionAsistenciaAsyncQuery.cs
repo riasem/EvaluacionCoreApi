@@ -54,7 +54,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
     {
         try
         {
-            var uri = "https://10.0.0.8:5208/api/v1/Solicitudes/GetSolicitudesGeneral?FechaDesde=" + request.FechaDesde.ToShortDateString() +
+            var uri = "http://10.0.0.8:5208/api/v1/Solicitudes/GetSolicitudesGeneral?FechaDesde=" + request.FechaDesde.ToShortDateString() +
                 "&FechaHasta=" + request.FechaHasta.ToShortDateString() + "&Udn=" + request.Udn + "&Area=" + request.Area + "&ScCosto=" + request.Departamento + "&SeleccionTodos=true";
 
             var objClaseTurno = await _repositoryClassAsync.ListAsync(cancellationToken);
