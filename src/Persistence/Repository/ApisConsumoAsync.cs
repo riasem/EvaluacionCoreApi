@@ -26,7 +26,7 @@ public class ApisConsumoAsync : IApisConsumoAsync
             using var client = new HttpClient();
 
             client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZGVudGlmaWNhY2lvbiI6IjA5NTA5NDcyODMiLCJPcmdhbml6YWNpb25JZCI6IiIsIlRva2VuRWNvbW1lcmNlIjoiL0JnV3M5bkQ0My8wRCtUVmtWaWZlajlqdFdhVk1qaWRFSGUzMy8wWmpmMzVkZkU3aUk3UkdtOG4xbWt5WURLbVRkc1Y4SUQzUi8yQm9GUkNMWVloZjhsZFdmaVo0VENDWHVuNTdvOXRyWnM9IiwiSXBEaXNwb3NpdGl2byI6IjE5Mi4xNjguMS4xIiwiSWREaXNwb3NpdGl2byI6ImE4MjVkMWUwMTgxNTM4MzMiLCJuYmYiOjE2Njk4MjYwMDcsImV4cCI6MTY4Mjk2NjAwNywiaWF0IjoxNjY5ODI2MDA3fQ.k2atHTECwx7l5GcgzRIjIocpZuffYTwtycAQPxSvsSU");
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZGVudGlmaWNhY2lvbiI6IjA5NTE4MTA5OTMiLCJPcmdhbml6YWNpb25JZCI6IiIsIlRva2VuRWNvbW1lcmNlIjoiWnZmd3JTTFo3NW4yMDl2MG1WNkNUYVJpTWZyYnV2N1hTYXJVYWhEZHQzSEUybkVXeU0rckswdkhFSEdzTEo5aWRSdzZYODBzY1lMVTFRKzQ2QkljaE1ZeG5NMkFhY2p6WTNwRlJFa1R4T0E9IiwiSXBEaXNwb3NpdGl2byI6IjE5Mi4xNjguMS4xIiwiSWREaXNwb3NpdGl2byI6ImE4MjVkMWUwMTgxNTM4MzMiLCJuYmYiOjE2NjUwNzQzNjcsImV4cCI6MTk4MDQzNDM2NywiaWF0IjoxNjY1MDc0MzY3fQ.TnHvstgcDd3gI-YNmedMWC6DEQ3ZfCCG-z6S0ik1tS8");
             var response = await client.GetAsync(uriEndPoint);
             var local = response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)

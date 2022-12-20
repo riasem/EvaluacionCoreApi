@@ -60,6 +60,8 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
             var objTipoTurno = await _repositoryTurnoAsync.ListAsync(cancellationToken);
             var objCliente = await _repositoryClienteAsync.ListAsync(cancellationToken);
             var (Success, Data) = await _ApiConsumoAsync.GetEndPoint(" ", uri, uriEnpoint);
+            Guid estadoAprobado = _config.GetSection("Estados:Aprobada").Get<Guid>();
+
             List<SolicitudGeneralType> solicitudGeneralType = (List<SolicitudGeneralType>)Data;
 
             List<TipoJornadaType> listaTipoJornada = new();
@@ -67,10 +69,6 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
             List<Cliente> objClienteTemp = new();      
             List<Cliente> objClienteFinal = new();
-
-            var modalidadJornadaTypes = _config.GetSection("modalidadJornada").Get<List<ModalidadJornadaType>>();
-            var tipoJornadaTypes = _config.GetSection("tipoJornada").Get<List<TipoJornadaType>>();
-
 
             List<EvaluacionAsistenciaResponseType> listaEvaluacionAsistencia = new();
 
@@ -84,7 +82,6 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                 CodMarcacion =  "TRLA",
                 Suscriptor = request.Identificacion?.ToString(),
             };
-
             var bitacora = await  _repoBitMarcacionAsync.GetBitacoraMarcacionAsync(requestMarcacion);
 
 
@@ -197,19 +194,22 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                 #region Procesamiento de solicitudes
 
                 List<Solicitud> solicitudes = new();
-                int codigo = string.IsNullOrEmpty(colaborador?.CodigoConvivencia) ? 0 : int.Parse(colaborador?.CodigoConvivencia);  
-                var solicitudesObj = solicitudGeneralType.Where(e => e.IdBeneficiario == codigo && e.FechaCreacion.ToShortDateString() == fechaConsulta.ToShortDateString()).ToList();
-                if (solicitudesObj.Any())
+                int codigo = string.IsNullOrEmpty(colaborador?.CodigoConvivencia) ? 0 : int.Parse(colaborador?.CodigoConvivencia);
+                if (solicitudGeneralType != null)
                 {
-                    foreach (var soli in solicitudesObj)
+                    var solicitudesObj = solicitudGeneralType.Where(e => e.IdBeneficiario == codigo && e.FechaAfectacion?.ToShortDateString() == fechaConsulta.ToShortDateString() && e.IdEstadoSolicitud == estadoAprobado).ToList();
+                    if (solicitudesObj.Any())
                     {
-                        solicitudes.Add(new Solicitud()
+                        foreach (var soli in solicitudesObj)
                         {
-                            IdSolicitud = soli.Id,
-                            IdTipoSolicitud = Guid.Parse(soli?.IdFeature),
-                            TipoSolicitud = soli.CodigoFeature,
-                            AplicaDescuento = soli.AplicaDescuento
-                        });
+                            solicitudes.Add(new Solicitud()
+                            {
+                                IdSolicitud = soli.Id,
+                                IdTipoSolicitud = Guid.Parse(soli?.IdFeature),
+                                TipoSolicitud = soli.CodigoFeature,
+                                AplicaDescuento = soli.AplicaDescuento
+                            });
+                        }
                     }
                 }
 

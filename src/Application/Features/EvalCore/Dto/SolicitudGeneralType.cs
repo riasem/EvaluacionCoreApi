@@ -17,4 +17,5 @@ public class SolicitudGeneralType
     public string Departamento { get; set; }
     public bool AplicaDescuento { get; set; }
     public DateTime FechaCreacion { get; set; }
+    public DateTime? FechaAfectacion { get; set; }
 }
