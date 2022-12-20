@@ -81,8 +81,8 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                 CodUdn = request.Udn,
                 CodArea = request.Area,
                 CodSubcentro = request.Departamento,
-                FechaDesde = request.FechaDesde.ToShortDateString(),
-                FechaHasta = request.FechaHasta.ToShortDateString(),
+                FechaDesde = request.FechaDesde.ToString("dd/MM/yyyy"),
+                FechaHasta = request.FechaHasta.ToString("dd/MM/yyyy"),
                 CodMarcacion =  "",
                 Suscriptor = request.Identificacion.ToString(),
             };
