@@ -72,6 +72,9 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
             List<EvaluacionAsistenciaResponseType> listaEvaluacionAsistencia = new();
 
+            List<Solicitud> solicitudes = new();
+            List<Novedad> novedades = new();
+
             GetBitacoraMarcacionRequest requestMarcacion = new()
             {
                 CodUdn = request.Udn,
@@ -79,7 +82,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                 CodSubcentro = request.Departamento,
                 FechaDesde = request.FechaDesde.ToShortDateString(),
                 FechaHasta = request.FechaHasta.ToShortDateString(),
-                CodMarcacion =  "TRLA",
+                CodMarcacion =  "",
                 Suscriptor = request.Identificacion?.ToString(),
             };
             var bitacora = await  _repoBitMarcacionAsync.GetBitacoraMarcacionAsync(requestMarcacion);
@@ -91,17 +94,11 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
                 var  colaborador = objCliente.Where(e => e.Identificacion == item.Cedula).FirstOrDefault();
 
-                if (colaborador == null)
-                {
-                    continue;
-                }
+                if (colaborador == null) continue;
 
                 var validador = listaEvaluacionAsistencia.Where(e => e.Identificacion == colaborador.Identificacion && e.Fecha == fechaConsulta).FirstOrDefault();
 
-                if (validador != null)
-                {
-                    continue;
-                }
+                if (validador != null) continue;
 
 
                 #region consulta y procesamiento de turno laboral
@@ -142,7 +139,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                         Id = subturnoFiltro?.Id,
                         Entrada = subturnoFiltro?.Turno?.Entrada == null ? fechaConsulta.AddHours(12) : subturnoFiltro?.Turno?.Entrada,
                         Salida = subturnoFiltro?.Turno?.Salida == null ? fechaConsulta.AddHours(14) : subturnoFiltro?.Turno?.Salida,
-                        TotalHoras = subturnoFiltro?.Turno?.TotalHoras != null ? subturnoFiltro?.Turno?.TotalHoras : "0",
+                        TotalHoras = (subturnoFiltro?.Turno?.TotalHoras) ?? "0",
                         MarcacionEntrada = marcacionEntradaRecesoFiltro?.Hora != null ? DateTime.Parse(marcacionEntradaRecesoFiltro?.Hora) : null,
                         MarcacionSalida = marcacionSalidaRecesoFiltro?.Hora != null ? DateTime.Parse(marcacionSalidaRecesoFiltro?.Hora) : null
                     };
@@ -151,7 +148,6 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
                 #region Consulta y procesamiento de novedades
 
-                    List<Novedad> novedades = new();
 
                     if (!string.IsNullOrEmpty(marcacionEntradaFiltro?.Novedad))
                     {
@@ -193,7 +189,6 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
                 #region Procesamiento de solicitudes
 
-                List<Solicitud> solicitudes = new();
                 int codigo = string.IsNullOrEmpty(colaborador?.CodigoConvivencia) ? 0 : int.Parse(colaborador?.CodigoConvivencia);
                 if (solicitudGeneralType != null)
                 {
