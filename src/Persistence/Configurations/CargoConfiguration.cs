@@ -14,7 +14,7 @@ public class CargoConfiguration : IEntityTypeConfiguration<Cargo>
     public void Configure(EntityTypeBuilder<Cargo> builder)
     {
         builder.HasKey(x => x.Id);
-        builder.HasMany(g => g.Cliente)
+        builder.HasMany(g => g.Clientes)
             .WithOne(g => g.Cargo)
             .HasForeignKey(g => g.CargoId)
             .IsRequired();

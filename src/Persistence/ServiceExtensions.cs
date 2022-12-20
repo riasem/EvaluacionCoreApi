@@ -13,6 +13,7 @@ using EvaluacionCore.Persistence.Contexts;
 using EvaluacionCore.Persistence.Repository;
 using EvaluacionCore.Persistence.Repository.BitacoraMarcacion;
 using Workflow.Persistence.Repository.TurnosAsignadosExcel;
+using EvaluacionCore.Persistence.Repository.General;
 
 namespace EvaluacionCore.Persistence;
 public static class ServiceExtensions
@@ -31,6 +32,7 @@ public static class ServiceExtensions
         services.AddTransient(typeof(IRepositoryAsync<>),typeof(CustomRepositoryAsync<>));
         services.AddTransient(typeof(IRepositoryGRiasemAsync<>), typeof(CustomRepositoryGRiasemAsync<>));
         //services.AddTransient<IAdjuntoService, AdjuntoService>();
+        services.AddTransient<IApisConsumoAsync, ApisConsumoAsync>();
         services.AddTransient<IBitacoraMarcacion, BitacoraMarcacionService>();
         services.AddTransient<ITurnosAsignadosExcel, TurnosAsignadosExcelService>();
         services.AddTransient<IMarcacion, MarcacionService>();

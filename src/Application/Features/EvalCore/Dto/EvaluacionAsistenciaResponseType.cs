@@ -31,8 +31,8 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
         [JsonPropertyName("turnoReceso")]
         public TurnoReceso TurnoReceso { get; set; }
 
-        [JsonPropertyName("novedad")]
-        public string Novedad { get; set; }
+        [JsonPropertyName("novedades")]
+        public List<Novedad> Novedades { get; set; }
 
         [JsonPropertyName("solicitudes")]
         public List<Solicitud> Solicitudes { get; set; }
@@ -41,14 +41,26 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
 
     public class TurnoLaboral
     {
-        [JsonPropertyName("id")]
-        public Guid Id { get; set; }
+        [JsonPropertyName("idTurno")]
+        public Guid? Id { get; set; }
 
-        [JsonPropertyName("entrada")]
-        public DateTime Entrada { get; set; }
+        [JsonPropertyName("entrada")]  //turno entrada
+        public DateTime? Entrada { get; set; }
 
-        [JsonPropertyName("salida")]
-        public DateTime Salida { get; set; }
+        [JsonPropertyName("idMarcacionEntrada")]
+        public int IdMarcacionEntrada { get; set; }
+
+        [JsonPropertyName("marcacionEntrada")]
+        public DateTime? MarcacionEntrada { get; set; }
+
+        [JsonPropertyName("salida")] // turno salida
+        public DateTime? Salida { get; set; }
+
+        [JsonPropertyName("idMarcacionSalida")]
+        public int IdMarcacionSalida { get; set; }
+
+        [JsonPropertyName("marcacionSalida")]
+        public DateTime? MarcacionSalida { get; set; }
 
         [JsonPropertyName("totalHoras")]
         public string TotalHoras { get; set; }
@@ -56,14 +68,26 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
 
     public class TurnoReceso
     {
-        [JsonPropertyName("id")]
-        public Guid Id { get; set; }
+        [JsonPropertyName("idTurno")]
+        public Guid? Id { get; set; }
 
-        [JsonPropertyName("entrada")]
-        public DateTime Entrada { get; set; }
+        [JsonPropertyName("entrada")]  //turno entrada
+        public DateTime? Entrada { get; set; }
 
-        [JsonPropertyName("salida")]
-        public DateTime Salida { get; set; }
+        [JsonPropertyName("idMarcacionEntrada")]
+        public int IdMarcacionEntrada { get; set; }
+
+        [JsonPropertyName("marcacionEntrada")]
+        public DateTime? MarcacionEntrada { get; set; }
+
+        [JsonPropertyName("salida")] // turno salida
+        public DateTime? Salida { get; set; }
+
+        [JsonPropertyName("idMarcacionSalida")]
+        public int IdMarcacionSalida { get; set; }
+
+        [JsonPropertyName("marcacionSalida")]
+        public DateTime? MarcacionSalida { get; set; }
 
         [JsonPropertyName("totalHoras")]
         public string TotalHoras { get; set; }
@@ -79,5 +103,17 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
 
         [JsonPropertyName("tipoSolicitud")]
         public string TipoSolicitud { get; set; }
+    }
+
+    public class Novedad
+    {
+        [JsonPropertyName("idMarcacion")]
+        public int IdSolicitud { get; set; }
+
+        [JsonPropertyName("descripcion")]
+        public string Descripcion { get; set; }
+
+        [JsonPropertyName("minutosNovedad")]
+        public string MinutosNovedad { get; set; }
     }
 }

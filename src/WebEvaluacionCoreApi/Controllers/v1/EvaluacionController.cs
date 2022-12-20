@@ -44,6 +44,9 @@ public class EvaluacionController : ApiControllerBase
     /// <param name="identificacion"></param>
     /// <param name="fechaDesde"></param>
     /// <param name="fechaHasta"></param>
+    /// <param name="Udn"></param>
+    /// <param name="Departamento"></param>
+    /// <param name="Area"></param>
     /// <param name="cancellationToken"></param>
     /// <returns>Capacidad que realiza la evaluación de asistencias.</returns>
     /// <response code="201">Evaluación Realizada</response>
@@ -53,13 +56,13 @@ public class EvaluacionController : ApiControllerBase
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [Authorize]
-    public async Task<IActionResult> GetAsistencias(DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken, string identificacion = "0")
+    public async Task<IActionResult> GetAsistencias(DateTime fechaDesde, DateTime fechaHasta, string Udn, string Departamento, string Area, CancellationToken cancellationToken, string identificacion = "0")
     {
         if (identificacion == "0")
         {
             identificacion = "";
         }
-        var objResult = await Mediator.Send(new GetEvaluacionAsistenciaAsyncQuery(identificacion, fechaDesde, fechaHasta), cancellationToken);
+        var objResult = await Mediator.Send(new GetEvaluacionAsistenciaAsyncQuery(identificacion, fechaDesde, fechaHasta, Udn, Area, Departamento), cancellationToken);
         return Ok(objResult);
         
     }

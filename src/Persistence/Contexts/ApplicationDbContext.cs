@@ -3,6 +3,7 @@ using EvaluacionCore.Domain.Entities.Asistencia;
 using EvaluacionCore.Domain.Entities.Calendario;
 using EvaluacionCore.Domain.Entities.Common;
 using EvaluacionCore.Domain.Entities.Justificacion;
+using EvaluacionCore.Domain.Entities.Organizacion;
 using EvaluacionCore.Domain.Entities.Permisos;
 using EvaluacionCore.Domain.Entities.Vacaciones;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +26,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<Localidad> Localidades { get; set; }
     public DbSet<TipoTurno> TipoTurnos { get; set; }
     public DbSet<Cliente> Clientes { get; set; }
+    public DbSet<Empresa> Empresas { get; set; }
+    public DbSet<Area> Areas { get; set; }
+    public DbSet<Departamento> Departamentos { get; set; }
     public DbSet<Turno> Turnos { get; set; }
     public DbSet<Calendario> Calendarios { get; set; }
     public DbSet<CiudadPais> CiudadPais { get; set; }
