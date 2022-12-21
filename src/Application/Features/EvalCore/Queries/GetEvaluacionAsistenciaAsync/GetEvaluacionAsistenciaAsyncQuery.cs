@@ -73,14 +73,12 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
             List<EvaluacionAsistenciaResponseType> listaEvaluacionAsistencia = new();
 
-            List<Solicitud> solicitudes = new();
-            List<Novedad> novedades = new();
 
             GetBitacoraMarcacionRequest requestMarcacion = new()
             {
                 CodUdn = request.Udn,
-                CodArea = request.Area,
-                CodSubcentro = request.Departamento,
+                CodArea = (request.Area) ?? "",
+                CodSubcentro = (request.Departamento) ?? "",
                 FechaDesde = request.FechaDesde.ToString("dd/MM/yyyy"),
                 FechaHasta = request.FechaHasta.ToString("dd/MM/yyyy"),
                 CodMarcacion =  "",
@@ -95,11 +93,15 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
             for (DateTime dtm = request.FechaDesde; dtm <= request.FechaHasta; dtm = dtm.AddDays(1))
             {
+                List<Solicitud> solicitudes = new();
+                List<Novedad> novedades = new();
+                //novedades.Clear();
 
                 foreach (var item in bitacora)
                 {
 
                     DateTime fechaConsulta = dtm;
+                    var u = dtm.ToShortDateString();
 
                     var colaborador = objCliente.Where(e => e.Identificacion == item.Cedula).FirstOrDefault();
 
@@ -109,7 +111,6 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
                     if (validador != null) continue;
 
-
                     #region consulta y procesamiento de turno laboral
 
                     var turnoFiltro = objTurnoCol.Where(e => e.FechaAsignacion == fechaConsulta && e.IdColaborador == colaborador.Id && e.Turno.IdTurnoPadre == null).FirstOrDefault();
@@ -117,8 +118,8 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                     string codMarcacionEntrada = (turnoFiltro?.Turno?.CodigoEntrada?.ToString()) ?? "10";
                     string codMarcacionSalida = (turnoFiltro?.Turno?.CodigoSalida?.ToString()) ?? "11";
 
-                    var marcacionEntradaFiltro = bitacora.Where(e => e.Codigo == colaborador.CodigoConvivencia && e.CodEvento == codMarcacionEntrada && e.Fecha == dtm.ToShortDateString()).FirstOrDefault();
-                    var marcacionSalidaFiltro = bitacora.Where(e => e.Codigo == colaborador.CodigoConvivencia && e.CodEvento == codMarcacionSalida && e.Fecha == dtm.ToShortDateString()).OrderByDescending(e => e.Fecha).FirstOrDefault();
+                    var marcacionEntradaFiltro = bitacora.Where(e => e.Codigo == colaborador.CodigoConvivencia && e.CodEvento == codMarcacionEntrada && DateTime.Parse(e.Fecha).ToShortDateString() == dtm.ToShortDateString()).FirstOrDefault();
+                    var marcacionSalidaFiltro = bitacora.Where(e => e.Codigo == colaborador.CodigoConvivencia && e.CodEvento == codMarcacionSalida && DateTime.Parse(e.Fecha).ToShortDateString() == dtm.ToShortDateString()).OrderByDescending(e => e.Fecha).FirstOrDefault();
 
                     TurnoLaboral turnoLaboral = new()
                     {
@@ -129,6 +130,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                         MarcacionEntrada = marcacionEntradaFiltro?.Hora != null ? DateTime.Parse(marcacionEntradaFiltro.Hora) : null,
                         MarcacionSalida = marcacionSalidaFiltro?.Hora != null ? DateTime.Parse(marcacionSalidaFiltro.Hora) : null
                     };
+
                     #endregion
 
 
@@ -139,8 +141,8 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                     string codMarcacionEntradaReceso = (subturnoFiltro?.Turno?.CodigoEntrada?.ToString()) ?? "14";
                     string codMarcacionSalidaReceso = (subturnoFiltro?.Turno?.CodigoEntrada?.ToString()) ?? "15";
 
-                    var marcacionEntradaRecesoFiltro = bitacora.Where(e => e.Codigo == colaborador.CodigoConvivencia && e.CodEvento == codMarcacionEntradaReceso && e.Fecha == dtm.ToShortDateString()).FirstOrDefault();
-                    var marcacionSalidaRecesoFiltro = bitacora.Where(e => e.Codigo == colaborador.CodigoConvivencia && e.CodEvento == codMarcacionSalidaReceso && e.Fecha == dtm.ToShortDateString()).OrderByDescending(e => e.Fecha).FirstOrDefault();
+                    var marcacionEntradaRecesoFiltro = bitacora.Where(e => e.Codigo == colaborador.CodigoConvivencia && e.CodEvento == codMarcacionEntradaReceso && DateTime.Parse(e.Fecha).ToShortDateString() == dtm.ToShortDateString()).FirstOrDefault();
+                    var marcacionSalidaRecesoFiltro = bitacora.Where(e => e.Codigo == colaborador.CodigoConvivencia && e.CodEvento == codMarcacionSalidaReceso && DateTime.Parse(e.Fecha).ToShortDateString() == dtm.ToShortDateString()).OrderByDescending(e => e.Fecha).FirstOrDefault();
 
 
                     TurnoReceso turnoReceso = new()
@@ -152,11 +154,11 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                         MarcacionEntrada = marcacionEntradaRecesoFiltro?.Hora != null ? DateTime.Parse(marcacionEntradaRecesoFiltro?.Hora) : null,
                         MarcacionSalida = marcacionSalidaRecesoFiltro?.Hora != null ? DateTime.Parse(marcacionSalidaRecesoFiltro?.Hora) : null
                     };
+
                     #endregion
 
 
                     #region Consulta y procesamiento de novedades
-
 
                     if (!string.IsNullOrEmpty(marcacionEntradaFiltro?.Novedad))
                     {
@@ -193,6 +195,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                             MinutosNovedad = marcacionSalidaRecesoFiltro.Minutos_Novedad
                         });
                     }
+
                     #endregion
 
 
@@ -216,7 +219,6 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                             }
                         }
                     }
-
 
                     #endregion
 
