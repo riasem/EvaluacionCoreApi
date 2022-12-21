@@ -62,7 +62,7 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
         [JsonPropertyName("marcacionSalida")]
         public DateTime? MarcacionSalida { get; set; }
 
-        [JsonPropertyName("totalHoras")]
+        [JsonPropertyName("totalHoras")] //duracion del turno laboral
         public string TotalHoras { get; set; }
     }
 
@@ -90,7 +90,7 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
         public DateTime? MarcacionSalida { get; set; }
 
         [JsonPropertyName("totalHoras")]
-        public string TotalHoras { get; set; }
+        public string TotalHoras { get; set; } // duracion de turno de receso
     }
 
     public class Solicitud
@@ -98,10 +98,10 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
         [JsonPropertyName("id")]
         public Guid IdSolicitud { get; set; }
 
-        [JsonPropertyName("idTipoSolicitud")]
+        [JsonPropertyName("idTipoSolicitud")] 
         public Guid IdTipoSolicitud { get; set; }
 
-        [JsonPropertyName("tipoSolicitud")]
+        [JsonPropertyName("tipoSolicitud")] // VAC, PER, JUS (HORAS EXTRAS)
         public string TipoSolicitud { get; set; }
 
         [JsonPropertyName("aplicaDescuento")]
@@ -111,12 +111,24 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
     public class Novedad
     {
         [JsonPropertyName("idMarcacion")]
-        public int IdSolicitud { get; set; }
+        public int IdMarcacion { get; set; }
+
+        [JsonPropertyName("idSolicitud")]
+        public Guid IdSolicitud { get; set; }
+
+        [JsonPropertyName("usuarioAprobador")]
+        public string UsuarioAprobador { get; set; }
+
+        [JsonPropertyName("fechaAprobacion")]
+        public DateTime? FechaAprobacion { get; set; }
 
         [JsonPropertyName("descripcion")]
         public string Descripcion { get; set; }
 
         [JsonPropertyName("minutosNovedad")]
         public string MinutosNovedad { get; set; }
+
+        [JsonPropertyName("estadoMarcacion")]
+        public string EstadoMarcacion { get; set; }
     }
 }

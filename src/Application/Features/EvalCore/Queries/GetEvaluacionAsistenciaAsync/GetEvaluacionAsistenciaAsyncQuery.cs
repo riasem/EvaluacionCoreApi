@@ -52,16 +52,16 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
     {
         try
         {
+            Guid estadoAprobado = _config.GetSection("Estados:Aprobada").Get<Guid>();
+            //incluir el colaborador en el request (de ser necesario)
             var uri = "http://10.0.0.8:5208/api/v1/Solicitudes/GetSolicitudesGeneral?FechaDesde=" + request.FechaDesde.ToShortDateString() +
                 "&FechaHasta=" + request.FechaHasta.ToShortDateString() + "&Udn=" + request.Udn + "&Area=" + request.Area + "&ScCosto=" + request.Departamento + "&SeleccionTodos=true";
 
-            var objClaseTurno = await _repositoryClassAsync.ListAsync(cancellationToken);
-            var objTurnoCol = await _repositoryTurnoColAsync.ListAsync(new TurnoColaboradorTreeSpec(), cancellationToken);
-            var objSubclaseTurno = await _repositorySubcAsync.ListAsync(cancellationToken);
-            var objTipoTurno = await _repositoryTurnoAsync.ListAsync(cancellationToken);
+            //incluir el colaborador en el request (de ser necesario) / adicional el rango de fechas 
+            var objTurnoCol = await _repositoryTurnoColAsync.ListAsync(new TurnoColaboradorTreeSpec(request.FechaDesde,request.FechaHasta), cancellationToken);
+
             var objCliente = await _repositoryClienteAsync.ListAsync(new ClientesByEmpresaSpec(), cancellationToken);
             var (Success, Data) = await _ApiConsumoAsync.GetEndPoint(" ", uri, uriEnpoint);
-            Guid estadoAprobado = _config.GetSection("Estados:Aprobada").Get<Guid>();
 
             List<SolicitudGeneralType> solicitudGeneralType = (List<SolicitudGeneralType>)Data;
 
@@ -90,12 +90,11 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
             //objClienteTemp.AddRange(objCliente.Where(e => e.Cargo.Departamento.Nombre == request.Departamento &&
             //                                         e.Cargo.Departamento.Area.Nombre == request.Area &&
             //                                         e.Cargo.Departamento.Area.Empresa.RazonSocial == request.Udn).ToList());
-
+            //comentado temporal, hasta que se normalicen los cargos con su coaborador y departamento
             for (DateTime dtm = request.FechaDesde; dtm <= request.FechaHasta; dtm = dtm.AddDays(1))
             {
                 List<Solicitud> solicitudes = new();
                 List<Novedad> novedades = new();
-                //novedades.Clear();
 
                 foreach (var item in bitacora)
                 {
@@ -121,6 +120,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                     var marcacionEntradaFiltro = bitacora.Where(e => e.Codigo == colaborador.CodigoConvivencia && e.CodEvento == codMarcacionEntrada && DateTime.Parse(e.Fecha).ToShortDateString() == dtm.ToShortDateString()).FirstOrDefault();
                     var marcacionSalidaFiltro = bitacora.Where(e => e.Codigo == colaborador.CodigoConvivencia && e.CodEvento == codMarcacionSalida && DateTime.Parse(e.Fecha).ToShortDateString() == dtm.ToShortDateString()).OrderByDescending(e => e.Fecha).FirstOrDefault();
 
+
                     TurnoLaboral turnoLaboral = new()
                     {
                         Id = turnoFiltro?.Id,
@@ -139,7 +139,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                     var subturnoFiltro = objTurnoCol.Where(e => e.FechaAsignacion == dtm && e.IdColaborador == colaborador.Id && e.Turno.IdTurnoPadre != null).FirstOrDefault();
 
                     string codMarcacionEntradaReceso = (subturnoFiltro?.Turno?.CodigoEntrada?.ToString()) ?? "14";
-                    string codMarcacionSalidaReceso = (subturnoFiltro?.Turno?.CodigoEntrada?.ToString()) ?? "15";
+                    string codMarcacionSalidaReceso = (subturnoFiltro?.Turno?.CodigoSalida?.ToString()) ?? "15";
 
                     var marcacionEntradaRecesoFiltro = bitacora.Where(e => e.Codigo == colaborador.CodigoConvivencia && e.CodEvento == codMarcacionEntradaReceso && DateTime.Parse(e.Fecha).ToShortDateString() == dtm.ToShortDateString()).FirstOrDefault();
                     var marcacionSalidaRecesoFiltro = bitacora.Where(e => e.Codigo == colaborador.CodigoConvivencia && e.CodEvento == codMarcacionSalidaReceso && DateTime.Parse(e.Fecha).ToShortDateString() == dtm.ToShortDateString()).OrderByDescending(e => e.Fecha).FirstOrDefault();
@@ -196,6 +196,32 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                         });
                     }
 
+                    if (turnoFiltro != null && marcacionEntradaFiltro == null)
+                    {
+                        novedades.Add(new Novedad
+                        {
+                            Descripcion = "No se registra marcación",
+                            MinutosNovedad = ""
+                        });
+                    }
+
+                    if (turnoFiltro == null && (marcacionEntradaFiltro != null || marcacionSalidaFiltro != null))
+                    {
+                        novedades.Add(new Novedad
+                        {
+                            Descripcion = "No ha sido asignado el turno laboral",
+                            MinutosNovedad = ""
+                        });
+                    }
+
+                    if (subturnoFiltro == null && (marcacionEntradaRecesoFiltro != null || marcacionSalidaRecesoFiltro != null))
+                    {
+                        novedades.Add(new Novedad
+                        {
+                            Descripcion = "No ha sido asignado el turno de receso",
+                            MinutosNovedad = ""
+                        });
+                    }
                     #endregion
 
 
@@ -225,7 +251,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
                     listaEvaluacionAsistencia.Add(new EvaluacionAsistenciaResponseType()
                     {
-                        Colaborador = colaborador.Nombres,
+                        Colaborador = colaborador.Nombres + " " + colaborador.Apellidos,
                         Identificacion = item.Cedula,
                         CodBiometrico = colaborador.CodigoConvivencia,
                         Udn = request.Udn,
