@@ -91,9 +91,9 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
             //                                         e.Cargo.Departamento.Area.Nombre == request.Area &&
             //                                         e.Cargo.Departamento.Area.Empresa.RazonSocial == request.Udn).ToList());
             //comentado temporal, hasta que se normalicen los cargos con su coaborador y departamento
-            List<Solicitud> solicitudes = new();
             for (DateTime dtm = request.FechaDesde; dtm <= request.FechaHasta; dtm = dtm.AddDays(1))
             {
+                List<Solicitud> solicitudes = new();
                 List<Novedad> novedades = new();
 
                 foreach (var item in bitacora)
@@ -226,6 +226,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
 
                     #region Procesamiento de solicitudes
+                    solicitudes.Clear();
 
                     int codigo = string.IsNullOrEmpty(colaborador?.CodigoConvivencia) ? 0 : int.Parse(colaborador?.CodigoConvivencia);
                     if (solicitudGeneralType != null)
