@@ -91,14 +91,13 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
             //                                         e.Cargo.Departamento.Area.Nombre == request.Area &&
             //                                         e.Cargo.Departamento.Area.Empresa.RazonSocial == request.Udn).ToList());
             //comentado temporal, hasta que se normalicen los cargos con su coaborador y departamento
+            List<Solicitud> solicitudes = new();
             for (DateTime dtm = request.FechaDesde; dtm <= request.FechaHasta; dtm = dtm.AddDays(1))
             {
-                List<Solicitud> solicitudes = new();
                 List<Novedad> novedades = new();
 
                 foreach (var item in bitacora)
                 {
-
                     DateTime fechaConsulta = dtm;
                     var u = dtm.ToShortDateString();
 
@@ -159,6 +158,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
 
                     #region Consulta y procesamiento de novedades
+                    novedades.Clear();
 
                     if (!string.IsNullOrEmpty(marcacionEntradaFiltro?.Novedad))
                     {
@@ -230,7 +230,10 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                     int codigo = string.IsNullOrEmpty(colaborador?.CodigoConvivencia) ? 0 : int.Parse(colaborador?.CodigoConvivencia);
                     if (solicitudGeneralType != null)
                     {
-                        var solicitudesObj = solicitudGeneralType.Where(e => e.IdBeneficiario == codigo && e.FechaAfectacion?.ToShortDateString() == fechaConsulta.ToShortDateString() && e.IdEstadoSolicitud == estadoAprobado).ToList();
+                        var solicitudesObj = solicitudGeneralType.Where(e => e.IdBeneficiario == codigo &&
+                                             fechaConsulta >= e.FechaAfectacionDesde && fechaConsulta <= e.FechaAfectacionDesde &&
+                                             e.IdEstadoSolicitud == estadoAprobado).ToList();
+
                         if (solicitudesObj.Any())
                         {
                             foreach (var soli in solicitudesObj)
@@ -265,6 +268,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                     });
 
                 }
+
                 
             }
 
