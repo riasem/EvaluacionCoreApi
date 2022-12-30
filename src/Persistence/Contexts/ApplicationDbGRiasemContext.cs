@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Workflow.Persistence.Contexts
+namespace EvaluacionCore.Persistence.Contexts
 {
     public class ApplicationDbGRiasemContext : DbContext
     {
@@ -20,6 +20,7 @@ namespace Workflow.Persistence.Contexts
         public DbSet<UserInfo> UserInfo { get; set; }
 
         public DbSet<AccMonitorLog> AccMonitorLog { get; set; }
+        public DbSet<AccMonitoLogRiasem> AccMonitoLogRiasem { get; set; }
         
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) =>

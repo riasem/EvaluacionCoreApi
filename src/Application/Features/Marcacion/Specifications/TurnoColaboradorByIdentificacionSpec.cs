@@ -12,9 +12,10 @@ public class TurnoColaboradorByIdentificacionSpec : Specification<TurnoColaborad
 {
     public TurnoColaboradorByIdentificacionSpec(string identificacion, DateTime FechaDesde, DateTime FechaHasta)
     {
-        Query.Where(e => e.FechaAsignacion >= FechaDesde && e.FechaAsignacion <= FechaHasta && e.Estado == "A")
+        Query.Where(e => e.FechaAsignacion.Date >= FechaDesde.Date && e.FechaAsignacion.Date <= FechaHasta.Date && e.Estado == "A")
              .Include(p => p.Colaborador).Where(p => p.Colaborador.Identificacion == identificacion)
-             .Include(p => p.Turno);
+             .Include(p => p.Turno)
+             .ThenInclude(p => p.ClaseTurno)/*.Where(p => p.Turno.ClaseTurno.CodigoClaseturno == "LABORA")*/;
 
     }
 }

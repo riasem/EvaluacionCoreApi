@@ -1,13 +1,9 @@
-﻿using AutoMapper;
-using EvaluacionCore.Application.Common.Exceptions;
-using EvaluacionCore.Application.Common.Interfaces;
+﻿using EvaluacionCore.Application.Common.Exceptions;
 using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetBitacoraMarcacion;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Dto;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Interfaces;
 using MediatR;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace EvaluacionCore.Application.Features.Marcacion.Commands.GetBitacoraMarcacion
 {

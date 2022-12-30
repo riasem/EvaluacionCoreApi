@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 
 namespace EnrolApp.Application.Features.Marcacion.Specifications;
 
-public class MarcacionByMaxIdSpec : Specification<AccMonitorLog>
+public class MarMonitorByRangeFechaSpec : Specification<AccMonitorLog>
 {
-    public MarcacionByMaxIdSpec()
+    public MarMonitorByRangeFechaSpec(string codigo, DateTime fechaDesde, DateTime fechaHasta)
     {
-        Query.OrderByDescending(x => x.Id).Take(1);
+        Query.Where(x => x.Pin == codigo && x.Time.Date >= fechaDesde.Date && x.Time.Date <= fechaHasta.Date);
     }
 }

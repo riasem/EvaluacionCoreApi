@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <Folder Include="Common\Filters\" />
+    <Folder Include="Features\EvalCore\Specifications\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -39,5 +39,8 @@ namespace EvaluacionCore.Application.Features.BitacoraMarcacion.Dto
 
         [JsonPropertyName("novedad")]
         public string Novedad { get; set; }
+
+        [JsonPropertyName("minutos_novedad")]
+        public string Minutos_Novedad { get; set; }
     }
 }

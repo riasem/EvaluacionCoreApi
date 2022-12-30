@@ -20,6 +20,7 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         /// <param name="CodUdn"></param>
         /// <param name="CodArea"></param>
         /// <param name="CodSubcentro"></param>
+        /// <param name="CodMarcacion"></param>
         /// <param name="FechaDesde"></param>
         /// <param name="FechaHasta"></param>
         /// <param name="cancellationToken"></param>
@@ -28,12 +29,12 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         [HttpGet("GetBitacoraMarcacion")]
         [EnableCors("AllowOrigin")]
         [ProducesResponseType(typeof(ResponseType<List<BitacoraMarcacionType>>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetBitacoraMarcacion(string CodUdn, string? CodArea, string? CodSubcentro, string? CodMarcacion, string FechaDesde, string FechaHasta, CancellationToken cancellationToken, string? Suscriptor)
+        public async Task<IActionResult> GetBitacoraMarcacion(string? CodUdn, string? CodArea, string? CodSubcentro, string? CodMarcacion, string FechaDesde, string FechaHasta, CancellationToken cancellationToken, string? Suscriptor)
         {
             var request = new GetBitacoraMarcacionRequest()
             {
                 Suscriptor = string.IsNullOrEmpty(Suscriptor) ? string.Empty : Suscriptor,
-                CodUdn = CodUdn,
+                CodUdn = string.IsNullOrEmpty(CodUdn) ? string.Empty : CodUdn,
                 CodArea = string.IsNullOrEmpty(CodArea) ? string.Empty : CodArea,
                 CodSubcentro = string.IsNullOrEmpty(CodSubcentro) ? "0" : CodSubcentro,
                 CodMarcacion = string.IsNullOrEmpty(CodMarcacion) ? string.Empty: CodMarcacion,
@@ -70,6 +71,7 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpPost("GenerarMarcacion")]
+        [EnableCors("AllowOrigin")]
         [ProducesResponseType(typeof(ResponseType<MarcacionResponseType>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateMarcacion([FromBody] CreateMarcacionRequest request, CancellationToken cancellationToken)
@@ -80,13 +82,21 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         }
 
 
-
+        /// <summary>
+        /// Obtener datos de horas trabajadas, horas asignadas y horas pendientes
+        /// </summary>
+        /// <param name="IdCliente"></param>
+        /// <param name="fechaDesde"></param>
+        /// <param name="fechasHasta"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet("ConsultaRecursos")]
-        [ProducesResponseType(typeof(ResponseType<ConsultaRecursoType>), StatusCodes.Status201Created)]
+        [EnableCors("AllowOrigin")]
+        [ProducesResponseType(typeof(ResponseType<List<ConsultaRecursoType>>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> ConsultaRecursos(string Identificacion, DateTime fechaDesde, DateTime fechasHasta, CancellationToken cancellationToken)
+        public async Task<IActionResult> ConsultaRecursos(Guid IdCliente, DateTime fechaDesde, DateTime fechasHasta, CancellationToken cancellationToken)
         {
-            var query = new GetRecursoQueries(Identificacion, fechaDesde,fechasHasta);
+            var query = new GetRecursoQueries(IdCliente, fechaDesde,fechasHasta);
             var objResult = await Mediator.Send(query, cancellationToken);
             return Ok(objResult);
         }

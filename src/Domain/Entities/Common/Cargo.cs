@@ -1,5 +1,6 @@
 ﻿using EnrolApp.Domain.Entities.Common;
 using EvaluacionCore.Domain.Entities.Common;
+using EvaluacionCore.Domain.Entities.Organizacion;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -15,10 +16,9 @@ public class Cargo
     [Column("id", Order = 0, TypeName = "uniqueidentifier")]
     public Guid Id { get; set; }
 
-    [NotMapped]
     [Column("departamentoId", Order = 1, TypeName = "uniqueidentifier")]
     public Guid DepartamentoId { get; set; }
-    
+    public virtual Departamento Departamento { get; set; }
 
     [Column("nombre", Order = 2, TypeName = "varchar")]
     public string Nombre { get; set; }
@@ -27,7 +27,7 @@ public class Cargo
     public string Descripcion { get; set; }
 
     [Column("cargoPadreId", Order = 4, TypeName = "uniqueidentifier")]
-    public Guid CargoPadreId { get; set; }
+    public Guid? CargoPadreId { get; set; } = Guid.Empty;
 
     [Column("estado", Order = 5, TypeName = "varchar")]
     public string Estado { get; set; }
@@ -44,5 +44,5 @@ public class Cargo
     [Column("fechaModificacion", Order = 9, TypeName = "datetime2")]
     public DateTime? FechaModificacion { get; set; }
 
-    public virtual ICollection<Cliente> Cliente { get; set; }
+    public virtual ICollection<Cliente> Clientes { get; set; }
 }
