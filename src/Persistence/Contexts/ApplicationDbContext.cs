@@ -26,6 +26,13 @@ public class ApplicationDbContext : DbContext
     public DbSet<TipoTurno> TipoTurnos { get; set; }
     public DbSet<Cliente> Clientes { get; set; }
     public DbSet<Turno> Turnos { get; set; }
+    public DbSet<CalendarioLocal> CalendarioLocal { get; set; }
+    public DbSet<CalendarioNacional> CalendarioNacional { get; set; }
+    public DbSet<Pais> Pais { get; set; }
+    public DbSet<Provincia> Provincia { get; set; }
+    public DbSet<Canton> Canton { get; set; }
+
+
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>

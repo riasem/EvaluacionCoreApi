@@ -1,6 +1,5 @@
 ﻿
 using Ardalis.Specification;
-using Dapper;
 using EnrolApp.Application.Features.Marcacion.Commands.CreateMarcacion;
 using EnrolApp.Application.Features.Marcacion.Specifications;
 using EnrolApp.Domain.Entities.Horario;
@@ -10,10 +9,8 @@ using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.Marcacion.Dto;
 using EvaluacionCore.Application.Features.Marcacion.Interfaces;
 using EvaluacionCore.Application.Features.Marcacion.Specifications;
-using EvaluacionCore.Application.Features.Turnos.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using EvaluacionCore.Domain.Entities.Marcaciones;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Data;

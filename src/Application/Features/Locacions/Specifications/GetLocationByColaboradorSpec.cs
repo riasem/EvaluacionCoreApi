@@ -13,7 +13,11 @@ namespace EvaluacionCore.Application.Features.Locacions.Specifications
         public GetLocationByColaboradorSpec(string Identificacion)
         {
             Query.Where(p => p.Colaborador.Identificacion == Identificacion && p.Estado == "A")
-                .Include(p => p.Localidad);
+                .Include(p => p.Colaborador)
+                .Include(p => p.Localidad)
+                .ThenInclude(p => p.Canton)
+                .ThenInclude(p => p.Provincia)
+                .ThenInclude(p => p.Pais);
         }
     }
 }
