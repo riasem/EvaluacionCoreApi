@@ -1,6 +1,7 @@
 ﻿using EnrolApp.Domain.Entities.Common;
 using EnrolApp.Domain.Entities.Horario;
 using EvaluacionCore.Domain.Entities.Asistencia;
+using EvaluacionCore.Domain.Entities.Calendario;
 using EvaluacionCore.Domain.Entities.Common;
 using EvaluacionCore.Domain.Entities.Justificacion;
 using EvaluacionCore.Domain.Entities.Permisos;

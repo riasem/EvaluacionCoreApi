@@ -5,14 +5,14 @@ using EvaluacionCore.Application.Features.EvalCore.Interfaces;
 using EvaluacionCore.Application.Features.Marcacion.Interfaces;
 using EvaluacionCore.Persistence.Contexts;
 using EvaluacionCore.Persistence.Repository;
-using EvaluacionCore.Persistence.Repository.BitacoraMarcacion;
 using EvaluacionCore.Persistence.Repository.Employees;
-using EvaluacionCore.Persistence.Repository.General;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Workflow.Persistence.Contexts;
+using Workflow.Persistence.Repository;
+using Workflow.Persistence.Repository.BitacoraMarcacion;
 using Workflow.Persistence.Repository.Calendario;
-using Workflow.Persistence.Repository.TurnosAsignadosExcel;
 
 namespace EvaluacionCore.Persistence;
 public static class ServiceExtensions
