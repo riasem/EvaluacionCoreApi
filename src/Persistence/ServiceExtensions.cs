@@ -15,6 +15,7 @@ using EvaluacionCore.Persistence.Repository;
 using EvaluacionCore.Persistence.Repository.BitacoraMarcacion;
 using Workflow.Persistence.Repository.TurnosAsignadosExcel;
 using EvaluacionCore.Persistence.Repository.General;
+using Workflow.Persistence.Repository.Calendario;
 
 namespace EvaluacionCore.Persistence;
 public static class ServiceExtensions
