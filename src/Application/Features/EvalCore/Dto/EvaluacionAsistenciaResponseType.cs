@@ -73,6 +73,9 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
         [JsonPropertyName("idFeatureEntrada")]
         public Guid? IdFeatureEntrada { get; set; }
 
+        [JsonPropertyName("tipoSolicitudEntrada")]
+        public string TipoSolicitudEntrada { get; set; }
+
         [JsonPropertyName("estadoEntrada")]
         public string EstadoEntrada { get; set; }
 
@@ -92,6 +95,9 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
 
         [JsonPropertyName("idFeatureSalida")]
         public Guid? IdFeatureSalida { get; set; }
+
+        [JsonPropertyName("tipoSolicitudSalida")]
+        public string TipoSolicitudSalida { get; set; }
 
         [JsonPropertyName("estadoSalida")]
         public string EstadoSalida { get; set; }
@@ -147,6 +153,9 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
         [JsonPropertyName("estadoEntradaReceso")]
         public string EstadoEntradaReceso { get; set; }
 
+        [JsonPropertyName("tipoSolicitudEntradaReceso")]
+        public string TipoSolicitudEntradaReceso { get; set; }
+
         [JsonPropertyName("fechaSolicitudEntradaReceso")]
         public DateTime? FechaSolicitudEntradaReceso { get; set; }
 
@@ -163,6 +172,9 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
 
         [JsonPropertyName("idFeatureSalidaReceso")]
         public Guid? IdFeatureSalidaReceso { get; set; }
+
+        [JsonPropertyName("tipoSolicitudSalidaReceso")]
+        public string TipoSolicitudSalidaReceso { get; set; }
 
         [JsonPropertyName("estadoSalidaReceso")]
         public string EstadoSalidaReceso { get; set; }

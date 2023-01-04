@@ -150,14 +150,19 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                         EstadoEntrada = objMarcacionColEntrada?.EstadoMarcacion ?? "",
                         FechaSolicitudEntrada = objMarcacionColEntrada?.FechaSolicitud != null ? DateTime.ParseExact(objMarcacionColEntrada.FechaSolicitud, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : DateTime.Parse("01-01-1900"),
                         UsuarioSolicitudEntrada = objMarcacionColEntrada?.UsuarioSolicitud ?? "0",
-                        IdSolicitudEntrada   = objMarcacionColEntrada?.IdSolicitud,
+                        IdSolicitudEntrada   = objMarcacionColEntrada?.IdSolicitud ?? Guid.Empty,
+                        IdFeatureEntrada = objMarcacionColEntrada?.IdFeature ?? Guid.Empty,
+                        TipoSolicitudEntrada = EvaluaTipoSolicitud(objMarcacionColEntrada?.IdFeature),
+
 
                         //MARCACION SALIDA
                         MarcacionSalida = fechaSalida,
                         EstadoSalida = objMarcacionColSalida?.EstadoMarcacion ?? "",
                         FechaSolicitudSalida = objMarcacionColSalida?.FechaSolicitud != null ? DateTime.ParseExact(objMarcacionColSalida.FechaSolicitud, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : DateTime.Parse("01-01-1900"),
                         UsuarioSolicitudSalida = objMarcacionColSalida?.UsuarioSolicitud ?? "0",
-                        IdSolicitudSalida = objMarcacionColSalida?.IdSolicitud
+                        IdSolicitudSalida = objMarcacionColSalida?.IdSolicitud ?? Guid.Empty,
+                        IdFeatureSalida = objMarcacionColSalida?.IdFeature ?? Guid.Empty,
+                        TipoSolicitudSalida = EvaluaTipoSolicitud(objMarcacionColSalida?.IdFeature)
                     };
 
 
@@ -198,23 +203,25 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                         MarcacionEntrada = marcacionEntradaRecesoFiltro?.Time != null ? DateTime.ParseExact(marcacionEntradaRecesoFiltro.Time, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : null,
                         FechaSolicitudEntradaReceso = marcacionEntradaRecesoFiltro?.FechaSolicitud != null ? DateTime.ParseExact(marcacionEntradaRecesoFiltro.FechaSolicitud, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : DateTime.Parse("01-01-1900"),
                         UsuarioSolicitudEntradaReceso = marcacionEntradaRecesoFiltro?.UsuarioSolicitud ?? "0",
-                        IdSolicitudEntradaReceso = marcacionEntradaRecesoFiltro?.IdSolicitud,
+                        IdSolicitudEntradaReceso = marcacionEntradaRecesoFiltro?.IdSolicitud ?? Guid.Empty,
                         EstadoEntradaReceso = marcacionEntradaRecesoFiltro?.EstadoMarcacion ?? "",
+                        IdFeatureEntradaReceso = marcacionEntradaRecesoFiltro?.IdFeature ?? Guid.Empty,
+                        TipoSolicitudEntradaReceso = EvaluaTipoSolicitud(marcacionEntradaRecesoFiltro?.IdFeature),
 
                         //marcaciones de receso salida
                         MarcacionSalida = marcacionSalidaRecesoFiltro?.Time != null ? DateTime.ParseExact(marcacionSalidaRecesoFiltro.Time, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : null,
                         FechaSolicitudSalidaReceso = marcacionSalidaRecesoFiltro?.FechaSolicitud != null ? DateTime.ParseExact(marcacionSalidaRecesoFiltro.FechaSolicitud, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : DateTime.Parse("01-01-1900"),
                         UsuarioSolicitudSalidaReceso = marcacionSalidaRecesoFiltro?.UsuarioSolicitud ?? "",
-                        IdSolicitudSalidaReceso = marcacionSalidaRecesoFiltro?.IdSolicitud,
+                        IdSolicitudSalidaReceso = marcacionSalidaRecesoFiltro?.IdSolicitud ?? Guid.Empty,
                         EstadoSalidaReceso = marcacionSalidaRecesoFiltro?.EstadoMarcacion ?? "",
-
+                        IdFeatureSalidaReceso = marcacionSalidaRecesoFiltro?.IdFeature ?? Guid.Empty,
+                        TipoSolicitudSalidaReceso = EvaluaTipoSolicitud(marcacionSalidaRecesoFiltro?.IdFeature),
                     };
 
                     #endregion
 
 
                     #region Consulta y procesamiento de novedades
-                    novedades.Clear();
 
                     if (turnoFiltro?.Turno?.ClaseTurno?.CodigoClaseturno == "LABORA")
                     {
@@ -304,7 +311,9 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                         TurnoReceso = turnoReceso
                     });
 
+                novedades.Clear();
                 }
+
 
             }
 
@@ -316,6 +325,35 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
             //insertar logs
         }
 
+    }
+
+
+    private string EvaluaTipoSolicitud(Guid? idFeature)
+    {
+        Guid permiso = Guid.Parse("DE4D17BD-9F03-4CCB-A3C0-3F37629CEA6A");
+        Guid justificacion = Guid.Parse("16D8E575-51A2-442D-889C-1E93E9F786B2");
+        Guid vacacion = Guid.Parse("26A08EC8-40FE-435C-8655-3F570278879E");
+        if (idFeature != null)
+        {
+            if (idFeature == permiso)
+            {
+                return "PER";
+            }
+            else if(idFeature == justificacion)
+            {
+                return "JUS";
+            }
+            else if (idFeature == vacacion)
+            {
+                return "VAC";
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+        return "";
     }
     
    
