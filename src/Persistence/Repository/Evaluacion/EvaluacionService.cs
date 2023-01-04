@@ -13,6 +13,9 @@ using Dapper;
 using EvaluacionCore.Application.Features.EvalCore.Commands.Specifications;
 using EvaluacionCore.Domain.Entities.Permisos;
 using EvaluacionCore.Domain.Entities.Vacaciones;
+using EvaluacionCore.Application.Features.BitacoraMarcacion.Dto;
+using EvaluacionCore.Domain.Entities.Common;
+using EvaluacionCore.Application.Features.Permisos.Dto;
 
 namespace EvaluacionCore.Persistence.Repository.Employees;
 
@@ -42,7 +45,7 @@ public class EvaluacionService : IEvaluacion
         _log = log;
         _config = config;
         ConnectionString = _config.GetConnectionString("Bd_Rrhh_Panacea");
-        ConnectionString_Marc = _config.GetConnectionString("Bd_Marcaciones_GRIAMSE");
+        ConnectionString_Marc = _config.GetConnectionString("DefaultConnection");
         _repoMarcaColAsync = repositoryMarcaCol;
         _repoTurnoColAsync = repositoryTurnoCol;
         _repositoryLocalidadColAsync = repositoryLocalidadCol;
@@ -171,6 +174,64 @@ public class EvaluacionService : IEvaluacion
 
             throw;
         }
+    }
+
+
+    public async Task<List<BitacoraMarcacionType>> ConsultaMarcaciones(string Identificacion, DateTime fechaDesde, DateTime fechaHasta, string codigoMarcacion)
+    {
+        List<BitacoraMarcacionType> bitacoraMarcacion = new();
+
+        try
+        {
+            //del  turno se saca hora entrada, salida. Margen posterior y previo y los codigos de marcacion
+            string query = "SELECT top 1 * FROM V_BIOMETRICO WHERE CEDULA = '" + Identificacion + "' AND time BETWEEN '" + fechaDesde.ToString("yyyy/MM/dd HH:mm:ss") + "' AND '" + fechaHasta.ToString("yyyy/MM/dd HH:mm:ss") + "' And state = '" + codigoMarcacion + "' Order by time desc";
+
+            using IDbConnection con = new SqlConnection(ConnectionString_Marc);
+            if (con.State == ConnectionState.Closed) con.Open();
+
+            bitacoraMarcacion = (await con.QueryAsync<BitacoraMarcacionType>(
+                query)).ToList();
+
+            if (con.State == ConnectionState.Open) con.Close();
+        }
+        catch (Exception e)
+        {
+            _log.LogError(e, string.Empty);
+        }
+
+        return bitacoraMarcacion;
+    }
+
+    public async Task<List<ColaboradorConvivenciaType>> ConsultaColaboradores(string codUdn, string codArea, string codScosto, string suscriptor)
+    {
+        List<ColaboradorConvivenciaType> bitacoraMarcacion = new();
+        string Udn    = !string.IsNullOrEmpty(codUdn) ? codUdn  : "codUdn";
+        string Area   = !string.IsNullOrEmpty(codArea) ? codArea : "codArea";
+        string Scosto = !string.IsNullOrEmpty(codScosto) ? codScosto : "codSubcentroCosto";
+        //string Susc   = !string.IsNullOrEmpty(suscriptor) ? suscriptor : "%";
+        try
+        {
+            string query = "SELECT identificacion, Empleado, codigoBiometrico FROM V_COLABORADORES_CONVIVENCIA WHERE codUdn = '" + Udn + "' AND codArea= '" + Area + "' AND codSubcentroCosto =  '" + Scosto + "' ";
+            if (!string.IsNullOrEmpty(suscriptor))
+            {
+                query += " and (Empleado LIKE CONCAT('%', '" + suscriptor + "', '%') OR codigoBiometrico = '" + suscriptor + "' OR identificacion = '" + suscriptor + "') ";
+            }
+            query += " order by desUdn, desArea, desCentroCosto, desSubcentroCosto, Empleado";
+
+            using IDbConnection con = new SqlConnection(ConnectionString_Marc);
+            if (con.State == ConnectionState.Closed) con.Open();
+
+            bitacoraMarcacion = (await con.QueryAsync<ColaboradorConvivenciaType>(
+                query)).ToList();
+
+            if (con.State == ConnectionState.Open) con.Close();
+        }
+        catch (Exception e)
+        {
+            _log.LogError(e, string.Empty);
+        }
+
+        return bitacoraMarcacion;
     }
 
 }

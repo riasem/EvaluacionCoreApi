@@ -3,7 +3,7 @@
     public interface IApisConsumoAsync
     {
 
-        Task<(bool Success, object Data)> GetEndPoint(object request, string uriEndPoint, string nombreEndPoint);
+        Task<(bool Success, object Data)> GetEndPoint(string uriEndPoint);
 
         Task<(bool Success, object Data)> PostEndPoint(object request, string uriEndPoint, string nombreEndPoint);
 
