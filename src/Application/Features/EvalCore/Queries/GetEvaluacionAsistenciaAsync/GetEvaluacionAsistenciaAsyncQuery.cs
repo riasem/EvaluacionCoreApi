@@ -77,7 +77,6 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
             TurnoLaboral turnoLaboral = new();
 
-            List<Novedad> novedades = new();
             TurnoColaborador turnoRecesoFiltro = new();
 
             var listaColaboradores =  await _EvaluacionAsync.ConsultaColaboradores(request.Udn, request.Area, request.Departamento, request.Suscriptor);
@@ -87,12 +86,12 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
                 for (DateTime dtm = request.FechaDesde; dtm <= request.FechaHasta; dtm = dtm.AddDays(1))
                 {
+                    List<Novedad> novedades = new();
                     //Se obtiene el turno laboral asignado al colaborador de la fecha en proceso
+
                     var turnoFiltro = await _repositoryTurnoColAsync.FirstOrDefaultAsync(new TurnoColaboradorTreeSpec(itemCol.Identificacion, dtm), cancellationToken);
 
 
-
-                    //RECORRIDO DE TURNO LABORAL
                     #region consulta y procesamiento de turno laboral
 
                     DateTime turnoLabDesde = dtm; //= dtm.AddHours(8);
@@ -154,7 +153,6 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                         IdFeatureEntrada = objMarcacionColEntrada?.IdFeature ?? Guid.Empty,
                         TipoSolicitudEntrada = EvaluaTipoSolicitud(objMarcacionColEntrada?.IdFeature),
 
-
                         //MARCACION SALIDA
                         MarcacionSalida = fechaSalida,
                         EstadoSalida = objMarcacionColSalida?.EstadoMarcacion ?? "",
@@ -164,7 +162,6 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                         IdFeatureSalida = objMarcacionColSalida?.IdFeature ?? Guid.Empty,
                         TipoSolicitudSalida = EvaluaTipoSolicitud(objMarcacionColSalida?.IdFeature)
                     };
-
 
                     #endregion
 
@@ -177,7 +174,6 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
                     string codMarcacionEntradaReceso = (turnoRecesoFiltro?.Turno?.CodigoEntrada?.ToString()) ?? "14";
                     string codMarcacionSalidaReceso = (turnoRecesoFiltro?.Turno?.CodigoSalida?.ToString()) ?? "15";
-
 
                     List<BitacoraMarcacionType> marcacionEntradaRecesoFiltro_ = await _EvaluacionAsync.ConsultaMarcaciones(itemCol.Identificacion, turnoRecesoDesde, turnoRecesoHasta, codMarcacionEntradaReceso);
                     BitacoraMarcacionType marcacionEntradaRecesoFiltro = marcacionEntradaRecesoFiltro_.FirstOrDefault();
@@ -245,6 +241,29 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                             });
                         }
 
+                        if (objMarcacionColEntrada == null)
+                        {
+                            novedades.Add(new Novedad
+                            {
+                                Descripcion = "Falta injustificada, no tiene registro de entrada. Fecha: " + dtm.ToShortDateString(),
+                                MinutosNovedad = "",
+                                EstadoMarcacion = "FI"
+                            });
+                        } //SI TIENE TURNO Y NO REALIZA MARCACION (FALTA) /FJ /FI
+
+                        if (objMarcacionColEntrada != null && objMarcacionColSalida == null)
+                        {
+                            novedades.Add(new Novedad
+                            {
+                                Descripcion = "No tiene registro de salida. Fecha: " + objMarcacionColEntrada.Fecha ,
+                                MinutosNovedad = "",
+                                EstadoMarcacion = "NS"
+                            });
+                        } //NO REGISTRA MARCACION DE SALIDA
+                    }
+
+                    if (turnoRecesoFiltro != null)
+                    {
                         if (!string.IsNullOrEmpty(marcacionSalidaRecesoFiltro?.Novedad))
                         {
                             novedades.Add(new Novedad
@@ -255,27 +274,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                             });
                         }
 
-                        if (turnoFiltro != null && objMarcacionColEntrada == null) // && 
-                        {
-                            novedades.Add(new Novedad
-                            {
-                                Descripcion = "Falta injustificada, no tiene registro de entrada.",
-                                MinutosNovedad = "",
-                                EstadoMarcacion = "FI"
-                            });
-                        } //SI TIENE TURNO Y NO REALIZA MARCACION (FALTA) /FJ /FI
-
-                        if (turnoFiltro == null && (objMarcacionColEntrada != null || objMarcacionColSalida == null))
-                        {
-                            novedades.Add(new Novedad
-                            {
-                                Descripcion = "No tiene registro de salida",
-                                MinutosNovedad = "",
-                                EstadoMarcacion = "NS"
-                            });
-                        } //NO REGISTRA MARCACION DE SALIDA
-
-                        if (turnoRecesoFiltro != null && marcacionEntradaRecesoFiltro != null && marcacionSalidaRecesoFiltro == null)
+                        if (marcacionEntradaRecesoFiltro != null && marcacionSalidaRecesoFiltro == null)
                         {
                             novedades.Add(new Novedad
                             {
@@ -284,18 +283,20 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                                 EstadoMarcacion = "NR" //RETORNO INJUSTIFICADO DE RECESO
                             });
                         }
-
-                        if (turnoRecesoFiltro == null && (marcacionEntradaRecesoFiltro != null || marcacionSalidaRecesoFiltro != null))
-                        {
-                            novedades.Add(new Novedad
-                            {
-                                Descripcion = "No ha sido asignado el turno de receso, pero registra marcacion de receso.",
-                                MinutosNovedad = "",
-                                EstadoMarcacion = "NT"
-                            });
-                        }
                     }
+
+                    if (turnoRecesoFiltro == null && (marcacionEntradaRecesoFiltro != null || marcacionSalidaRecesoFiltro != null))
+                    {
+                        novedades.Add(new Novedad
+                        {
+                            Descripcion = "No ha sido asignado el turno de receso, pero registra marcacion de receso.",
+                            MinutosNovedad = "",
+                            EstadoMarcacion = "NT"
+                        });
+                    }
+
                     #endregion
+
 
                     listaEvaluacionAsistencia.Add(new EvaluacionAsistenciaResponseType()
                     {
@@ -311,13 +312,12 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                         TurnoReceso = turnoReceso
                     });
 
-                novedades.Clear();
                 }
-
 
             }
 
             return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = listaEvaluacionAsistencia, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
+
         }
        catch (Exception e)
         {

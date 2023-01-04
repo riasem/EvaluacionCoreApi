@@ -9,7 +9,7 @@ public class TurnoColaboradorTreeSpec : Specification<TurnoColaborador>
     {
         Query
             .Include(p => p.Turno)
-            .Where(e => e.FechaAsignacion == fechaAsignacion && e.Turno.IdTurnoPadre == null && e.Turno.Estado == "A")
+            .Where(e => e.FechaAsignacion.Date == fechaAsignacion.Date && e.Turno.IdTurnoPadre == null && e.Turno.Estado == "A")
             .Include(p => p.Colaborador)
             .Where(f => f.Colaborador.Identificacion == Identificacion)
             .Include(p => p.Turno.ClaseTurno);
