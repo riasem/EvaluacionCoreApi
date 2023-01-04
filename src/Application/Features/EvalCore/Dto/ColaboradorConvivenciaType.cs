@@ -13,4 +13,14 @@ public class ColaboradorConvivenciaType
     [JsonPropertyName("codigoBiometrico")]
     public string CodigoBiometrico { get; set; }
 
+    [JsonPropertyName("desUdn")]
+    public string DesUdn { get; set; }
+
+    [JsonPropertyName("desArea")]
+    public string DesArea { get; set; }
+
+    [JsonPropertyName("desSubcentroCosto")]
+    public string DesSubcentroCosto { get; set; }
+
+
 }

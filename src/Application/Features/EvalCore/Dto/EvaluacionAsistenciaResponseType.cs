@@ -34,8 +34,8 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
         [JsonPropertyName("novedades")]
         public List<Novedad> Novedades { get; set; }
 
-        [JsonPropertyName("solicitudes")]
-        public List<Solicitud> Solicitudes { get; set; }
+        //[JsonPropertyName("solicitudes")]
+        //public List<Solicitud> Solicitudes { get; set; }
 
     }
 

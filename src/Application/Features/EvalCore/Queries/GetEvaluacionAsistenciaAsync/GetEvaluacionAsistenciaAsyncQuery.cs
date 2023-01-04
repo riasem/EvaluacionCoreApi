@@ -70,43 +70,13 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
             //incluir dentro del recorrido del colaborador 
 
 
-            //incluir el colaborador en el request (de ser necesario) / adicional el rango de fechas 
-            //var objTurnoCol = await _repositoryTurnoColAsync.ListAsync(new TurnoColaboradorTreeSpec(request.FechaDesde,request.FechaHasta), cancellationToken);
-
-            var objCliente = await _repositoryClienteAsync.ListAsync(new ClientesByEmpresaSpec(), cancellationToken);
-
-            List<TipoJornadaType> listaTipoJornada = new();
-            List<ModalidadJornadaType> listaModalidadJornada = new(); 
-            List<Cliente> objClienteTemp = new();      
-            List<Cliente> objClienteFinal = new();
             List<EvaluacionAsistenciaResponseType> listaEvaluacionAsistencia = new();
 
-
-            //GetBitacoraMarcacionRequest requestMarcacion = new()
-            //{
-            //    CodUdn = request.Udn,
-            //    CodArea = (request.Area) ?? "",
-            //    CodSubcentro = (request.Departamento) ?? "",
-            //    FechaDesde = request.FechaDesde.ToString("dd/MM/yyyy"),
-            //    FechaHasta = request.FechaHasta.ToString("dd/MM/yyyy"),
-            //    CodMarcacion =  "",
-            //    Suscriptor = request.Suscriptor.ToString(),
-            //};
-            //var bitacora = await  _repoBitMarcacionAsync.GetBitacoraMarcacionAsync(requestMarcacion);
-
-
-
-
-            List<TurnoColaborador> objTurnoCol;
-            List<BitacoraMarcacionType> objMarcacionCol;
-            List<SolicitudPermiso> objPermiso;
-            SolicitudJustificacion objJustificacion;
             bool poseeTurno = false;
             bool poseeTurnoReceso = false;
 
             TurnoLaboral turnoLaboral = new();
 
-            List<Solicitud> solicitudes = new();
             List<Novedad> novedades = new();
             TurnoColaborador turnoRecesoFiltro = new();
 
@@ -178,14 +148,14 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                         //marcacion ENTRADA
                         MarcacionEntrada = fechaEntrada,
                         EstadoEntrada = objMarcacionColEntrada?.EstadoMarcacion ?? "",
-                        FechaSolicitudEntrada = objMarcacionColEntrada?.FechaSolicitud != null ? DateTime.Parse(objMarcacionColEntrada?.FechaSolicitud) : DateTime.Parse("01-01-1900"),
+                        FechaSolicitudEntrada = objMarcacionColEntrada?.FechaSolicitud != null ? DateTime.ParseExact(objMarcacionColEntrada.FechaSolicitud, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : DateTime.Parse("01-01-1900"),
                         UsuarioSolicitudEntrada = objMarcacionColEntrada?.UsuarioSolicitud ?? "0",
                         IdSolicitudEntrada   = objMarcacionColEntrada?.IdSolicitud,
 
                         //MARCACION SALIDA
                         MarcacionSalida = fechaSalida,
                         EstadoSalida = objMarcacionColSalida?.EstadoMarcacion ?? "",
-                        FechaSolicitudSalida = objMarcacionColSalida?.FechaSolicitud != null ? DateTime.Parse(objMarcacionColSalida?.FechaSolicitud) : DateTime.Parse("01-01-1900"),
+                        FechaSolicitudSalida = objMarcacionColSalida?.FechaSolicitud != null ? DateTime.ParseExact(objMarcacionColSalida.FechaSolicitud, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : DateTime.Parse("01-01-1900"),
                         UsuarioSolicitudSalida = objMarcacionColSalida?.UsuarioSolicitud ?? "0",
                         IdSolicitudSalida = objMarcacionColSalida?.IdSolicitud
                     };
@@ -304,7 +274,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                             {
                                 Descripcion = "No tiene registro de retorno del receso",
                                 MinutosNovedad = "",
-                                EstadoMarcacion = ""
+                                EstadoMarcacion = "NR" //RETORNO INJUSTIFICADO DE RECESO
                             });
                         }
 
@@ -314,7 +284,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                             {
                                 Descripcion = "No ha sido asignado el turno de receso, pero registra marcacion de receso.",
                                 MinutosNovedad = "",
-                                EstadoMarcacion = ""
+                                EstadoMarcacion = "NT"
                             });
                         }
                     }
@@ -325,14 +295,13 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                         Colaborador = itemCol.Empleado,
                         Identificacion = itemCol.Identificacion,
                         CodBiometrico = itemCol.CodigoBiometrico,
-                        Udn = request.Udn,
-                        Area = request.Area,
-                        SubCentroCosto = request.Departamento,
+                        Udn = itemCol.DesUdn,
+                        Area = itemCol.DesArea,
+                        SubCentroCosto = itemCol.DesSubcentroCosto,
                         Fecha = dtm,
                         Novedades = novedades,
                         TurnoLaboral = turnoLaborall,
-                        TurnoReceso = turnoReceso,
-                        //Solicitudes = solicitudes
+                        TurnoReceso = turnoReceso
                     });
 
                 }

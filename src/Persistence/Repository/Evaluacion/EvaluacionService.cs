@@ -211,7 +211,7 @@ public class EvaluacionService : IEvaluacion
         //string Susc   = !string.IsNullOrEmpty(suscriptor) ? suscriptor : "%";
         try
         {
-            string query = "SELECT identificacion, Empleado, codigoBiometrico FROM V_COLABORADORES_CONVIVENCIA WHERE codUdn = '" + Udn + "' AND codArea= '" + Area + "' AND codSubcentroCosto =  '" + Scosto + "' ";
+            string query = "SELECT identificacion, Empleado, codigoBiometrico, desUdn, desArea, desSubcentroCosto FROM V_COLABORADORES_CONVIVENCIA WHERE codUdn = '" + Udn + "' AND codArea= '" + Area + "' AND codSubcentroCosto =  '" + Scosto + "' ";
             if (!string.IsNullOrEmpty(suscriptor))
             {
                 query += " and (Empleado LIKE CONCAT('%', '" + suscriptor + "', '%') OR codigoBiometrico = '" + suscriptor + "' OR identificacion = '" + suscriptor + "') ";
