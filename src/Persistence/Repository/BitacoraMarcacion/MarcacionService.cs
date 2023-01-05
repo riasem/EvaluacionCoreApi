@@ -76,7 +76,7 @@ public class MarcacionService : IMarcacion
 
                 AccMonitorLog accMonitorLog = new()
                 {
-                    Id = 9995415,
+                    //Id = 9995415,
                     State = 0,
                     Time = marcacionColaborador,
                     Pin = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.CodigoConvivencia,
