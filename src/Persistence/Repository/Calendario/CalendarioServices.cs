@@ -43,20 +43,21 @@ public class CalendarioServices : ICalendario
         {
             var objClienteLocalidad = await _repoLocalidadColaborador.ListAsync(new GetLocationByColaboradorSpec(identificacion));
             if (!objClienteLocalidad.Any()) return new ResponseType<List<DiasFeriadoIdentificacionResponseType>>() { StatusCode = "001", Succeeded = true, Message = "No tiene asignado una localidad" };
-            var listCantones = objClienteLocalidad.DistinctBy(x => x.Localidad.Canton.Codigo).ToList();
-            var listPaises = objClienteLocalidad.DistinctBy(x => x.Localidad.Canton.Provincia.Pais.Codigo).ToList();
+            var canton = objClienteLocalidad.Where(x => x.EsPrincipal == true).FirstOrDefault()/*DistinctBy(x => x.Localidad.Canton.Codigo).ToList()*/;
+            var pais = objClienteLocalidad.Where(x => x.EsPrincipal == true).FirstOrDefault()/*.DistinctBy(x => x.Localidad.Canton.Provincia.Pais.Codigo).ToList()*/;
             List<DiasFeriadoIdentificacionResponseType> result = new();
 
-            foreach (var pais in listPaises)
-            {
+            //foreach (var pais in listPaises)
+            //{
                 var CalendarioNacional = await _repoCalendarioNa.FirstOrDefaultAsync(new GetFeriadosNacionalByIdentificacionSpec(pais.Localidad.Canton.Provincia.Pais.Id, fecha));
                 if (CalendarioNacional != null)
                 {
                     result.Add(new DiasFeriadoIdentificacionResponseType
                     {
-                        Identificacion = identificacion,
-                        Nombres = pais.Colaborador.Nombres,
-                        Apellidos = pais.Colaborador.Apellidos,
+                        //Identificacion = identificacion,
+                        //Nombres = pais.Colaborador.Nombres,
+                        //Apellidos = pais.Colaborador.Apellidos,
+                        Fecha = fecha,
                         Localidad = pais.Localidad.Descripcion,
                         Canton = pais.Localidad.Canton.Descripcion,
                         Provincia = pais.Localidad.Canton.Provincia.Descripcion,
@@ -66,19 +67,20 @@ public class CalendarioServices : ICalendario
                         FechaFestiva = CalendarioNacional.FechaFestiva,
                         TipoFeriado = "Nacional",
                         Descripcion = CalendarioNacional.Descripcion
-                    });
+                    });;;
                 }
-            }
-            foreach (var canton in listCantones)
-            {
+            //}
+            //foreach (var canton in listCantones)
+            //{
                 var CalendarioLocal = await _repoCalendarioLocal.FirstOrDefaultAsync(new GetFeriadosLocalesByIdentificacionSpec(canton.Localidad.Canton.Id, fecha));
                 if (CalendarioLocal != null)
                 {
                     result.Add(new DiasFeriadoIdentificacionResponseType
                     {
-                        Identificacion = identificacion,
-                        Nombres = canton.Colaborador.Nombres,
-                        Apellidos = canton.Colaborador.Apellidos,
+                        //Identificacion = identificacion,
+                        //Nombres = canton.Colaborador.Nombres,
+                        //Apellidos = canton.Colaborador.Apellidos,
+                        Fecha = fecha,
                         Localidad = canton.Localidad.Descripcion,
                         Canton = canton.Localidad.Canton.Descripcion,
                         Provincia = canton.Localidad.Canton.Provincia.Descripcion,
@@ -90,7 +92,7 @@ public class CalendarioServices : ICalendario
                         Descripcion = CalendarioLocal.Descripcion
                     });
                 }
-            }
+            //}
 
             if (!result.Any())
             {
@@ -119,6 +121,7 @@ public class CalendarioServices : ICalendario
             {
                 diasFeriados.Add(new DiasFeriadosResponseType
                 {
+                    Fecha = fecha,
                     TipoFeriado = "Local",
                     Canton = objCanton.Descripcion,
                     Descripcion = CalendarioLocal.Descripcion,
@@ -134,6 +137,7 @@ public class CalendarioServices : ICalendario
             {
                 diasFeriados.Add(new DiasFeriadosResponseType
                 {
+                    Fecha = fecha,
                     TipoFeriado = "Nacional",
                     Canton = objCanton.Descripcion,
                     Descripcion = CalendarioNacional.Descripcion,

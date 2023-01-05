@@ -37,6 +37,9 @@ public class LocalidadColaborador
     [Column("fechaModificacion", Order = 7, TypeName = "datetime2")]
     public DateTime? FechaModificacion { get; set; }
 
+    [Column("esPrincipal", Order = 8, TypeName = "bit")]
+    public bool? EsPrincipal { get; set; }
+
     public virtual ICollection<MarcacionColaborador> MarcacionColaboradores { get; set; }
 
 }

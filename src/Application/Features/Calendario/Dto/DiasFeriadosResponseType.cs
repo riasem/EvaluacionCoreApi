@@ -9,20 +9,20 @@ namespace EvaluacionCore.Application.Features.Calendario.Dto;
 
 public class DiasFeriadosResponseType
 {
-    [JsonPropertyName("tipoFeriado")]
-    public string TipoFeriado { get; set; }
-
-    [JsonPropertyName("pais")]
-    public string Pais { get; set; }
-
-    [JsonPropertyName("provincia")]
-    public string Provincia { get; set; }
+    public DateTime Fecha { get; set; }
 
     [JsonPropertyName("canton")]
     public string Canton { get; set; }
 
-    [JsonPropertyName("descripion")]
-    public string Descripcion { get; set; }
+    [JsonPropertyName("provincia")]
+
+    public string Provincia { get; set; }
+
+    [JsonPropertyName("pais")]
+    public string Pais { get; set; }
+
+    [JsonPropertyName("fechaConmemorativa")]
+    public DateTime FechaConmemorativa { get; set; }
 
     [JsonPropertyName("esRecuperable")]
     public bool? EsRecuperable { get; set; }
@@ -30,8 +30,20 @@ public class DiasFeriadosResponseType
     [JsonPropertyName("fechaFestiva")]
     public DateTime FechaFestiva { get; set; }
 
-    [JsonPropertyName("fechaConmemorativa")]
-    public DateTime FechaConmemorativa { get; set; }
+    [JsonPropertyName("tipoFeriado")]
+    public string TipoFeriado { get; set; }
+
+
+    [JsonPropertyName("descripion")]
+    public string Descripcion { get; set; }
+
+
+
+
+
+
 
     
+
+
 }
