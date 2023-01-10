@@ -72,7 +72,7 @@ public class MarcacionService : IMarcacion
 
                 AccMonitorLog accMonitorLog = new()
                 {
-                    //Id = objMonitorLog.Id + 1,
+                    //Id = 9995415,
                     State = 0,
                     Time = marcacionColaborador,
                     Pin = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.CodigoConvivencia,
@@ -442,15 +442,15 @@ public class MarcacionService : IMarcacion
     {
         string estadoMarcacion = "";
 
-        if (desciption.Contains("EXCEDIDO"))
+        if (desciption.Contains("HA EXCEDIDO"))
         {
             estadoMarcacion = "ER";
         }
-        else if(desciption.Contains("ATRASO"))
+        if(desciption.Contains("ATRASO DE"))
         {
             estadoMarcacion = "AI";
         }
-        else if(desciption.Contains("SALIDA"))
+        if(desciption.Contains("SALIDA ANTICIPADA"))
         {
             estadoMarcacion = "SI";
         }
