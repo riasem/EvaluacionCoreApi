@@ -15,7 +15,6 @@ using EvaluacionCore.Domain.Entities.Marcaciones;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Data;
-using EvaluacionCore.Application.Common.Interfaces;
 
 namespace EvaluacionCore.Persistence.Repository.BitacoraMarcacion;
 
@@ -324,7 +323,7 @@ public class MarcacionService : IMarcacion
         {
             var objTurnoColaborador = await _repoTurnoCola.ListAsync(new TurnoColaboradorByIdentificacionSpec(itemCliente.Identificacion, fechaDesde, fechaHasta), cancellationToken);
             var marcacionesColaborador = await _repoMarcacionCola.ListAsync(new MarcacionByRangeFechaSpec(itemCliente.Identificacion, fechaDesde, fechaHasta), cancellationToken);
-            var marcaMonitor = await _repoMonitorLogAsync.ListAsync(new MarMonitorByRangeFechaSpec(itemCliente.CodigoConvivencia, fechaDesde, fechaHasta), cancellationToken);
+            var marcaMonitor = await _repoMonitoLogRiasemAsync.ListAsync(new MarMonitorByRangeFechaSpec(itemCliente.CodigoConvivencia, fechaDesde, fechaHasta), cancellationToken);
             TimeSpan difFechas = fechaHasta - fechaDesde;
             List<Dias> dias = new();
             for (int i = 0; i <= difFechas.Days; i++)
@@ -333,7 +332,7 @@ public class MarcacionService : IMarcacion
                 var turnoAsig = objTurnoColaborador.Where(x => x.FechaAsignacion.Date == fechanueva.Date && x.Turno.ClaseTurno.CodigoClaseturno == "LABORA").FirstOrDefault();
                 var turnoAsigReceso = objTurnoColaborador.Where(x => x.FechaAsignacion.Date == fechanueva.Date && x.Turno.ClaseTurno.CodigoClaseturno == "RECESO").FirstOrDefault();
                 var marcacionCliente = marcacionesColaborador.Where(x => x.FechaCreacion.Date == fechanueva.Date && x.EstadoProcesado == true).FirstOrDefault();
-                var marcacionMonitor = marcaMonitor.Where(x => x.Time.Date == fechanueva.Date).ToList();
+                var marcacionMonitor = marcaMonitor.Where(x => x.Time.Value.Date == fechanueva.Date).ToList();
                 var localidadDescripcion = string.Empty;
                 var tHAsignada = string.Empty;
                 var tHTrabajadas = string.Empty;
@@ -368,11 +367,11 @@ public class MarcacionService : IMarcacion
 
                 if (marcacionMonitor.Any())
                 {
-                    var mEntrada = marcacionMonitor.Where(x => x.Time.Date == fechanueva.Date && x.State == 10).OrderBy(x => x.Time).FirstOrDefault();
-                    var mSalida = marcacionMonitor.Where(x => x.Time.Date == fechanueva.Date && x.State == 11).OrderByDescending(x => x.Time).FirstOrDefault();
+                    var mEntrada = marcacionMonitor.Where(x => x.Time.Value.Date == fechanueva.Date && x.State == 10).OrderBy(x => x.Time).FirstOrDefault();
+                    var mSalida = marcacionMonitor.Where(x => x.Time.Value.Date == fechanueva.Date && x.State == 11).OrderByDescending(x => x.Time).FirstOrDefault();
                     if (mEntrada != null && mSalida != null)
                     {
-                        hTTrabajadas = (mSalida.Time.TimeOfDay - mEntrada.Time.TimeOfDay).TotalHours.ToString();
+                        hTTrabajadas = (mSalida.Time.Value.TimeOfDay - mEntrada.Time.Value.TimeOfDay).TotalHours.ToString();
                     }
                     else
                     {
