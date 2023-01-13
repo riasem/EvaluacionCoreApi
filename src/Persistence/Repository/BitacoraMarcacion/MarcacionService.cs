@@ -67,18 +67,17 @@ public class MarcacionService : IMarcacion
             //Validación de turno que corresponde
             //var objTurno = await _repoTurnoCola.ListAsync(new TurnosByIdClienteSpec(objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
 
-            if (Request.DispositivoId == objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.DispositivoId)
-            {
+            //if (Request.DispositivoId == objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.DispositivoId)
+            //{
 
                 AccMonitorLog accMonitorLog = new()
                 {
-                    //Id = 9995415,
                     State = 0,
                     Time = marcacionColaborador,
-                    Pin = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.CodigoConvivencia,
-                    Device_Id = 999,
+                    Pin = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador?.CodigoConvivencia,
+                    Device_Id = 999, //parametrizar desde el request
                     Verified = 0,
-                    Device_Name = "EnrolApp",
+                    Device_Name = "EnrolApp", //parametrizar desde el request
                     Status = 1
                 };
 
@@ -87,17 +86,15 @@ public class MarcacionService : IMarcacion
                 {
                     return new ResponseType<MarcacionResponseType>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
                 }
-
-                var objMarcacion =  _repoMonitoLogRiasemAsync.ListAsync(cancellationToken).Result.Take(1000).OrderByDescending(e => e.Time);
-
-                var marcacionEmpl = objMarcacion.Where(e => e.Device_Id == 999 && e.Pin == accMonitorLog.Pin).OrderByDescending(e => e.Time).FirstOrDefault();
-
+                await Task.Delay(1500);
+                var marcacionEmpl =  _repoMonitoLogRiasemAsync.FirstOrDefaultAsync(new MarcacionByColaboradorAndTime(objResultado.Pin, objResultado.Time), cancellationToken);
+            
                 if (marcacionEmpl is not null)
                 {
-                    string tipoMarcacion = EvaluaTipoMarcacion(marcacionEmpl.State);
-                    string estadoMarcacion = EvaluaEstadoMarcacion(marcacionEmpl.Description);
+                string tipoMarcacion = EvaluaTipoMarcacion(marcacionEmpl.Result.State);
+                string estadoMarcacion = EvaluaEstadoMarcacion(marcacionEmpl.Result.Description);
 
-                    objResultFinal = new()
+                objResultFinal = new()
                     {
                         //MarcacionId = Guid.Parse(marcacionid),  TEMPORAL SE COMENTA HASTA REGULARIZAR 
                         MarcacionId = marcacionEmpl.Id,
@@ -113,6 +110,7 @@ public class MarcacionService : IMarcacion
 
                 return new ResponseType<MarcacionResponseType>() { Data = objResultFinal, Message = "Marcación registrada correctamente", StatusCode = "100", Succeeded = true };
 
+                #region COMENTADO KPI 1412
                 //if (!objTurno.Any())
                 //{
                 //    var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
@@ -124,7 +122,6 @@ public class MarcacionService : IMarcacion
                 //    return new ResponseType<MarcacionResponseType>() { Message = "Su marcación se ingreso correctamente, por el momento no tiene turno asignado por favor comunicar a su superior que le asigne", StatusCode = "100", Succeeded = true };
                 //}
 
-                #region COMENTADO KPI 1412
                 //Guid? idturnovalidado = Guid.Empty;
                 //var tipoMarcacion = string.Empty;
                 //var codigoMarcacion = string.Empty;
@@ -297,15 +294,14 @@ public class MarcacionService : IMarcacion
                 #endregion
 
 
-            }
-            return new ResponseType<MarcacionResponseType>() { Message = "Debe marcar desde su dispositivo movil.", Succeeded = true, StatusCode = "101" };
+            //}
+            //return new ResponseType<MarcacionResponseType>() { Message = "Debe marcar desde su dispositivo movil.", Succeeded = true, StatusCode = "101" };
 
         }
         catch (Exception ex)
         {
             _log.LogError(ex, string.Empty);
             return new ResponseType<MarcacionResponseType>() { Message = CodeMessageResponse.GetMessageByCode("102"), StatusCode = "102", Succeeded = false };
-
         }
 
 
