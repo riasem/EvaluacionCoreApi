@@ -86,20 +86,20 @@ public class MarcacionService : IMarcacion
                 {
                     return new ResponseType<MarcacionResponseType>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
                 }
-                await Task.Delay(1500);
+                await Task.Delay(1500, cancellationToken);
                 var marcacionEmpl =  _repoMonitoLogRiasemAsync.FirstOrDefaultAsync(new MarcacionByColaboradorAndTime(objResultado.Pin, objResultado.Time), cancellationToken);
             
                 if (marcacionEmpl is not null)
                 {
-                string tipoMarcacion = EvaluaTipoMarcacion(marcacionEmpl.Result.State);
-                string estadoMarcacion = EvaluaEstadoMarcacion(marcacionEmpl.Result.Description);
+                //string tipoMarcacion = EvaluaTipoMarcacion(marcacionEmpl.Result.State);
+                //string estadoMarcacion = EvaluaEstadoMarcacion(marcacionEmpl.Result.Description);
 
                 objResultFinal = new()
                     {
                         //MarcacionId = Guid.Parse(marcacionid),  TEMPORAL SE COMENTA HASTA REGULARIZAR 
-                        MarcacionId = marcacionEmpl.Id,
-                        TipoMarcacion = tipoMarcacion,
-                        EstadoMarcacion = estadoMarcacion
+                        MarcacionId = marcacionEmpl.Result.Id,
+                        TipoMarcacion = marcacionEmpl.Result.Estado,
+                        EstadoMarcacion = marcacionEmpl.Result.Description
                     };
                 }
                 else
