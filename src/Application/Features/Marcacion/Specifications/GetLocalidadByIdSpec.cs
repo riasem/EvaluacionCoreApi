@@ -11,7 +11,5 @@ public class GetLocalidadByIdSpec : Specification<Localidad>
         Query.Where(p => p.Id == id && p.LocalidadColaboradores.Where(x => x.Colaborador.CodigoConvivencia == codigoEmpleado).Any())
             .Include(p => p.LocalidadColaboradores.Where(x => x.Colaborador.CodigoConvivencia == codigoEmpleado))
             .ThenInclude(p => p.Colaborador);
-            
-
     }
 }

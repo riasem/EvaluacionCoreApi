@@ -1,5 +1,6 @@
 ﻿using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Interfaces;
+using EvaluacionCore.Application.Features.Calendario.Interfaces;
 using EvaluacionCore.Application.Features.EvalCore.Interfaces;
 using EvaluacionCore.Application.Features.Marcacion.Interfaces;
 using EvaluacionCore.Application.Features.Turnos.Interfaces;
@@ -14,6 +15,7 @@ using EvaluacionCore.Persistence.Repository;
 using EvaluacionCore.Persistence.Repository.BitacoraMarcacion;
 using Workflow.Persistence.Repository.TurnosAsignadosExcel;
 using EvaluacionCore.Persistence.Repository.General;
+using Workflow.Persistence.Repository.Calendario;
 
 namespace EvaluacionCore.Persistence;
 public static class ServiceExtensions
@@ -37,6 +39,7 @@ public static class ServiceExtensions
         services.AddTransient<ITurnosAsignadosExcel, TurnosAsignadosExcelService>();
         services.AddTransient<IMarcacion, MarcacionService>();
         services.AddTransient<IEvaluacion, EvaluacionService>();
+        services.AddTransient<ICalendario, CalendarioServices>();
 
 
         #endregion

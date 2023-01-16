@@ -4,6 +4,7 @@ using EvaluacionCore.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Workflow.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221228201555_CalendarioNuevo")]
+    partial class CalendarioNuevo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,10 +32,15 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnName("id")
                         .HasColumnOrder(0);
 
-                    b.Property<Guid>("CargoPadreId")
+                    b.Property<Guid?>("CargoPadreId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("cargoPadreId")
                         .HasColumnOrder(4);
+
+                    b.Property<Guid>("DepartamentoId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("departamentoId")
+                        .HasColumnOrder(1);
 
                     b.Property<string>("Descripcion")
                         .HasColumnType("varchar")
@@ -71,6 +78,8 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnOrder(8);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DepartamentoId");
 
                     b.ToTable("WF_Cargo", "dbo");
                 });
@@ -830,7 +839,7 @@ namespace Workflow.Persistence.Migrations
                     b.ToTable("AS_CalendarioNacional", "dbo");
                 });
 
-            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Calendario.Calendario", b =>
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Calendario.Canton", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -838,62 +847,59 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnName("id")
                         .HasColumnOrder(0);
 
-                    b.Property<Guid?>("CiudadPaisId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Codigo")
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)")
+                        .HasColumnName("codigo")
+                        .HasColumnOrder(2);
 
-                    b.Property<string>("DiaDeLaSemana")
-                        .HasColumnType("varchar")
-                        .HasColumnName("diaDeLaSemana")
+                    b.Property<string>("Descripcion")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("descripcion")
                         .HasColumnOrder(3);
 
-                    b.Property<bool>("EsRecuperable")
-                        .HasColumnType("bit")
-                        .HasColumnName("esRecuperable")
-                        .HasColumnOrder(5);
-
-                    b.Property<bool>("Eslaborable")
-                        .HasColumnType("bit")
-                        .HasColumnName("esLaborable")
-                        .HasColumnOrder(4);
-
                     b.Property<string>("Estado")
-                        .HasColumnType("varchar")
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
                         .HasColumnName("estado")
-                        .HasColumnOrder(6);
+                        .HasColumnOrder(4);
 
                     b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("datetime2")
                         .HasColumnName("fechaCreacion")
+                        .HasColumnOrder(6);
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("fechaModificacion")
                         .HasColumnOrder(8);
 
-                    b.Property<DateTime?>("FechaModificacion")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("fechaModificacion")
-                        .HasColumnOrder(10);
-
-                    b.Property<Guid>("IdCiudadPais")
+                    b.Property<Guid>("IdProvincia")
                         .HasColumnType("uniqueidentifier")
-                        .HasColumnName("idCiudadPais")
-                        .HasColumnOrder(2);
+                        .HasColumnName("idProvincia")
+                        .HasColumnOrder(1);
 
                     b.Property<string>("UsuarioCreacion")
-                        .HasColumnType("varchar")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("usuarioCreacion")
-                        .HasColumnOrder(7);
+                        .HasColumnOrder(5);
 
                     b.Property<string>("UsuarioModificacion")
-                        .HasColumnType("varchar")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("usuarioModificacion")
-                        .HasColumnOrder(9);
+                        .HasColumnOrder(7);
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CiudadPaisId");
+                    b.HasIndex("IdProvincia");
 
-                    b.ToTable("AS_Calendario", "dbo");
+                    b.ToTable("AS_Canton", "dbo");
                 });
 
-            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Calendario.CiudadPais", b =>
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Calendario.Pais", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -901,13 +907,21 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnName("id")
                         .HasColumnOrder(0);
 
-                    b.Property<string>("Ciudad")
-                        .HasColumnType("varchar")
-                        .HasColumnName("ciudad")
+                    b.Property<string>("Codigo")
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)")
+                        .HasColumnName("codigo")
+                        .HasColumnOrder(1);
+
+                    b.Property<string>("Descripcion")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("descripcion")
                         .HasColumnOrder(2);
 
                     b.Property<string>("Estado")
-                        .HasColumnType("varchar")
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
                         .HasColumnName("estado")
                         .HasColumnOrder(3);
 
@@ -922,18 +936,80 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnOrder(7);
 
                     b.Property<string>("UsuarioCreacion")
-                        .HasColumnType("varchar")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("usuarioCreacion")
                         .HasColumnOrder(4);
 
                     b.Property<string>("UsuarioModificacion")
-                        .HasColumnType("varchar")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("usuarioModificacion")
                         .HasColumnOrder(6);
 
                     b.HasKey("Id");
 
-                    b.ToTable("AS_CiudadPais", "dbo");
+                    b.ToTable("AS_Pais", "dbo");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Calendario.Provincia", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("Codigo")
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)")
+                        .HasColumnName("codigo")
+                        .HasColumnOrder(2);
+
+                    b.Property<string>("Descripcion")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("descripcion")
+                        .HasColumnOrder(3);
+
+                    b.Property<string>("Estado")
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasColumnName("estado")
+                        .HasColumnOrder(4);
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("fechaCreacion")
+                        .HasColumnOrder(6);
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("fechaModificacion")
+                        .HasColumnOrder(8);
+
+                    b.Property<Guid>("IdPais")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("idPais")
+                        .HasColumnOrder(1);
+
+                    b.Property<string>("UsuarioCreacion")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("usuarioCreacion")
+                        .HasColumnOrder(5);
+
+                    b.Property<string>("UsuarioModificacion")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("usuarioModificacion")
+                        .HasColumnOrder(7);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdPais");
+
+                    b.ToTable("AS_Provincia", "dbo");
                 });
 
             modelBuilder.Entity("EvaluacionCore.Domain.Entities.Common.Cliente", b =>
@@ -1258,6 +1334,173 @@ namespace Workflow.Persistence.Migrations
                     b.ToTable("WF_TipoJustificacion", "dbo");
                 });
 
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Organizacion.Area", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("Codigo")
+                        .HasMaxLength(15)
+                        .HasColumnType("varchar(15)")
+                        .HasColumnName("codigo")
+                        .HasColumnOrder(2);
+
+                    b.Property<Guid>("EmpresaId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("empresaId")
+                        .HasColumnOrder(1);
+
+                    b.Property<string>("Estado")
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasColumnName("estado")
+                        .HasColumnOrder(4);
+
+                    b.Property<string>("Nombre")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("nombre")
+                        .HasColumnOrder(3);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmpresaId");
+
+                    b.ToTable("OG_Area", "dbo");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Organizacion.Departamento", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
+                        .HasColumnOrder(0);
+
+                    b.Property<Guid>("AreaId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("areaId")
+                        .HasColumnOrder(1);
+
+                    b.Property<string>("Codigo")
+                        .HasMaxLength(15)
+                        .HasColumnType("varchar(15)")
+                        .HasColumnName("codigo")
+                        .HasColumnOrder(2);
+
+                    b.Property<string>("Estado")
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasColumnName("estado")
+                        .HasColumnOrder(4);
+
+                    b.Property<string>("Nombre")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("nombre")
+                        .HasColumnOrder(3);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AreaId");
+
+                    b.ToTable("OG_Departamento", "dbo");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Organizacion.Empresa", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("Codigo")
+                        .HasMaxLength(15)
+                        .HasColumnType("varchar(15)")
+                        .HasColumnName("codigo")
+                        .HasColumnOrder(2);
+
+                    b.Property<string>("Estado")
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasColumnName("estado")
+                        .HasColumnOrder(7);
+
+                    b.Property<Guid>("GrupoEmpresarialId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("grupoEmpresarialId")
+                        .HasColumnOrder(1);
+
+                    b.Property<byte[]>("Logo")
+                        .HasColumnType("varbinary")
+                        .HasColumnName("logo")
+                        .HasColumnOrder(6);
+
+                    b.Property<string>("NombreComercial")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("nombreComercial")
+                        .HasColumnOrder(4);
+
+                    b.Property<string>("RazonSocial")
+                        .HasMaxLength(80)
+                        .HasColumnType("varchar(80)")
+                        .HasColumnName("razonSocial")
+                        .HasColumnOrder(5);
+
+                    b.Property<string>("Ruc")
+                        .HasMaxLength(13)
+                        .HasColumnType("varchar(13)")
+                        .HasColumnName("ruc")
+                        .HasColumnOrder(3);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GrupoEmpresarialId");
+
+                    b.ToTable("OG_Empresa", "dbo");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Organizacion.GrupoEmpresarial", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("Codigo")
+                        .HasMaxLength(15)
+                        .HasColumnType("varchar(15)")
+                        .HasColumnName("codigo")
+                        .HasColumnOrder(1);
+
+                    b.Property<string>("Estado")
+                        .HasMaxLength(1)
+                        .HasColumnType("varchar(1)")
+                        .HasColumnName("estado")
+                        .HasColumnOrder(4);
+
+                    b.Property<byte[]>("Logo")
+                        .HasColumnType("varbinary")
+                        .HasColumnName("logo")
+                        .HasColumnOrder(3);
+
+                    b.Property<string>("Nombre")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("nombre")
+                        .HasColumnOrder(2);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("OG_GrupoEmpresarial", "dbo");
+                });
+
             modelBuilder.Entity("EvaluacionCore.Domain.Entities.Permisos.SolicitudPermiso", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1444,6 +1687,28 @@ namespace Workflow.Persistence.Migrations
                     b.ToTable("AS_SolicitudVacacion", "dbo");
                 });
 
+            modelBuilder.Entity("EnrolApp.Domain.Entities.Common.Cargo", b =>
+                {
+                    b.HasOne("EvaluacionCore.Domain.Entities.Organizacion.Departamento", "Departamento")
+                        .WithMany("Cargos")
+                        .HasForeignKey("DepartamentoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Departamento");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Asistencia.Localidad", b =>
+                {
+                    b.HasOne("EvaluacionCore.Domain.Entities.Calendario.Canton", "Canton")
+                        .WithMany("Localidades")
+                        .HasForeignKey("IdCanton")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Canton");
+                });
+
             modelBuilder.Entity("EvaluacionCore.Domain.Entities.Asistencia.LocalidadColaborador", b =>
                 {
                     b.HasOne("EvaluacionCore.Domain.Entities.Common.Cliente", "Colaborador")
@@ -1528,19 +1793,54 @@ namespace Workflow.Persistence.Migrations
                     b.Navigation("Turno");
                 });
 
-            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Calendario.Calendario", b =>
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Calendario.CalendarioLocal", b =>
                 {
-                    b.HasOne("EvaluacionCore.Domain.Entities.Calendario.CiudadPais", "CiudadPais")
-                        .WithMany("Calendarios")
-                        .HasForeignKey("CiudadPaisId");
+                    b.HasOne("EvaluacionCore.Domain.Entities.Calendario.Canton", "Canton")
+                        .WithMany("CalendariosLocal")
+                        .HasForeignKey("IdCanton")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("CiudadPais");
+                    b.Navigation("Canton");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Calendario.CalendarioNacional", b =>
+                {
+                    b.HasOne("EvaluacionCore.Domain.Entities.Calendario.Pais", "Pais")
+                        .WithMany("CalendarioNacional")
+                        .HasForeignKey("IdPais")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Pais");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Calendario.Canton", b =>
+                {
+                    b.HasOne("EvaluacionCore.Domain.Entities.Calendario.Provincia", "Provincia")
+                        .WithMany("Cantones")
+                        .HasForeignKey("IdProvincia")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Provincia");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Calendario.Provincia", b =>
+                {
+                    b.HasOne("EvaluacionCore.Domain.Entities.Calendario.Pais", "Pais")
+                        .WithMany("Provincias")
+                        .HasForeignKey("IdPais")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Pais");
                 });
 
             modelBuilder.Entity("EvaluacionCore.Domain.Entities.Common.Cliente", b =>
                 {
                     b.HasOne("EnrolApp.Domain.Entities.Common.Cargo", "Cargo")
-                        .WithMany("Cliente")
+                        .WithMany("Clientes")
                         .HasForeignKey("CargoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1565,6 +1865,39 @@ namespace Workflow.Persistence.Migrations
                     b.Navigation("EstadoTarea");
 
                     b.Navigation("TipoJustificacion");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Organizacion.Area", b =>
+                {
+                    b.HasOne("EvaluacionCore.Domain.Entities.Organizacion.Empresa", "Empresa")
+                        .WithMany("Areas")
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Empresa");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Organizacion.Departamento", b =>
+                {
+                    b.HasOne("EvaluacionCore.Domain.Entities.Organizacion.Area", "Area")
+                        .WithMany("Departamentos")
+                        .HasForeignKey("AreaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Area");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Organizacion.Empresa", b =>
+                {
+                    b.HasOne("EvaluacionCore.Domain.Entities.Organizacion.GrupoEmpresarial", "GrupoEmpresarial")
+                        .WithMany("Empresas")
+                        .HasForeignKey("GrupoEmpresarialId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GrupoEmpresarial");
                 });
 
             modelBuilder.Entity("EvaluacionCore.Domain.Entities.Permisos.SolicitudPermiso", b =>
@@ -1605,7 +1938,7 @@ namespace Workflow.Persistence.Migrations
 
             modelBuilder.Entity("EnrolApp.Domain.Entities.Common.Cargo", b =>
                 {
-                    b.Navigation("Cliente");
+                    b.Navigation("Clientes");
                 });
 
             modelBuilder.Entity("EvaluacionCore.Domain.Entities.Asistencia.ClaseTurno", b =>
@@ -1643,9 +1976,23 @@ namespace Workflow.Persistence.Migrations
                     b.Navigation("MarcacionColaboradores");
                 });
 
-            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Calendario.CiudadPais", b =>
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Calendario.Canton", b =>
                 {
-                    b.Navigation("Calendarios");
+                    b.Navigation("CalendariosLocal");
+
+                    b.Navigation("Localidades");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Calendario.Pais", b =>
+                {
+                    b.Navigation("CalendarioNacional");
+
+                    b.Navigation("Provincias");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Calendario.Provincia", b =>
+                {
+                    b.Navigation("Cantones");
                 });
 
             modelBuilder.Entity("EvaluacionCore.Domain.Entities.Common.Cliente", b =>
@@ -1667,6 +2014,26 @@ namespace Workflow.Persistence.Migrations
             modelBuilder.Entity("EvaluacionCore.Domain.Entities.Justificacion.TipoJustificacion", b =>
                 {
                     b.Navigation("SolicitudJustificacion");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Organizacion.Area", b =>
+                {
+                    b.Navigation("Departamentos");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Organizacion.Departamento", b =>
+                {
+                    b.Navigation("Cargos");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Organizacion.Empresa", b =>
+                {
+                    b.Navigation("Areas");
+                });
+
+            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Organizacion.GrupoEmpresarial", b =>
+                {
+                    b.Navigation("Empresas");
                 });
 
             modelBuilder.Entity("EvaluacionCore.Domain.Entities.Permisos.TipoPermiso", b =>

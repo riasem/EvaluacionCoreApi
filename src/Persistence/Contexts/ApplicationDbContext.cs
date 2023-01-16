@@ -30,8 +30,13 @@ public class ApplicationDbContext : DbContext
     public DbSet<Area> Areas { get; set; }
     public DbSet<Departamento> Departamentos { get; set; }
     public DbSet<Turno> Turnos { get; set; }
-    public DbSet<Calendario> Calendarios { get; set; }
-    public DbSet<CiudadPais> CiudadPais { get; set; }
+    public DbSet<CalendarioLocal> CalendarioLocal { get; set; }
+    public DbSet<CalendarioNacional> CalendarioNacional { get; set; }
+    public DbSet<Pais> Pais { get; set; }
+    public DbSet<Provincia> Provincia { get; set; }
+    public DbSet<Canton> Canton { get; set; }
+
+
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>

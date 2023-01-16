@@ -19,7 +19,7 @@ public class ApisConsumoAsync : IApisConsumoAsync
     }
 
    
-    public async Task<(bool Success, object Data)> GetEndPoint(object request,string uriEndPoint,string nombreEndPoint)
+    public async Task<(bool Success, object Data)> GetEndPoint(string uriEndPoint)
     {
         try
         {

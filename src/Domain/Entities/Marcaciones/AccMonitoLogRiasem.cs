@@ -71,4 +71,7 @@ public class AccMonitoLogRiasem
     [Column("event_point_name", Order = 21, TypeName = "nvarchar")]
     public string Event_Point_Name { get; set; }
 
+    [Column("estado", Order = 21, TypeName = "nvarchar")]
+    public string Estado { get; set; }
+
 }

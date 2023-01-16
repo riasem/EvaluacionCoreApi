@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using EvaluacionCore.Domain.Entities.Calendario;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EvaluacionCore.Domain.Entities.Asistencia;
@@ -13,6 +14,9 @@ public class Localidad
 
     [Column("idEmpresa", Order = 1, TypeName = "uniqueidentifier")]
     public Guid IdEmpresa { get; set; }
+    [Column("idCanton", TypeName = "uniqueidentifier")]
+    public Guid IdCanton { get; set; }
+    public virtual Canton Canton { get; set; }
 
     [Column("codigo", Order = 2, TypeName = "varchar")]
     [StringLength(10)] public string Codigo { get; set; } = string.Empty;

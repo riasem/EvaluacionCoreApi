@@ -34,8 +34,8 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
         [JsonPropertyName("novedades")]
         public List<Novedad> Novedades { get; set; }
 
-        [JsonPropertyName("solicitudes")]
-        public List<Solicitud> Solicitudes { get; set; }
+        //[JsonPropertyName("solicitudes")]
+        //public List<Solicitud> Solicitudes { get; set; }
 
     }
 
@@ -64,6 +64,53 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
 
         [JsonPropertyName("totalHoras")] //duracion del turno laboral
         public string TotalHoras { get; set; }
+
+
+        //se añaden campos en marcacion para el control de novedades y solicitudes de entrada
+        [JsonPropertyName("idSolicitudEntrada")]
+        public Guid? IdSolicitudEntrada  {get; set;}
+
+        [JsonPropertyName("idFeatureEntrada")]
+        public Guid? IdFeatureEntrada { get; set; }
+
+        [JsonPropertyName("tipoSolicitudEntrada")]
+        public string TipoSolicitudEntrada { get; set; }
+
+        [JsonPropertyName("estadoEntrada")]
+        public string EstadoEntrada { get; set; }
+
+        [JsonPropertyName("fechaSolicitudEntrada")]
+        public DateTime? FechaSolicitudEntrada { get; set; }
+
+        [JsonPropertyName("usuarioSolicitudEntrada")]
+        public string UsuarioSolicitudEntrada { get; set; }
+
+        [JsonPropertyName("estadoSolicitudEntrada")]
+        public Guid? EstadoSolicitudEntrada { get; set; }
+
+
+        //se añaden campos en marcacion para el control de novedades y solicitudes de salida
+        [JsonPropertyName("idSolicitudSalida")]
+        public Guid? IdSolicitudSalida { get; set;}
+
+        [JsonPropertyName("idFeatureSalida")]
+        public Guid? IdFeatureSalida { get; set; }
+
+        [JsonPropertyName("tipoSolicitudSalida")]
+        public string TipoSolicitudSalida { get; set; }
+
+        [JsonPropertyName("estadoSalida")]
+        public string EstadoSalida { get; set; }
+
+        [JsonPropertyName("fechaSolicitudSalida")]
+        public DateTime? FechaSolicitudSalida { get; set; }
+
+        [JsonPropertyName("usuarioSolicitudSalida")]
+        public string UsuarioSolicitudSalida { get; set; }
+
+        [JsonPropertyName("estadoSolicitudSalida")]
+        public Guid? EstadoSolicitudSalida { get; set; }
+
     }
 
     public class TurnoReceso
@@ -91,6 +138,57 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
 
         [JsonPropertyName("totalHoras")]
         public string TotalHoras { get; set; } // duracion de turno de receso
+
+
+
+
+
+        //se añaden campos en marcacion para el control de novedades y solicitudes de entrada
+        [JsonPropertyName("idSolicitudEntradaReceso")]
+        public Guid? IdSolicitudEntradaReceso { get; set; }
+
+        [JsonPropertyName("idFeatureEntradaReceso")]
+        public Guid? IdFeatureEntradaReceso { get; set; }
+
+        [JsonPropertyName("estadoEntradaReceso")]
+        public string EstadoEntradaReceso { get; set; }
+
+        [JsonPropertyName("tipoSolicitudEntradaReceso")]
+        public string TipoSolicitudEntradaReceso { get; set; }
+
+        [JsonPropertyName("fechaSolicitudEntradaReceso")]
+        public DateTime? FechaSolicitudEntradaReceso { get; set; }
+
+        [JsonPropertyName("usuarioSolicitudEntradaReceso")]
+        public string UsuarioSolicitudEntradaReceso { get; set; }
+
+        [JsonPropertyName("estadoSolicitudEntradaReceso")]
+        public Guid? EstadoSolicitudEntradaReceso { get; set; }
+
+
+        //se añaden campos en marcacion para el control de novedades y solicitudes de salida
+        [JsonPropertyName("idSolicitudSalidaReceso")]
+        public Guid? IdSolicitudSalidaReceso { get; set; }
+
+        [JsonPropertyName("idFeatureSalidaReceso")]
+        public Guid? IdFeatureSalidaReceso { get; set; }
+
+        [JsonPropertyName("tipoSolicitudSalidaReceso")]
+        public string TipoSolicitudSalidaReceso { get; set; }
+
+        [JsonPropertyName("estadoSalidaReceso")]
+        public string EstadoSalidaReceso { get; set; }
+
+        [JsonPropertyName("fechaSolicitudSalidaReceso")]
+        public DateTime? FechaSolicitudSalidaReceso { get; set; }
+
+        [JsonPropertyName("usuarioSolicitudSalidaReceso")]
+        public string UsuarioSolicitudSalidaReceso { get; set; }
+
+        [JsonPropertyName("estadoSolicitudSalidaReceso")]
+        public Guid? EstadoSolicitudSalidaReceso { get; set; }
+
+
     }
 
     public class Solicitud
