@@ -1,4 +1,5 @@
 ﻿using EvaluacionCore.Application.Common.Wrappers;
+using EvaluacionCore.Application.Features.Turnos.Commands.CargarInfoExcelTurnos;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurno;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoColaborador;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoSubTurno;
@@ -202,6 +203,24 @@ public class TurnosController : ApiControllerBase
 
         var objResult = await Mediator.Send(new GetTurnosAsignadosExcelCommand(request), cancellationToken);
         return Ok(objResult);
+    }
+
+    /// <summary>
+    /// Carga la información de los turnos desde el archivo excel 
+    /// </summary>
+    /// <param name="infoTurnos"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpPost("CargarInfoArchivoExcelTurnos")]
+    [EnableCors("AllowOrigin")]
+    [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
+    [Authorize]
+    public async Task<IActionResult> CargarInfoArchivoExcelTurnos(CargarInfoExcelTurnosRequest info, CancellationToken cancellationToken)
+    {
+        //var doc = Newtonsoft.Json.JsonConvert.DeserializeXmlNode(info.JsonTurnos);
+        var xml = Newtonsoft.Json.JsonConvert.DeserializeXmlNode("{\"Turno\":" + info.JsonTurnos + "}", "Turnos").OuterXml;
+
+        return Ok();
     }
 
 }

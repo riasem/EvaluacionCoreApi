@@ -1,6 +1,4 @@
-﻿using EnrolApp.Domain.Entities.Common;
-using EvaluacionCore.Domain.Entities.Common;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EvaluacionCore.Domain.Entities.Organizacion;
@@ -29,6 +27,6 @@ public class Departamento
 
 
     //public virtual ICollection<Prospecto> Prospectos { get; set; }
-    public virtual ICollection<Cargo> Cargos { get; set; }
+    //public virtual ICollection<Cargo> Cargos { get; set; }
     //public virtual ICollection<Cliente> Clientes { get; set; }
 }
