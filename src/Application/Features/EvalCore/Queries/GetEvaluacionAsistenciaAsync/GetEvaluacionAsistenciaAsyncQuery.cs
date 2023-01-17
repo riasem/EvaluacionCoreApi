@@ -1,15 +1,11 @@
 ﻿using AutoMapper;
 using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
-using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetBitacoraMarcacion;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Dto;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Interfaces;
 using EvaluacionCore.Application.Features.EvalCore.Dto;
 using EvaluacionCore.Application.Features.EvalCore.Interfaces;
-using EvaluacionCore.Application.Features.Permisos.Dto;
-using EvaluacionCore.Application.Features.Turnos.Dto;
 using EvaluacionCore.Application.Features.Turnos.Specifications;
-using EvaluacionCore.Application.Features.Vacaciones.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using EvaluacionCore.Domain.Entities.Common;
 using EvaluacionCore.Domain.Entities.Justificacion;
@@ -72,7 +68,6 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
             List<EvaluacionAsistenciaResponseType> listaEvaluacionAsistencia = new();
 
-            bool poseeTurno = false;
             bool poseeTurnoReceso = false;
 
             TurnoLaboral turnoLaboral = new();
@@ -88,7 +83,6 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                 {
                     List<Novedad> novedades = new();
                     //Se obtiene el turno laboral asignado al colaborador de la fecha en proceso
-
                     var turnoFiltro = await _repositoryTurnoColAsync.FirstOrDefaultAsync(new TurnoColaboradorTreeSpec(itemCol.Identificacion, dtm), cancellationToken);
 
 
@@ -102,7 +96,6 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                         turnoLabDesde = dtm.AddHours(turnoFiltro?.Turno?.Entrada.Hour ?? 0).AddMinutes(turnoFiltro?.Turno?.Entrada.Minute ?? 0);
                         turnoLabHasta = dtm.AddHours(turnoFiltro?.Turno?.Salida.Hour ?? 0).AddMinutes(turnoFiltro?.Turno?.Salida.Minute ?? 0);
                         turnoRecesoFiltro = await _repositoryTurnoColAsync.FirstOrDefaultAsync(new TurnoRecesoColaboradorTreeSpec(itemCol.Identificacion, dtm, turnoFiltro?.Turno.Id), cancellationToken);
-                        poseeTurno = true;
                         if (turnoRecesoFiltro != null) poseeTurnoReceso = true;
                     }
                     if (turnoLabDesde > turnoLabHasta) turnoLabHasta.AddDays(1);

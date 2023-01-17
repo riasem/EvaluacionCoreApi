@@ -56,12 +56,12 @@ public class EvaluacionController : ApiControllerBase
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [Authorize]
-    public async Task<IActionResult> GetAsistencias(DateTime fechaDesde, DateTime fechaHasta, string Udn, string Departamento, string Area, CancellationToken cancellationToken, string identificacion = "0")
+    public async Task<IActionResult> GetAsistencias(DateTime fechaDesde, DateTime fechaHasta, string? Udn, string? Departamento, string? Area, CancellationToken cancellationToken, string? identificacion)
     {
-        if (identificacion == "0")
-        {
-            identificacion = "";
-        }
+        //if (identificacion == "0")
+        //{
+        //    identificacion = "";
+        //}
         var objResult = await Mediator.Send(new GetEvaluacionAsistenciaAsyncQuery(identificacion, fechaDesde, fechaHasta, Udn, Area, Departamento), cancellationToken);
         return Ok(objResult);
         
