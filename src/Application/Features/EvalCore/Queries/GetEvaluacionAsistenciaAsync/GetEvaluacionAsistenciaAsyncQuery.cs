@@ -343,11 +343,12 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
             }
 
-            var lista = listaEvaluacionAsistencia.Where(e => filtroNovedades.Contains(e.TurnoLaboral.EstadoEntrada) || filtroNovedades.Contains(e.TurnoLaboral.EstadoSalida) ||
-                                                 filtroNovedades.Contains(e.TurnoReceso.EstadoEntradaReceso) || filtroNovedades.Contains(e.TurnoReceso.EstadoSalidaReceso) ||
-                                                 filtroNovedades.Contains(e.Novedades.FirstOrDefault()?.EstadoMarcacion)).ToList();
+            //var lista = listaEvaluacionAsistencia.Where(e => filtroNovedades.Contains(e.TurnoLaboral.EstadoEntrada) || filtroNovedades.Contains(e.TurnoLaboral.EstadoSalida) ||
+            //                                     filtroNovedades.Contains(e.TurnoReceso.EstadoEntradaReceso) || filtroNovedades.Contains(e.TurnoReceso.EstadoSalidaReceso) ||
+            //                                     filtroNovedades.Contains(e.Novedades.FirstOrDefault()?.EstadoMarcacion)).ToList();
 
-            return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = lista, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
+            //return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = lista, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
+            return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = listaEvaluacionAsistencia, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
 
         }
        catch (Exception e)
