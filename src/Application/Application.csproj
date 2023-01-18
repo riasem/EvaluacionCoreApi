@@ -27,6 +27,8 @@
 
   <ItemGroup>
     <Folder Include="Common\Filters\" />
+    <Folder Include="Features\RecordatorioTurnos\Dto\" />
+    <Folder Include="Features\RecordatorioTurnos\Queries\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -35,7 +35,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<Pais> Pais { get; set; }
     public DbSet<Provincia> Provincia { get; set; }
     public DbSet<Canton> Canton { get; set; }
-
+    public DbSet<NovedadRecordatorioCab> NovedadRecordatorioCabs { get; set; }
+    public DbSet<NovedadRecordatorioDet> NovedadRecordatorioDet { get; set; }
+    public DbSet<Recordatorio> Recordatorios { get; set; }
 
 
 

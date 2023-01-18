@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using EvaluacionCore.Domain.Entities.Asistencia;
+using EvaluacionCore.Domain.Entities.Permisos;
 
 namespace EvaluacionCore.Domain.Entities.Common;
 
@@ -98,6 +99,7 @@ public class Cliente
 
     public virtual ICollection<TurnoColaborador> TurnoColaboradores { get; set; }
     public virtual ICollection<LocalidadColaborador> LocalidadColaboradores { get; set; }
+    //public virtual ICollection<NovedadRecordatorioCab> NovedadRecordatorioCabs { get; set; }
 
 }
 
