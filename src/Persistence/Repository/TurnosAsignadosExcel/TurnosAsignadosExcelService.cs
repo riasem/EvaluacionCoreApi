@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using System.Data;
 using Dapper;
 using System.Text.Json;
+using EvaluacionCore.Application.Features.Turnos.Commands.CargarInfoExcelTurnos;
 
 namespace Workflow.Persistence.Repository.TurnosAsignadosExcel
 {
@@ -35,7 +36,7 @@ namespace Workflow.Persistence.Repository.TurnosAsignadosExcel
                 using IDbConnection con = new SqlConnection(ConnectionString);
                 if (con.State == ConnectionState.Closed) con.Open();
 
-                var turnosExcel =  (await con.QueryAsync<dynamic>(
+                var turnosExcel = (await con.QueryAsync<dynamic>(
                                    sql: string.Concat(Esquema, TurnosExcel),
                                    param: new
                                    {
@@ -48,7 +49,7 @@ namespace Workflow.Persistence.Repository.TurnosAsignadosExcel
                                    commandType: CommandType.StoredProcedure)).ToList();
 
                 responseList = JsonSerializer.Serialize(turnosExcel);
-                
+
                 if (con.State == ConnectionState.Open) con.Close();
             }
             catch (Exception e)
@@ -57,6 +58,39 @@ namespace Workflow.Persistence.Repository.TurnosAsignadosExcel
             }
 
             return responseList;
+        }
+
+        public async Task<int> CargarInfoExcelTurnosAsync(CargarInfoExcelTurnosRequest request)
+        {
+            int response = 0;
+
+            try
+            {
+                string TurnosExcel = _config.GetSection("StoredProcedure:TurnosAsignadosExcel:CargaExcel").Get<string>();
+
+                using IDbConnection con = new SqlConnection(ConnectionString);
+                if (con.State == ConnectionState.Closed) con.Open();
+
+                var turnosExcel = await con.QueryAsync<dynamic>(
+                                   sql: string.Concat(Esquema, TurnosExcel),
+                                   param: new
+                                   {
+                                       json = request.JsonTurnos,
+                                       identificacion = request.Identificacion,
+                                   },
+                                   commandType: CommandType.StoredProcedure);
+
+                response = turnosExcel.Select(x => x.Response).FirstOrDefault();
+
+                if (con.State == ConnectionState.Open) con.Close();
+            }
+            catch (Exception e)
+            {
+                _log.LogError(e, string.Empty);
+                response = 0;
+            }
+
+            return response;
         }
     }
 }

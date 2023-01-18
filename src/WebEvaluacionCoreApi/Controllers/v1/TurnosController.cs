@@ -12,6 +12,7 @@ using EvaluacionCore.Application.Features.Turnos.Queries.GetTurnosColaborador;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 using WebEvaluacionCoreApi.Controllers;
 
 namespace WebEnrolAppApi.Controllers.v1;
@@ -208,19 +209,22 @@ public class TurnosController : ApiControllerBase
     /// <summary>
     /// Carga la información de los turnos desde el archivo excel 
     /// </summary>
-    /// <param name="infoTurnos"></param>
+    /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost("CargarInfoArchivoExcelTurnos")]
     [EnableCors("AllowOrigin")]
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
     [Authorize]
-    public async Task<IActionResult> CargarInfoArchivoExcelTurnos(CargarInfoExcelTurnosRequest info, CancellationToken cancellationToken)
+    public async Task<IActionResult> CargarInfoArchivoExcelTurnos(CargarInfoExcelTurnosRequest request, CancellationToken cancellationToken)
     {
-        //var doc = Newtonsoft.Json.JsonConvert.DeserializeXmlNode(info.JsonTurnos);
-        var xml = Newtonsoft.Json.JsonConvert.DeserializeXmlNode("{\"Turno\":" + info.JsonTurnos + "}", "Turnos").OuterXml;
+        var Identificacion = new JwtSecurityToken(HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
 
-        return Ok();
+        request.Identificacion = Identificacion;
+
+        var objResult = await Mediator.Send(new CargarInfoExcelTurnosCommand(request), cancellationToken);
+
+        return Ok(objResult);
     }
 
 }
