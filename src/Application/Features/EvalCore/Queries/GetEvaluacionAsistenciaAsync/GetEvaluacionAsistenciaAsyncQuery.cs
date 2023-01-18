@@ -135,9 +135,9 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                         else
                         {
                             turnoLaborall.MarcacionEntrada = fechaEntrada;
-                            turnoLaborall.EstadoEntrada = "00";
+                            turnoLaborall.EstadoEntrada = "";
                             turnoLaborall.FechaSolicitudEntrada = DateTime.Parse("01-01-1900");
-                            turnoLaborall.UsuarioSolicitudEntrada = "0";
+                            turnoLaborall.UsuarioSolicitudEntrada = "";
                             turnoLaborall.IdSolicitudEntrada = Guid.Empty;
                             turnoLaborall.IdFeatureEntrada = Guid.Empty;
                             turnoLaborall.TipoSolicitudEntrada = "";
@@ -161,9 +161,9 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                         else
                         {
                             turnoLaborall.MarcacionSalida = fechaSalida;
-                            turnoLaborall.EstadoSalida = "00";
+                            turnoLaborall.EstadoSalida = "";
                             turnoLaborall.FechaSolicitudSalida = DateTime.Parse("01-01-1900");
-                            turnoLaborall.UsuarioSolicitudSalida = "0";
+                            turnoLaborall.UsuarioSolicitudSalida = "";
                             turnoLaborall.IdSolicitudSalida = Guid.Empty;
                             turnoLaborall.IdFeatureSalida = Guid.Empty;
                             turnoLaborall.TipoSolicitudSalida = "";
@@ -231,9 +231,9 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                         {
 
                             turnoReceso.MarcacionSalida = fechaSalida;
-                            turnoReceso.EstadoSalidaReceso = "00";
+                            turnoReceso.EstadoSalidaReceso = "";
                             turnoReceso.FechaSolicitudSalidaReceso = DateTime.Parse("01-01-1900");
-                            turnoReceso.UsuarioSolicitudSalidaReceso = "0";
+                            turnoReceso.UsuarioSolicitudSalidaReceso = "";
                             turnoReceso.IdSolicitudSalidaReceso = Guid.Empty;
                             turnoReceso.IdFeatureSalidaReceso = Guid.Empty;
                             turnoReceso.TipoSolicitudSalidaReceso = "";
@@ -343,7 +343,11 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
             }
 
-            return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = listaEvaluacionAsistencia, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
+            var lista = listaEvaluacionAsistencia.Where(e => filtroNovedades.Contains(e.TurnoLaboral.EstadoEntrada) || filtroNovedades.Contains(e.TurnoLaboral.EstadoSalida) ||
+                                                 filtroNovedades.Contains(e.TurnoReceso.EstadoEntradaReceso) || filtroNovedades.Contains(e.TurnoReceso.EstadoSalidaReceso) ||
+                                                 filtroNovedades.Contains(e.Novedades.FirstOrDefault()?.EstadoMarcacion)).ToList();
+
+            return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = lista, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
 
         }
        catch (Exception e)
