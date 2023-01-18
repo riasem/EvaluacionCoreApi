@@ -66,4 +66,27 @@ public class EvaluacionController : ApiControllerBase
         return Ok(objResult);
         
     }
+
+    /// <summary>
+    /// Obtener Combo de novedades para control de asistencias
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns>Capacidad que realiza la evaluación de asistencias.</returns>
+    /// <response code="201">Consulta Realizada</response>
+    /// <response code="400">Ocurrió un error al realizar la evaluación</response>
+    [HttpGet("GetComboNovedades")]
+    [EnableCors("AllowOrigin")]
+    [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [Authorize]
+    public async Task<IActionResult> GetComboNovedades(CancellationToken cancellationToken)
+    {
+        //if (identificacion == "0")
+        //{
+        //    identificacion = "";
+        //}
+        var objResult = await Mediator.Send(new GetComboNovedadesAsyncQuery(), cancellationToken);
+        return Ok(objResult);
+        
+    }
 }
