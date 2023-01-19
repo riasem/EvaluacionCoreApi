@@ -18,7 +18,7 @@ namespace EvaluacionCore.Application.Features.Turnos.Commands.InactivaTurnoColab
         public DateTime FechaAsignacion { get; set; }
 
         [JsonProperty("idAsignacion")]
-        public Guid IdAsignacion { get; set; }
+        public Guid? IdAsignacion { get; set; }
 
         [JsonProperty("subturnos")]
         public List<Subturno3> Subturnos { get; set; }

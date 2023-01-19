@@ -44,6 +44,10 @@ public class EvaluacionController : ApiControllerBase
     /// <param name="identificacion"></param>
     /// <param name="fechaDesde"></param>
     /// <param name="fechaHasta"></param>
+    /// <param name="Udn"></param>
+    /// <param name="Departamento"></param>
+    /// <param name="Area"></param>
+    /// <param name="FiltroNovedades"></param>
     /// <param name="cancellationToken"></param>
     /// <returns>Capacidad que realiza la evaluación de asistencias.</returns>
     /// <response code="201">Evaluación Realizada</response>
@@ -53,13 +57,36 @@ public class EvaluacionController : ApiControllerBase
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [Authorize]
-    public async Task<IActionResult> GetAsistencias(DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken, string identificacion = "0")
+    public async Task<IActionResult> GetAsistencias(DateTime fechaDesde, DateTime fechaHasta, string? Udn, string? Departamento, string? Area, CancellationToken cancellationToken, string? identificacion, string FiltroNovedades)
     {
-        if (identificacion == "0")
-        {
-            identificacion = "";
-        }
-        var objResult = await Mediator.Send(new GetEvaluacionAsistenciaAsyncQuery(identificacion, fechaDesde, fechaHasta), cancellationToken);
+        //if (identificacion == "0")
+        //{
+        //    identificacion = "";
+        //}
+        var objResult = await Mediator.Send(new GetEvaluacionAsistenciaAsyncQuery(identificacion, fechaDesde, fechaHasta, Udn, Area, Departamento, FiltroNovedades), cancellationToken);
+        return Ok(objResult);
+        
+    }
+
+    /// <summary>
+    /// Obtener Combo de novedades para control de asistencias
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns>Capacidad que realiza la evaluación de asistencias.</returns>
+    /// <response code="201">Consulta Realizada</response>
+    /// <response code="400">Ocurrió un error al realizar la evaluación</response>
+    [HttpGet("GetComboNovedades")]
+    [EnableCors("AllowOrigin")]
+    [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [Authorize]
+    public async Task<IActionResult> GetComboNovedades(CancellationToken cancellationToken)
+    {
+        //if (identificacion == "0")
+        //{
+        //    identificacion = "";
+        //}
+        var objResult = await Mediator.Send(new GetComboNovedadesAsyncQuery(), cancellationToken);
         return Ok(objResult);
         
     }

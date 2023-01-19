@@ -36,7 +36,7 @@ namespace WebEvaluacionCoreApi.Controllers.v1
                 Suscriptor = string.IsNullOrEmpty(Suscriptor) ? string.Empty : Suscriptor,
                 CodUdn = string.IsNullOrEmpty(CodUdn) ? string.Empty : CodUdn,
                 CodArea = string.IsNullOrEmpty(CodArea) ? string.Empty : CodArea,
-                CodSubcentro = string.IsNullOrEmpty(CodSubcentro) ? "0" : CodSubcentro,
+                CodSubcentro = string.IsNullOrEmpty(CodSubcentro) ? string.Empty : CodSubcentro,
                 CodMarcacion = string.IsNullOrEmpty(CodMarcacion) ? string.Empty: CodMarcacion,
                 FechaDesde = FechaDesde,
                 FechaHasta = FechaHasta
@@ -50,15 +50,16 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         /// Consulta información de los combos para la opción bitácora de marcaciones
         /// </summary>
         /// <param name="Tipo"></param>
-        /// <param name="Codigo"></param>
+        /// <param name="Udn"></param>
+        /// <param name="Area"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpGet("GetComboBitacoraMarcacion")]
         [EnableCors("AllowOrigin")]
         [ProducesResponseType(typeof(ResponseType<List<BitacoraMarcacionType>>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetComboBitacoraMarcacion(string Tipo, string Codigo, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetComboBitacoraMarcacion(string Tipo, string? Udn, string? Area, CancellationToken cancellationToken)
         {
-            var request = new GetComboBitacoraMarcacionRequest() { Tipo = Tipo, Codigo = Codigo };
+            var request = new GetComboBitacoraMarcacionRequest() { Tipo = Tipo, Udn = Udn ?? "", Area = Area ?? "" };
 
             var objResult = await Mediator.Send(new GetComboBitacoraMarcacionCommand(request), cancellationToken);
             return Ok(objResult);

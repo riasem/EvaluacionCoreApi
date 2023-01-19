@@ -26,13 +26,27 @@ public class InactivaTurnoColaboradorCommandHandler : IRequestHandler<InactivaTu
         {
             foreach (var it in request.TurnoRequest)
             {
-
                 if (it.Selected)
                 {
+                    if (it.IdAsignacion == null)
+                    {
+                        TurnoColaborador objClient = new()
+                        {
+                            Id = Guid.NewGuid(), //id turno colaborador
+                            IdTurno = it.IdTurno,
+                            IdColaborador = it.IdColaborador,
+                            Estado = "A",
+                            UsuarioCreacion = "SYSTEM",
+                            FechaAsignacion = it.FechaAsignacion,
+                            FechaCreacion = DateTime.Now
+                        };
+
+                        await _repoTurnoAsync.AddAsync(objClient, cancellationToken);
+                    }
+
                     foreach (var item in it.Subturnos)
                     {
-
-                        if (item.IdTurnoAsignado == null)
+                        if (item.IdTurnoAsignado == null && item.Selected)
                         {
                             TurnoColaborador objClient = new()
                             {
@@ -42,19 +56,20 @@ public class InactivaTurnoColaboradorCommandHandler : IRequestHandler<InactivaTu
                                 Estado = "A",
                                 UsuarioCreacion = "SYSTEM",
                                 FechaAsignacion = it.FechaAsignacion,
-                                FechaCreacion = DateTime.UtcNow
+                                FechaCreacion = DateTime.Now
                             };
 
                             await _repoTurnoAsync.AddAsync(objClient, cancellationToken);
                         }
-                        else
+
+                        if (item.IdTurnoAsignado != null)
                         {
                             TurnoColaborador objClient = new()
                             {
                                 Id = item.IdTurnoAsignado,
                                 Estado = item.Selected ? "A" : "I",
                                 FechaAsignacion = it.FechaAsignacion,
-                                FechaModificacion = DateTime.UtcNow,
+                                FechaModificacion = DateTime.Now,
                                 UsuarioModificacion = "SYSTEM",
                                 IdTurno = item.Id,
                                 IdColaborador = it.IdColaborador
@@ -62,7 +77,6 @@ public class InactivaTurnoColaboradorCommandHandler : IRequestHandler<InactivaTu
 
                             await _repoTurnoAsync.UpdateAsync(objClient, cancellationToken);
                         }
-
                     }
                 }
                 else
@@ -74,7 +88,7 @@ public class InactivaTurnoColaboradorCommandHandler : IRequestHandler<InactivaTu
                         IdColaborador = it.IdColaborador,
                         IdTurno = it.IdTurno,
 
-                        FechaModificacion = DateTime.UtcNow,
+                        FechaModificacion = DateTime.Now,
                         UsuarioModificacion = "SYSTEM",
                         FechaAsignacion = it.FechaAsignacion
                     };
@@ -89,7 +103,7 @@ public class InactivaTurnoColaboradorCommandHandler : IRequestHandler<InactivaTu
                             Estado = "I",
                             IdTurno = item.Id,
                             IdColaborador = it.IdColaborador,
-                            FechaModificacion = DateTime.UtcNow,
+                            FechaModificacion = DateTime.Now,
                             UsuarioModificacion = "SYSTEM",
                             FechaAsignacion = it.FechaAsignacion,
                         };
@@ -98,14 +112,14 @@ public class InactivaTurnoColaboradorCommandHandler : IRequestHandler<InactivaTu
                     }
                 }
             }
-            
-            return new ResponseType<string>() { Data = /*objResult.Id.ToString()*/ null,Message = "Turnos actualizados correctamente", StatusCode ="100",Succeeded = true };
+
+            return new ResponseType<string>() { Data = /*objResult.Id.ToString()*/ null, Message = "Turnos actualizados correctamente", StatusCode = "100", Succeeded = true };
         }
         catch (Exception ex)
         {
             return new ResponseType<string>() { Data = null, Message = "No se pudo registrar la asignación", StatusCode = "102", Succeeded = false };
         }
-        
-       
+
+
     }
 }

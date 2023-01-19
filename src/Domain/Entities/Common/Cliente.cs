@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using EvaluacionCore.Domain.Entities.Asistencia;
-using EnrolApp.Domain.Entities.Common;
+using EvaluacionCore.Domain.Entities.Permisos;
 
 namespace EvaluacionCore.Domain.Entities.Common;
 
@@ -86,19 +86,20 @@ public class Cliente
     [StringLength(100)]
     public string DispositivoId { get; set; }
 
-    [NotMapped]
-    [Column("cargoId", Order = 21, TypeName = "uniqueidentifier")]
-    public Guid CargoId { get; set; }
-    public virtual Cargo Cargo { get; set; }
+    //[NotMapped]
+    //[Column("cargoId", Order = 21, TypeName = "uniqueidentifier")]
+    //public Guid CargoId { get; set; }
+    //public virtual Cargo Cargo { get; set; }
 
-    [Column("clientePadreId", Order = 22, TypeName = "uniqueidentifier")]
+    [Column("clientePadreId", Order = 21, TypeName = "uniqueidentifier")]
     public Guid? ClientePadreId { get; set; }
 
-    [Column("nombreUsuario", Order = 23, TypeName = "varchar")]
+    [Column("nombreUsuario", Order = 22, TypeName = "varchar")]
     public string NombreUsuario { get; set; }
 
     public virtual ICollection<TurnoColaborador> TurnoColaboradores { get; set; }
     public virtual ICollection<LocalidadColaborador> LocalidadColaboradores { get; set; }
+    //public virtual ICollection<NovedadRecordatorioCab> NovedadRecordatorioCabs { get; set; }
 
 }
 

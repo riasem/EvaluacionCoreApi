@@ -1,7 +1,9 @@
 ﻿using EvaluacionCore.Application.Common.Wrappers;
+using EvaluacionCore.Application.Features.Turnos.Commands.CargarInfoExcelTurnos;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurno;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoColaborador;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoSubTurno;
+using EvaluacionCore.Application.Features.Turnos.Commands.GetTurnosAsignadosExcel;
 using EvaluacionCore.Application.Features.Turnos.Commands.InactivaTurnoColaborador;
 using EvaluacionCore.Application.Features.Turnos.Commands.UpdateTurnoColaborador;
 using EvaluacionCore.Application.Features.Turnos.Queries.GetMaestrosTurnoAsync;
@@ -10,6 +12,7 @@ using EvaluacionCore.Application.Features.Turnos.Queries.GetTurnosColaborador;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 using WebEvaluacionCoreApi.Controllers;
 
 namespace WebEnrolAppApi.Controllers.v1;
@@ -35,7 +38,7 @@ public class TurnosController : ApiControllerBase
     {
         var objResult = await Mediator.Send(new CreateTurnoCommand(request), cancellationToken);
         return Ok(objResult);
-        
+
     }
 
     /// <summary>
@@ -86,7 +89,7 @@ public class TurnosController : ApiControllerBase
         var objResult = await Mediator.Send(new GetTurnosAsyncQuery(), cancellationToken);
         return Ok(objResult);
     }
-    
+
 
     /// <summary>
     /// Retorna el listado de maestros de turnos
@@ -174,5 +177,54 @@ public class TurnosController : ApiControllerBase
     //    return Ok(objResult);
     //}
 
+    /// <summary>
+    /// Consulta información generar archivos turnos asignados
+    /// </summary>
+    /// <param name="codUdn"></param>
+    /// <param name="codArea"></param>
+    /// <param name="codScc"></param>
+    /// <param name="fechaDesde"></param>
+    /// <param name="fechaHasta"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpGet("GetInfoTurnosAsignadosExcel")]
+    [EnableCors("AllowOrigin")]
+    [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
+    [Authorize]
+    public async Task<IActionResult> GetInfoTurnosAsignadosExcel(string codUdn, string? codArea, string? codScc, string fechaDesde, string fechaHasta, CancellationToken cancellationToken)
+    {
+        GetTurnosAsignadosExcelRequest request = new GetTurnosAsignadosExcelRequest
+        {
+            CodUdn = codUdn,
+            CodArea = string.IsNullOrEmpty(codArea) ? "" : codArea,
+            CodScc = string.IsNullOrEmpty(codScc) ? "" : codScc,
+            FechaDesde = fechaDesde,
+            FechaHasta = fechaHasta
+        };
+
+        var objResult = await Mediator.Send(new GetTurnosAsignadosExcelCommand(request), cancellationToken);
+        return Ok(objResult);
+    }
+
+    /// <summary>
+    /// Carga la información de los turnos desde el archivo excel 
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpPost("CargarInfoArchivoExcelTurnos")]
+    [EnableCors("AllowOrigin")]
+    [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
+    [Authorize]
+    public async Task<IActionResult> CargarInfoArchivoExcelTurnos(CargarInfoExcelTurnosRequest request, CancellationToken cancellationToken)
+    {
+        var Identificacion = new JwtSecurityToken(HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
+
+        request.Identificacion = Identificacion;
+
+        var objResult = await Mediator.Send(new CargarInfoExcelTurnosCommand(request), cancellationToken);
+
+        return Ok(objResult);
+    }
 
 }

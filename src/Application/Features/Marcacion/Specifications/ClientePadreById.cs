@@ -1,5 +1,4 @@
 ﻿using Ardalis.Specification;
-using EnrolApp.Domain.Entities.Common;
 using EvaluacionCore.Domain.Entities.Common;
 
 namespace EnrolApp.Application.Features.Marcacion.Specifications;

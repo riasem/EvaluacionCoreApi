@@ -9,7 +9,7 @@ using Dapper;
 using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetComboBitacoraMarcacion;
 
-namespace Workflow.Persistence.Repository.BitacoraMarcacion
+namespace EvaluacionCore.Persistence.Repository.BitacoraMarcacion
 {
     public class BitacoraMarcacionService : IBitacoraMarcacion
     {
@@ -22,7 +22,7 @@ namespace Workflow.Persistence.Repository.BitacoraMarcacion
         {
             _log = log;
             _config = config;
-            ConnectionString = _config.GetConnectionString("Bd_Marcaciones_GRIAMSE");
+            ConnectionString = _config.GetConnectionString("DefaultConnection");
             Esquema = _config.GetSection("StoredProcedure:Esquema").Get<string>();
         }
 
@@ -77,7 +77,8 @@ namespace Workflow.Persistence.Repository.BitacoraMarcacion
                     param: new
                     {
                         tipo = request.Tipo,
-                        codigo = request.Codigo,
+                        udn = request.Udn,
+                        area = request.Area,
                         identificacion = string.Empty,
                     },
                     commandType: CommandType.StoredProcedure)).ToList();

@@ -13,6 +13,7 @@ namespace EvaluacionCore.Application.Common.Wrappers
         {
             Succeeded = false;
             Message = message;
+            Errors = null;
         }
 
         public ResponseType(T data, string message = null)
@@ -20,6 +21,7 @@ namespace EvaluacionCore.Application.Common.Wrappers
             Succeeded = true; 
             Message = message;
             Data = data;
+            Errors = null;
         }
 
         public bool Succeeded { get; set; } 

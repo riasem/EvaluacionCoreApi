@@ -143,7 +143,7 @@ try
     }); // We want to log all HTTP requests
 
     // Configure the HTTP request pipeline.
-    if (app.Environment.IsDevelopment())
+    if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
     {
         app.UseSwagger();
         app.UseSwaggerUI(c =>

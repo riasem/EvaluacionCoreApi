@@ -34,10 +34,34 @@ namespace EvaluacionCore.Application.Features.BitacoraMarcacion.Dto
         [JsonPropertyName("codEvento")]
         public string CodEvento { get; set; }
 
+        [JsonPropertyName("time")]
+        public string Time { get; set; }
+
         [JsonPropertyName("evento")]
         public string Evento { get; set; }
 
         [JsonPropertyName("novedad")]
         public string Novedad { get; set; }
+
+        [JsonPropertyName("minutos_novedad")]
+        public string Minutos_Novedad { get; set; }
+
+        [JsonPropertyName("idSolicitud")]
+        public Guid? IdSolicitud { get; set; } = Guid.Empty;
+
+        [JsonPropertyName("idFeature")]
+        public Guid? IdFeature { get; set; } = Guid.Empty;
+
+        [JsonPropertyName("estadoMarcacion")]
+        public string EstadoMarcacion {get; set; } 
+
+        [JsonPropertyName("fechaSolicitud")]
+        public string FechaSolicitud {get; set; } 
+
+        [JsonPropertyName("usuarioSolicitud")]
+        public string UsuarioSolicitud {get; set; }
+
+        //[JsonPropertyName("estadoSolicitud")]
+        //public string EstadoSolicitud {get; set; } 
     }
 }

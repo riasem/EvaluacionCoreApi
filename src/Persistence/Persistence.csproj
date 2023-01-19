@@ -36,6 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Configurations\Asistencia\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 </Project>
