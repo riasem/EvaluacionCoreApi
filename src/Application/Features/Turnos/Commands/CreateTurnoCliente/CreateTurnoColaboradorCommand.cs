@@ -37,7 +37,7 @@ public class CreateTurnoColaboradorCommandHandler : IRequestHandler<CreateTurnoC
                 {
 
                     var consulta = await _repoTurnoAsync.ListAsync(cancellationToken);
-                    var filtro = consulta.Where(e => e.FechaAsignacion == fechaDesde.AddDays(i) && e.IdColaborador == item.IdCliente).ToList();
+                    var filtro = consulta.Where(e => e.FechaAsignacion == fechaDesde.AddDays(i) && e.IdColaborador == item.IdCliente && e.Estado == "A").ToList();
 
                     if (filtro.Count > 0)
                     {
