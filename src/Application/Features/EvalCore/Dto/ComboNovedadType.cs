@@ -4,11 +4,11 @@ namespace EvaluacionCore.Application.Features.Permisos.Dto;
 
 public class ComboNovedadType
 {
-    [JsonPropertyName("codigoNovedad")]
-    public string CodigoNovedad { get; set; }
+    [JsonPropertyName("codigo")]
+    public string Codigo { get; set; }
 
-    [JsonPropertyName("descripcionNovedad")]
-    public string DescripcionNovedad { get; set; }
+    [JsonPropertyName("descripcion")]
+    public string Descripcion { get; set; }
 
 
 }
