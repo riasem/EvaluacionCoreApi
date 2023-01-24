@@ -1,6 +1,7 @@
 ﻿using EnrolApp.Application.Features.Marcacion.Commands.CreateMarcacion;
 using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetBitacoraMarcacion;
+using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetBitacoraMarcacionCapacidadesEspeciales;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetComboBitacoraMarcacion;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Dto;
 using EvaluacionCore.Application.Features.Marcacion.Commands.GetBitacoraMarcacion;
@@ -102,6 +103,27 @@ namespace WebEvaluacionCoreApi.Controllers.v1
             return Ok(objResult);
         }
 
+        /// <summary>
+        /// Consulta y genera información de la bitácora de marcaciones del departamento de capacidades especiales
+        /// </summary>
+        /// <param name="fechaDesde"></param>
+        /// <param name="fechaHasta"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpGet("GetBitacoraMarcacionCapacidadesEspeciales")]
+        [EnableCors("AllowOrigin")]
+        [ProducesResponseType(typeof(ResponseType<List<BitacoraMarcacionType>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetBitacoraMarcacionCapacidadesEspeciales(string fechaDesde, string fechaHasta, CancellationToken cancellationToken)
+        {
+            var request = new GetBitacoraMarcacionCapacidadesEspecialesRequest()
+            {
+                FechaDesde = fechaDesde,
+                FechaHasta = fechaHasta
+            };
+
+            var objResult = await Mediator.Send(new GetBitacoraMarcacionCapacidadesEspecialesCommand(request), cancellationToken);
+            return Ok(objResult);
+        }
 
 
 

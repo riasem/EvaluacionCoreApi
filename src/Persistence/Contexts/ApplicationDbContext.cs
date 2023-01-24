@@ -38,8 +38,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<NovedadRecordatorioCab> NovedadRecordatorioCabs { get; set; }
     public DbSet<NovedadRecordatorioDet> NovedadRecordatorioDet { get; set; }
     public DbSet<Recordatorio> Recordatorios { get; set; }
-
-
+    public DbSet<ColaboradorConvivencia> ColaboradorConvivencia { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
