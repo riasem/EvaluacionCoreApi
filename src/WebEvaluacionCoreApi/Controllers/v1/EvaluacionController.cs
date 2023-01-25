@@ -1,5 +1,6 @@
 ﻿using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.EvalCore.Commands.EvaluacionAsistencias;
+using EvaluacionCore.Application.Features.EvalCore.Queries.GetComboPeriodoAsync;
 using EvaluacionCore.Application.Features.EvalCore.Queries.GetEvaluacionAsistenciaAsync;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -42,8 +43,7 @@ public class EvaluacionController : ApiControllerBase
     /// Obtener Control de Asistencias
     /// </summary>
     /// <param name="identificacion"></param>
-    /// <param name="fechaDesde"></param>
-    /// <param name="fechaHasta"></param>
+    /// <param name="periodo"></param>
     /// <param name="Udn"></param>
     /// <param name="Departamento"></param>
     /// <param name="Area"></param>
@@ -57,13 +57,13 @@ public class EvaluacionController : ApiControllerBase
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [Authorize]
-    public async Task<IActionResult> GetAsistencias(DateTime fechaDesde, DateTime fechaHasta, string? Udn, string? Departamento, string? Area, CancellationToken cancellationToken, string? identificacion, string FiltroNovedades)
+    public async Task<IActionResult> GetAsistencias(string periodo, string? Udn, string? Departamento, string? Area, CancellationToken cancellationToken, string? identificacion, string FiltroNovedades)
     {
         //if (identificacion == "0")
         //{
         //    identificacion = "";
         //}
-        var objResult = await Mediator.Send(new GetEvaluacionAsistenciaAsyncQuery(identificacion, fechaDesde, fechaHasta, Udn, Area, Departamento, FiltroNovedades), cancellationToken);
+        var objResult = await Mediator.Send(new GetEvaluacionAsistenciaAsyncQuery(identificacion, periodo, Udn, Area, Departamento, FiltroNovedades), cancellationToken);
         return Ok(objResult);
         
     }
@@ -80,14 +80,28 @@ public class EvaluacionController : ApiControllerBase
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [Authorize]
-    public async Task<IActionResult> GetComboNovedades(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetComboNovedades( CancellationToken cancellationToken)
     {
-        //if (identificacion == "0")
-        //{
-        //    identificacion = "";
-        //}
         var objResult = await Mediator.Send(new GetComboNovedadesAsyncQuery(), cancellationToken);
         return Ok(objResult);
-        
+    }
+
+    /// <summary>
+    /// Obtener Combo de periodos para control de asistencias
+    /// </summary>
+    /// <param name="codUdn"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns>Capacidad que realiza la evaluación de asistencias.</returns>
+    /// <response code="201">Consulta Realizada</response>
+    /// <response code="400">Ocurrió un error al realizar la evaluación</response>
+    [HttpGet("GetComboPeriodos")]
+    [EnableCors("AllowOrigin")]
+    [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [Authorize]
+    public async Task<IActionResult> GetComboPeriodo(string codUdn, CancellationToken cancellationToken)
+    {
+        var objResult = await Mediator.Send(new GetComboPeriodoAsyncQuery(codUdn), cancellationToken);
+        return Ok(objResult);
     }
 }

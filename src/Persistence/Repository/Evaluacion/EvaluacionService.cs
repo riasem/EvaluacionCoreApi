@@ -1,21 +1,21 @@
-﻿using EnrolApp.Application.Features.Marcacion.Specifications;
+﻿using Dapper;
+using EnrolApp.Application.Features.Marcacion.Specifications;
 using EnrolApp.Domain.Entities.Horario;
 using EvaluacionCore.Application.Common.Interfaces;
+using EvaluacionCore.Application.Features.BitacoraMarcacion.Dto;
+using EvaluacionCore.Application.Features.EvalCore.Commands.Specifications;
 using EvaluacionCore.Application.Features.EvalCore.Interfaces;
 using EvaluacionCore.Application.Features.Marcacion.Specifications;
+using EvaluacionCore.Application.Features.Permisos.Dto;
 using EvaluacionCore.Domain.Entities.Asistencia;
+using EvaluacionCore.Domain.Entities.ControlAsistencia;
+using EvaluacionCore.Domain.Entities.Permisos;
+using EvaluacionCore.Domain.Entities.Vacaciones;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Data;
-using Dapper;
-using EvaluacionCore.Application.Features.EvalCore.Commands.Specifications;
-using EvaluacionCore.Domain.Entities.Permisos;
-using EvaluacionCore.Domain.Entities.Vacaciones;
-using EvaluacionCore.Application.Features.BitacoraMarcacion.Dto;
-using EvaluacionCore.Domain.Entities.Common;
-using EvaluacionCore.Application.Features.Permisos.Dto;
 
 namespace EvaluacionCore.Persistence.Repository.Employees;
 
@@ -78,7 +78,6 @@ public class EvaluacionService : IEvaluacion
             return (e.Message, 0);
         }
     }
-
     public async Task<(string resp, int succ)> EvaluaConParams(string identificacion, DateTime? fechaDesde, DateTime? fechaHasta)
     {
         try
@@ -161,7 +160,6 @@ public class EvaluacionService : IEvaluacion
             throw;
         }
     }
-
     public string EvaluaSinParams()
     {
         try
@@ -175,8 +173,6 @@ public class EvaluacionService : IEvaluacion
             throw;
         }
     }
-
-
     public async Task<List<BitacoraMarcacionType>> ConsultaMarcaciones(string Identificacion, DateTime fechaDesde, DateTime fechaHasta, string codigoMarcacion)
     {
         List<BitacoraMarcacionType> bitacoraMarcacion = new();
@@ -201,7 +197,6 @@ public class EvaluacionService : IEvaluacion
 
         return bitacoraMarcacion;
     }
-
     public async Task<List<ColaboradorConvivenciaType>> ConsultaColaboradores(string codUdn, string codArea, string codScosto, string suscriptor)
     {
         List<ColaboradorConvivenciaType> bitacoraMarcacion = new();
@@ -233,5 +228,106 @@ public class EvaluacionService : IEvaluacion
 
         return bitacoraMarcacion;
     }
+    public async Task<List<ColaboradorConvivenciaType>> ConsultaColaborador(string suscriptor)
+    {
+        List<ColaboradorConvivenciaType> bitacoraMarcacion = new();
+        //string Susc   = !string.IsNullOrEmpty(suscriptor) ? suscriptor : "%";
+        try
+        {
+            string query = "SELECT identificacion, Empleado, codigoBiometrico, desUdn, desArea, desSubcentroCosto FROM V_COLABORADORES_CONVIVENCIA WHERE ";
+            query += " identificacion = '" + suscriptor + "' ";
 
+            using IDbConnection con = new SqlConnection(ConnectionString_Marc);
+            if (con.State == ConnectionState.Closed) con.Open();
+
+            bitacoraMarcacion = (await con.QueryAsync<ColaboradorConvivenciaType>(
+                query)).ToList();
+
+            if (con.State == ConnectionState.Open) con.Close();
+        }
+        catch (Exception e)
+        {
+            _log.LogError(e, string.Empty);
+        }
+
+        return bitacoraMarcacion;
+    }
+    
+
+    public async Task<List<ControlAsistenciaCab>> ConsultaControlAsistenciaCab(string codUdn, string codArea, string codScosto, string periodo, string suscriptor)
+    {
+        List<ControlAsistenciaCab> bitacoraMarcacion = new();
+        string Udn = !string.IsNullOrEmpty(codUdn) ? codUdn : "codUdn";
+        string Area = !string.IsNullOrEmpty(codArea) ? codArea : "codArea";
+        string Scosto = !string.IsNullOrEmpty(codScosto) ? codScosto : "codSubcentroCosto";
+        //string Susc   = !string.IsNullOrEmpty(suscriptor) ? suscriptor : "%";
+        try
+        {
+            string query = "SELECT top 1 * FROM GRIAMSE.dbo.controlAsistenciaCab WHERE udn = '"
+                            + Udn + "' AND area= '" + Area + "' AND subcentroCosto =  '" + Scosto + "' " + " AND periodo= '" + periodo + "' ";
+            if (!string.IsNullOrEmpty(suscriptor))
+            {
+                query += " and identificacion =  '" + suscriptor + "' ";
+            }
+            query += " order by fechaRegistro desc";
+
+            using IDbConnection con = new SqlConnection(ConnectionString_Marc);
+            if (con.State == ConnectionState.Closed) con.Open();
+
+            bitacoraMarcacion = (await con.QueryAsync<ControlAsistenciaCab>(
+                query)).ToList();
+
+            if (con.State == ConnectionState.Open) con.Close();
+        }
+        catch (Exception e)
+        {
+            _log.LogError(e, string.Empty);
+        }
+
+        return bitacoraMarcacion;
+    }
+    public async Task<List<ControlAsistenciaDet>> ConsultaControlAsistenciaDet(int idControlAsistenciaCab)
+    {
+        List<ControlAsistenciaDet> bitacoraMarcacion = new();
+        try
+        {
+            string query = "SELECT * FROM GRIAMSE.dbo.controlAsistenciaDet WHERE idControlAsistenciaCab = " + idControlAsistenciaCab + " order by fecha asc";
+
+            using IDbConnection con = new SqlConnection(ConnectionString_Marc);
+            if (con.State == ConnectionState.Closed) con.Open();
+
+            bitacoraMarcacion = (await con.QueryAsync<ControlAsistenciaDet>(
+                query)).ToList();
+
+            if (con.State == ConnectionState.Open) con.Close();
+        }
+        catch (Exception e)
+        {
+            _log.LogError(e, string.Empty);
+        }
+
+        return bitacoraMarcacion;
+    }    
+    public async Task<List<ControlAsistenciaNovedad>> ConsultaControlAsistenciaNovedad(int idControlAsistenciaDet)
+    {
+        List<ControlAsistenciaNovedad> bitacoraMarcacion = new();
+        try
+        {
+            string query = "SELECT * FROM GRIAMSE.dbo.controlAsistenciaNovedad WHERE idControlAsistenciaDet = " + idControlAsistenciaDet + " order by fecha desc";
+
+            using IDbConnection con = new SqlConnection(ConnectionString_Marc);
+            if (con.State == ConnectionState.Closed) con.Open();
+
+            bitacoraMarcacion = (await con.QueryAsync<ControlAsistenciaNovedad>(
+                query)).ToList();
+
+            if (con.State == ConnectionState.Open) con.Close();
+        }
+        catch (Exception e)
+        {
+            _log.LogError(e, string.Empty);
+        }
+
+        return bitacoraMarcacion;
+    }
 }
