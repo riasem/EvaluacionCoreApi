@@ -131,7 +131,7 @@ namespace EvaluacionCore.Persistence.Repository.BitacoraMarcacion
 
             try
             {
-                var colConv = await _repositoryAsyncColConv.ListAsync(new GetColaboradorConvivenciaByUdnAreaSccSpec(codUdn, codArea, codScc, "0914592381"));
+                var colConv = await _repositoryAsyncColConv.ListAsync(new GetColaboradorConvivenciaByUdnAreaSccSpec(codUdn, codArea, codScc, string.Empty));
 
                 if (!colConv.Any())
                     return new ResponseType<List<BitacoraMarcacionType>>() { Data = lstMarcacion, Message = "No se encontró información de los colaboradores", StatusCode = "001", Succeeded = false };
