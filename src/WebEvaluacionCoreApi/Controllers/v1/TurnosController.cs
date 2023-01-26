@@ -7,6 +7,7 @@ using EvaluacionCore.Application.Features.Turnos.Commands.GetTurnosAsignadosExce
 using EvaluacionCore.Application.Features.Turnos.Commands.InactivaTurnoColaborador;
 using EvaluacionCore.Application.Features.Turnos.Commands.UpdateTurnoColaborador;
 using EvaluacionCore.Application.Features.Turnos.Queries.GetMaestrosTurnoAsync;
+using EvaluacionCore.Application.Features.Turnos.Queries.GetTurnosAsignadoColaboradorAsync;
 using EvaluacionCore.Application.Features.Turnos.Queries.GetTurnosAsync;
 using EvaluacionCore.Application.Features.Turnos.Queries.GetTurnosColaborador;
 using Microsoft.AspNetCore.Authorization;
@@ -108,7 +109,7 @@ public class TurnosController : ApiControllerBase
 
 
     /// <summary>
-    /// Retorna el listado de turnos asignados al colaborador en un rango de fechas 
+    /// Retorna el listado de turnos asignados de los colaboradores que esta como jefe en un rango de fechas 
     /// </summary>
     /// <param name="identificacion"></param>
     /// <param name="fechaDesde"></param>
@@ -124,6 +125,27 @@ public class TurnosController : ApiControllerBase
         var objResult = await Mediator.Send(new GetTurnosColaboradorAsyncQuery(identificacion, fechaDesde, fechaHasta), cancellationToken);
         return Ok(objResult);
     }
+
+
+
+    /// <summary>
+    /// Consulta el listado de los turnos asignado al colaborador en un rango de fechas
+    /// </summary>
+    /// <param name="identificacion"></param>
+    /// <param name="fechaDesde"></param>
+    /// <param name="fechaHasta"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpGet("GetTurnosAsignadosColaborador")]
+    [EnableCors("AllowOrigin")]
+    [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
+    [Authorize]
+    public async Task<IActionResult> GetTurnosAsignadoColaborador(string identificacion, DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken)
+    {
+        var objResult = await Mediator.Send(new GetTurnosAsignadoColaboradorAsyncQuery(identificacion, fechaDesde, fechaHasta), cancellationToken);
+        return Ok(objResult);
+    }
+
 
 
 

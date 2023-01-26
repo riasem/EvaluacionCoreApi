@@ -41,5 +41,26 @@ namespace EvaluacionCore.Application.Features.Turnos.Dto
         [JsonPropertyName("codigoIntegracion")]
         public string CodigoIntegracion { get; set; }
 
+        [JsonPropertyName("descripcion")]
+        public string Descripcion { get; set; }
+
+        [JsonPropertyName("mensaje")]
+        public string Mensaje { get; set; }
+
+        [JsonPropertyName("margenEntradaPrevio")]
+        public int? MargenEntradaPrevio { get; set; }
+
+        [JsonPropertyName("margenSalidaPosterior")]
+        public int? MargenSalidaPosterior { get; set; }
+
+        [JsonPropertyName("margenEntradaGracia")]
+        public int? MargenEntradaGracia { get; set; }
+
+        [JsonPropertyName("margenSalidaGracia")]
+        public int? MargenSalidaGracia { get; set; }
+
+
+
+
     }
 }

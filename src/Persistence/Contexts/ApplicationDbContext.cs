@@ -40,6 +40,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<Recordatorio> Recordatorios { get; set; }
     public DbSet<ColaboradorConvivencia> ColaboradorConvivencia { get; set; }
 
+    public DbSet<TurnoColaborador> TurnoColaborador { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
