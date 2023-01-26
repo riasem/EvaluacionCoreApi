@@ -260,15 +260,22 @@ public class EvaluacionService : IEvaluacion
         string Udn = !string.IsNullOrEmpty(codUdn) ? codUdn : "codUdn";
         string Area = !string.IsNullOrEmpty(codArea) ? codArea : "codArea";
         string Scosto = !string.IsNullOrEmpty(codScosto) ? codScosto : "codSubcentroCosto";
+        string query = "";
         //string Susc   = !string.IsNullOrEmpty(suscriptor) ? suscriptor : "%";
         try
         {
-            string query = "SELECT top 1 * FROM GRIAMSE.dbo.controlAsistenciaCab WHERE udn = '"
-                            + Udn + "' AND area= '" + Area + "' AND subcentroCosto =  '" + Scosto + "' " + " AND periodo= '" + periodo + "' ";
             if (!string.IsNullOrEmpty(suscriptor))
             {
+                query += "SELECT top 1 * FROM GRIAMSE.dbo.controlAsistenciaCab WHERE udn = '"
+                            + Udn + "' AND area= '" + Area + "' AND subcentroCosto =  '" + Scosto + "' " + " AND periodo= '" + periodo + "' ";
                 query += " and identificacion =  '" + suscriptor + "' ";
             }
+            else
+            {
+                query += "SELECT * FROM GRIAMSE.dbo.controlAsistenciaCab WHERE udn = '"
+                            + Udn + "' AND area= '" + Area + "' AND subcentroCosto =  '" + Scosto + "' " + " AND periodo= '" + periodo + "' ";
+            }
+
             query += " order by fechaRegistro desc";
 
             using IDbConnection con = new SqlConnection(ConnectionString_Marc);

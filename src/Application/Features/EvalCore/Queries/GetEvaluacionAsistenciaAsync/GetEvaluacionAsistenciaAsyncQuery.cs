@@ -51,113 +51,119 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
             var cabecera = await _EvaluacionAsync.ConsultaControlAsistenciaCab(request.Udn, request.Area, request.Departamento, request.Periodo, request.Suscriptor);
 
-            var itemCol = await _EvaluacionAsync.ConsultaColaborador(request.Suscriptor);
 
-            if (cabecera != null)
+            if (cabecera == null)
             {
-                controlAsistenciaDet = await _EvaluacionAsync.ConsultaControlAsistenciaDet(cabecera.FirstOrDefault().id);
+                return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = null, Succeeded = false, StatusCode = "001", Message = "La consulta no retorna datos." };
             }
 
-            if (controlAsistenciaDet.Any())
+            foreach (var itemCab in cabecera)
             {
-                foreach (var item in controlAsistenciaDet)
+                controlAsistenciaDet = await _EvaluacionAsync.ConsultaControlAsistenciaDet(itemCab.id);
+
+                if (controlAsistenciaDet.Any())
                 {
-                    List<Novedad> novedades = new();
-
-                    #region consulta y procesamiento de turno laboral
-
-                    //SE PREPARA LA INFORMACION DE RETORNO
-                    TurnoLaboral turnoLaborall = new()
+                    foreach (var item in controlAsistenciaDet)
                     {
-                        //turno
-                        Id = item.IdTurnoLaboral,
-                        Entrada = item.EntradaLaboral,
-                        Salida = item.SalidaLaboral,
-                        TotalHoras = item.TotalHorasLaboral,
+                        var itemCol = await _EvaluacionAsync.ConsultaColaborador(item.Colaborador);
+                        List<Novedad> novedades = new();
 
-                        MarcacionEntrada = item.MarcacionEntradaLaboral,
-                        EstadoEntrada = item.EstadoEntradaLaboral,
-                        FechaSolicitudEntrada = item.FechaSolicitudEntradaLaboral,
-                        UsuarioSolicitudEntrada = item.UsuarioSolicitudEntradaLaboral,
-                        IdSolicitudEntrada = item.IdSolicitudEntradaLaboral,
-                        IdFeatureEntrada = item.IdFeatureEntradaLaboral,
-                        TipoSolicitudEntrada = item.TipoSolicitudEntradaLaboral,
+                        #region consulta y procesamiento de turno laboral
 
-                        MarcacionSalida = item.MarcacionSalidaLaboral,
-                        EstadoSalida = item.EstadoSalidaLaboral,
-                        FechaSolicitudSalida = item.FechaSolicitudSalidaLaboral,
-                        UsuarioSolicitudSalida = item.UsuarioSolicitudSalidaLaboral,
-                        IdSolicitudSalida = item.IdSolicitudSalidaLaboral,
-                        IdFeatureSalida = item.IdFeatureSalidaLaboral,
-                        TipoSolicitudSalida = item.TipoSolicitudSalidaLaboral
-                    };
-
-
-                    #endregion
-                    
-                    #region consulta y procesamiento de turno de receso
-
-
-                    TurnoReceso turnoReceso = new()
-                    {
-                        //turno de receso asignado
-                        Id = item.IdTurnoReceso,
-                        Entrada = item.EntradaReceso,
-                        Salida = item.SalidaReceso,
-                        TotalHoras = item.TotalHorasReceso,
-
-                        //marcaciones de receso entrada
-                        MarcacionEntrada = item.MarcacionEntradaReceso,
-                        FechaSolicitudEntradaReceso = DateTime.Parse("1900-01-01"),
-                        UsuarioSolicitudEntradaReceso = "",
-                        IdSolicitudEntradaReceso = Guid.Parse("00000000-0000-0000-0000-000000000000"),
-                        EstadoEntradaReceso = item.EstadoEntradaReceso,
-                        IdFeatureEntradaReceso = Guid.Parse("00000000-0000-0000-0000-000000000000"),
-                        TipoSolicitudEntradaReceso = "",
-
-                        MarcacionSalida = item.MarcacionSalidaReceso,
-                        FechaSolicitudSalidaReceso = DateTime.Parse("1900-01-01"),
-                        UsuarioSolicitudSalidaReceso = "",
-                        IdSolicitudSalidaReceso = Guid.Parse("00000000-0000-0000-0000-000000000000"),
-                        EstadoSalidaReceso = item.EstadoSalidaReceso,
-                        IdFeatureSalidaReceso = Guid.Parse("00000000-0000-0000-0000-000000000000"),
-                        TipoSolicitudSalidaReceso = ""
-
-                    };
-
-                    #endregion
-
-                    #region Consulta y procesamiento de novedades
-
-                    var listaNovedades = await _EvaluacionAsync.ConsultaControlAsistenciaNovedad(item.Id);
-
-                    foreach (var listaNovedad in listaNovedades)
-                    {
-                        novedades.Add(new Novedad
+                        //SE PREPARA LA INFORMACION DE RETORNO
+                        TurnoLaboral turnoLaborall = new()
                         {
-                            Descripcion = listaNovedad.Descripcion,
-                            MinutosNovedad = listaNovedad.MinutosNovedad,
-                            EstadoMarcacion = listaNovedad.EstadoMarcacion
+                            //turno
+                            Id = item.IdTurnoLaboral,
+                            Entrada = item.EntradaLaboral,
+                            Salida = item.SalidaLaboral,
+                            TotalHoras = item.TotalHorasLaboral,
+
+                            MarcacionEntrada = item.MarcacionEntradaLaboral,
+                            EstadoEntrada = item.EstadoEntradaLaboral,
+                            FechaSolicitudEntrada = item.FechaSolicitudEntradaLaboral,
+                            UsuarioSolicitudEntrada = item.UsuarioSolicitudEntradaLaboral,
+                            IdSolicitudEntrada = item.IdSolicitudEntradaLaboral,
+                            IdFeatureEntrada = item.IdFeatureEntradaLaboral,
+                            TipoSolicitudEntrada = item.TipoSolicitudEntradaLaboral,
+
+                            MarcacionSalida = item.MarcacionSalidaLaboral,
+                            EstadoSalida = item.EstadoSalidaLaboral,
+                            FechaSolicitudSalida = item.FechaSolicitudSalidaLaboral,
+                            UsuarioSolicitudSalida = item.UsuarioSolicitudSalidaLaboral,
+                            IdSolicitudSalida = item.IdSolicitudSalidaLaboral,
+                            IdFeatureSalida = item.IdFeatureSalidaLaboral,
+                            TipoSolicitudSalida = item.TipoSolicitudSalidaLaboral
+                        };
+
+
+                        #endregion
+
+                        #region consulta y procesamiento de turno de receso
+
+
+                        TurnoReceso turnoReceso = new()
+                        {
+                            //turno de receso asignado
+                            Id = item.IdTurnoReceso,
+                            Entrada = item.EntradaReceso,
+                            Salida = item.SalidaReceso,
+                            TotalHoras = item.TotalHorasReceso,
+
+                            //marcaciones de receso entrada
+                            MarcacionEntrada = item.MarcacionEntradaReceso,
+                            FechaSolicitudEntradaReceso = DateTime.Parse("1900-01-01"),
+                            UsuarioSolicitudEntradaReceso = "",
+                            IdSolicitudEntradaReceso = Guid.Parse("00000000-0000-0000-0000-000000000000"),
+                            EstadoEntradaReceso = item.EstadoEntradaReceso,
+                            IdFeatureEntradaReceso = Guid.Parse("00000000-0000-0000-0000-000000000000"),
+                            TipoSolicitudEntradaReceso = "",
+
+                            MarcacionSalida = item.MarcacionSalidaReceso,
+                            FechaSolicitudSalidaReceso = DateTime.Parse("1900-01-01"),
+                            UsuarioSolicitudSalidaReceso = "",
+                            IdSolicitudSalidaReceso = Guid.Parse("00000000-0000-0000-0000-000000000000"),
+                            EstadoSalidaReceso = item.EstadoSalidaReceso,
+                            IdFeatureSalidaReceso = Guid.Parse("00000000-0000-0000-0000-000000000000"),
+                            TipoSolicitudSalidaReceso = ""
+
+                        };
+
+                        #endregion
+
+                        #region Consulta y procesamiento de novedades
+
+                        var listaNovedades = await _EvaluacionAsync.ConsultaControlAsistenciaNovedad(item.Id);
+
+                        foreach (var listaNovedad in listaNovedades)
+                        {
+                            novedades.Add(new Novedad
+                            {
+                                Descripcion = listaNovedad.Descripcion,
+                                MinutosNovedad = listaNovedad.MinutosNovedad,
+                                EstadoMarcacion = listaNovedad.EstadoMarcacion
+                            });
+                        }
+
+                        #endregion
+
+                        listaEvaluacionAsistencia.Add(new EvaluacionAsistenciaResponseType()
+                        {
+                            Colaborador = itemCol?.FirstOrDefault()?.Empleado,
+                            Identificacion = itemCol?.FirstOrDefault()?.Identificacion,
+                            CodBiometrico = itemCol?.FirstOrDefault()?.CodigoBiometrico,
+                            Udn = itemCol?.FirstOrDefault()?.DesUdn,
+                            Area = itemCol?.FirstOrDefault()?.DesArea,
+                            SubCentroCosto = itemCol?.FirstOrDefault()?.DesSubcentroCosto,
+                            Fecha = item.Fecha,
+                            Novedades = novedades,
+                            TurnoLaboral = turnoLaborall,
+                            TurnoReceso = turnoReceso
                         });
                     }
-
-                    #endregion
-
-                    listaEvaluacionAsistencia.Add(new EvaluacionAsistenciaResponseType()
-                    {
-                        Colaborador = request.Suscriptor,
-                        Identificacion = request.Suscriptor,
-                        CodBiometrico = itemCol[0].CodigoBiometrico,
-                        Udn = itemCol[0].DesUdn,
-                        Area = itemCol[0].DesArea,
-                        SubCentroCosto = itemCol[0].DesSubcentroCosto,
-                        Fecha = item.Fecha,
-                        Novedades = novedades,
-                        TurnoLaboral = turnoLaborall,
-                        TurnoReceso = turnoReceso
-                    });
                 }
             }
+
 
             var lista = listaEvaluacionAsistencia.Where(e => filtroNovedades.Contains(e.TurnoLaboral.EstadoEntrada) || filtroNovedades.Contains(e.TurnoLaboral.EstadoSalida) ||
                                                  filtroNovedades.Contains(e.TurnoReceso.EstadoEntradaReceso) || filtroNovedades.Contains(e.TurnoReceso.EstadoSalidaReceso) ||
