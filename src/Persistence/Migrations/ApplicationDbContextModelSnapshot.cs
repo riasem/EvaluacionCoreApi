@@ -234,11 +234,6 @@ namespace Workflow.Persistence.Migrations
                         .HasColumnName("id")
                         .HasColumnOrder(0);
 
-                    b.Property<bool?>("EsPrincipal")
-                        .HasColumnType("bit")
-                        .HasColumnName("esPrincipal")
-                        .HasColumnOrder(8);
-
                     b.Property<string>("Estado")
                         .IsRequired()
                         .HasColumnType("varchar")
@@ -1504,128 +1499,6 @@ namespace Workflow.Persistence.Migrations
                     b.ToTable("OG_GrupoEmpresarial", "dbo");
                 });
 
-            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Permisos.NovedadRecordatorioCab", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("id");
-
-                    b.Property<Guid?>("ColaboradorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("DiasRecordatorio")
-                        .HasColumnType("int")
-                        .HasColumnName("diasRecordatorio");
-
-                    b.Property<string>("Estado")
-                        .HasColumnType("varchar")
-                        .HasColumnName("estado");
-
-                    b.Property<DateTime>("FechaEvaluacion")
-                        .HasColumnType("datetime")
-                        .HasColumnName("fechaEvaluacion");
-
-                    b.Property<Guid>("IdJefe")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("idJefe");
-
-                    b.Property<string>("TipoRecordatorio")
-                        .HasColumnType("varchar")
-                        .HasColumnName("tipoRecordatorio");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ColaboradorId");
-
-                    b.ToTable("AS_NovedadRecordatorioCab", "dbo");
-                });
-
-            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Permisos.NovedadRecordatorioDet", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("id");
-
-                    b.Property<string>("Area")
-                        .HasColumnType("varchar")
-                        .HasColumnName("area");
-
-                    b.Property<int>("CodBiometricoColaborador")
-                        .HasColumnType("int")
-                        .HasColumnName("codBiometricoColaborador");
-
-                    b.Property<DateTime>("FechaEvaluacion")
-                        .HasColumnType("datetime")
-                        .HasColumnName("fechaEvaluacion");
-
-                    b.Property<DateTime>("FechaNoAsignada")
-                        .HasColumnType("datetime")
-                        .HasColumnName("fechaNoAsignada");
-
-                    b.Property<Guid>("IdNovedadRecordatorioCab")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("idNovedadRecordatorioCab");
-
-                    b.Property<string>("IdentificacionColaborador")
-                        .HasColumnType("varchar")
-                        .HasColumnName("identificacionColaborador");
-
-                    b.Property<string>("NombreColaborador")
-                        .HasColumnType("varchar")
-                        .HasColumnName("nombreColaborador");
-
-                    b.Property<Guid?>("NovedadRecordatorioCabId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("SubcentroCosto")
-                        .HasColumnType("varchar")
-                        .HasColumnName("subCentroCosto");
-
-                    b.Property<string>("Udn")
-                        .HasColumnType("varchar")
-                        .HasColumnName("udn");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NovedadRecordatorioCabId");
-
-                    b.ToTable("AS_NovedadRecordatorioDet", "dbo");
-                });
-
-            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Permisos.Recordatorio", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("id");
-
-                    b.Property<DateTime>("FechaLimite")
-                        .HasColumnType("datetime")
-                        .HasColumnName("fechaLimite");
-
-                    b.Property<DateTime>("FinRecordatorio")
-                        .HasColumnType("datetime")
-                        .HasColumnName("finRecordatorio");
-
-                    b.Property<Guid>("IdPlantilla")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("idPlantillaSms");
-
-                    b.Property<DateTime>("InicioRecordatorio")
-                        .HasColumnType("datetime")
-                        .HasColumnName("inicioRecordatorio");
-
-                    b.Property<string>("PeriodoRecordatorio")
-                        .HasColumnType("varchar")
-                        .HasColumnName("periodoRecordatorio");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AS_Recordatorio", "dbo");
-                });
-
             modelBuilder.Entity("EvaluacionCore.Domain.Entities.Permisos.SolicitudPermiso", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2025,24 +1898,6 @@ namespace Workflow.Persistence.Migrations
                     b.Navigation("GrupoEmpresarial");
                 });
 
-            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Permisos.NovedadRecordatorioCab", b =>
-                {
-                    b.HasOne("EvaluacionCore.Domain.Entities.Common.Cliente", "Colaborador")
-                        .WithMany("NovedadRecordatorioCabs")
-                        .HasForeignKey("ColaboradorId");
-
-                    b.Navigation("Colaborador");
-                });
-
-            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Permisos.NovedadRecordatorioDet", b =>
-                {
-                    b.HasOne("EvaluacionCore.Domain.Entities.Permisos.NovedadRecordatorioCab", "NovedadRecordatorioCab")
-                        .WithMany("NovedadRecordatorioDets")
-                        .HasForeignKey("NovedadRecordatorioCabId");
-
-                    b.Navigation("NovedadRecordatorioCab");
-                });
-
             modelBuilder.Entity("EvaluacionCore.Domain.Entities.Permisos.SolicitudPermiso", b =>
                 {
                     b.HasOne("EvaluacionCore.Domain.Entities.EstadoTarea", "EstadoTarea")
@@ -2142,8 +1997,6 @@ namespace Workflow.Persistence.Migrations
                 {
                     b.Navigation("LocalidadColaboradores");
 
-                    b.Navigation("NovedadRecordatorioCabs");
-
                     b.Navigation("TurnoColaboradores");
                 });
 
@@ -2179,11 +2032,6 @@ namespace Workflow.Persistence.Migrations
             modelBuilder.Entity("EvaluacionCore.Domain.Entities.Organizacion.GrupoEmpresarial", b =>
                 {
                     b.Navigation("Empresas");
-                });
-
-            modelBuilder.Entity("EvaluacionCore.Domain.Entities.Permisos.NovedadRecordatorioCab", b =>
-                {
-                    b.Navigation("NovedadRecordatorioDets");
                 });
 
             modelBuilder.Entity("EvaluacionCore.Domain.Entities.Permisos.TipoPermiso", b =>

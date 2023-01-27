@@ -257,25 +257,28 @@ public class EvaluacionService : IEvaluacion
     public async Task<List<ControlAsistenciaCab>> ConsultaControlAsistenciaCab(string codUdn, string codArea, string codScosto, string periodo, string suscriptor)
     {
         List<ControlAsistenciaCab> bitacoraMarcacion = new();
-        string Udn = !string.IsNullOrEmpty(codUdn) ? codUdn : "codUdn";
-        string Area = !string.IsNullOrEmpty(codArea) ? codArea : "codArea";
-        string Scosto = !string.IsNullOrEmpty(codScosto) ? codScosto : "codSubcentroCosto";
+        //string Udn = !string.IsNullOrEmpty(codUdn) ? codUdn : "udn";
+        //string Area = !string.IsNullOrEmpty(codArea) ? codArea : "area";
+        //string Scosto = !string.IsNullOrEmpty(codScosto) ? codScosto : "subcentroCosto";
         string query = "";
         //string Susc   = !string.IsNullOrEmpty(suscriptor) ? suscriptor : "%";
         try
         {
             if (!string.IsNullOrEmpty(suscriptor))
             {
-                query += "SELECT top 1 * FROM GRIAMSE.dbo.controlAsistenciaCab WHERE udn = '"
-                            + Udn + "' AND area= '" + Area + "' AND subcentroCosto =  '" + Scosto + "' " + " AND periodo= '" + periodo + "' ";
+                query += "SELECT top 1 * FROM GRIAMSE.dbo.controlAsistenciaCab WHERE udn = ISNULL("
+                            + codUdn + ", udn) AND area= '" + codArea + "' AND periodo= '" + periodo + "' ";
                 query += " and identificacion =  '" + suscriptor + "' ";
             }
             else
             {
                 query += "SELECT * FROM GRIAMSE.dbo.controlAsistenciaCab WHERE udn = '"
-                            + Udn + "' AND area= '" + Area + "' AND subcentroCosto =  '" + Scosto + "' " + " AND periodo= '" + periodo + "' ";
+                            + codUdn + "' AND area= '" + codArea +  "'  AND periodo= '" + periodo + "' ";
             }
-
+            if (!string.IsNullOrEmpty(codScosto))
+            {
+                query += "' AND subcentroCosto =  '" + codScosto;
+            }
             query += " order by fechaRegistro desc";
 
             using IDbConnection con = new SqlConnection(ConnectionString_Marc);

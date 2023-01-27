@@ -13,7 +13,7 @@ public class NovedadRecordatorioDet
     
     [Column("idNovedadRecordatorioCab", TypeName = "uniqueidentifier")]
     public Guid IdNovedadRecordatorioCab { get; set; }
-    public virtual NovedadRecordatorioCab NovedadRecordatorioCab { get; set; }
+    //public virtual NovedadRecordatorioCab NovedadRecordatorioCab { get; set; }
 
     [Column("codBiometricoColaborador", TypeName = "varchar")]
     public string CodBiometricoColaborador { get; set; }

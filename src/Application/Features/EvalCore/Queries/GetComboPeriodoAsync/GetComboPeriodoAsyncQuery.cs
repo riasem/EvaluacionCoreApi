@@ -19,19 +19,29 @@ public class GetComboNovedadesAsyncHandler : IRequestHandler<GetComboPeriodoAsyn
     }
     async Task<ResponseType<List<ComboPeriodoType>>> IRequestHandler<GetComboPeriodoAsyncQuery, ResponseType<List<ComboPeriodoType>>>.Handle(GetComboPeriodoAsyncQuery request, CancellationToken cancellationToken)
     {
-        var objPeriodo = await _repositoryPeriodoAsync.ListAsync(cancellationToken);
-        
-        List<ComboPeriodoType> objResult = new() { };
-
-        objResult = objPeriodo.Where(e => e.Udn == request.CodUdn).Select(e => new ComboPeriodoType
+        try
         {
-            Id = e.Id,
-            DesPeriodo = e.DesPeriodo,
-            Udn = e.Udn
-        }).ToList();
+            var objPeriodo = await _repositoryPeriodoAsync.ListAsync(cancellationToken);
+
+            List<ComboPeriodoType> objResult = new() { };
+
+            objResult = objPeriodo.Where(e => e.Udn == request.CodUdn).Select(e => new ComboPeriodoType
+            {
+                Id = e.Id,
+                DesPeriodo = e.DesPeriodo,
+                Udn = e.Udn,
+                FechaDesdeCorte = e.FechaDesdeCorte,
+                FechaHastaCorte = e.FechaHastaCorte
+
+            }).ToList();
 
 
-        return new ResponseType<List<ComboPeriodoType>>() { Data = objResult, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
+            return new ResponseType<List<ComboPeriodoType>>() { Data = objResult, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
+        }
+        catch (Exception e)
+        {
+            return new ResponseType<List<ComboPeriodoType>>() { Data = null, Succeeded = false, StatusCode = "001", Message = "Ocurrió un error en la consulta" };
+        }
         
     }
 

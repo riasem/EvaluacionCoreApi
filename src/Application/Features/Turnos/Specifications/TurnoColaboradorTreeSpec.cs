@@ -10,6 +10,7 @@ public class TurnoColaboradorTreeSpec : Specification<TurnoColaborador>
         try
         {
             Query
+                .Where(e => e.Estado == "A")
                 .Include(p => p.Turno)
                 .Where(e => e.FechaAsignacion.Date == fechaAsignacion.Date && e.Turno.IdTurnoPadre == null && e.Turno.Estado == "A")
                 .Include(p => p.Colaborador)

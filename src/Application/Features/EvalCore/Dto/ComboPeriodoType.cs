@@ -13,4 +13,10 @@ public class ComboPeriodoType
     [JsonPropertyName("desPeriodo")]
     public string DesPeriodo { get; set; }
 
+    [JsonPropertyName("fechaDesdeCorte")]
+    public DateTime FechaDesdeCorte { get; set; }
+
+    [JsonPropertyName("fechaHastaCorte")]
+    public DateTime FechaHastaCorte { get; set; }
+
 }
