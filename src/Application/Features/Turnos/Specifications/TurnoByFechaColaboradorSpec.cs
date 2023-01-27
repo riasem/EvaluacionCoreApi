@@ -12,7 +12,7 @@ public class TurnoByFechaColaboradorSpec : Specification<TurnoColaborador>
 {
     public TurnoByFechaColaboradorSpec(DateTime fechaDesde, DateTime fechaHasta, Guid idColaborador)
     {
-        Query.Where(e => e.FechaAsignacion.Date >= fechaDesde.Date && e.FechaAsignacion.Date <= fechaHasta.Date && e.Estado == "A" && e.IdColaborador == idColaborador)
+        Query.Where(e => e.FechaAsignacion.Date >= fechaDesde.Date && e.FechaAsignacion.Date <= fechaHasta.Date && e.Estado == "A" && e.IdColaborador == idColaborador && e.Turno.IdTurnoPadre == null)
               .Include(p => p.Turno)
               .ThenInclude(p => p.ClaseTurno);
     }
