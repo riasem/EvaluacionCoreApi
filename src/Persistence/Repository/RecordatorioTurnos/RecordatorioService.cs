@@ -55,10 +55,9 @@ public class RecordatorioService : IRecordatorio
         try
         {
             DateTime hoy = DateTime.Today;
-            string periodo = hoy.ToString("yyyy-MM"); 
+            string periodo = hoy.ToString("yyyy-MM");
             var objRecordatorio = await _repoRecordatorio.FirstOrDefaultAsync(new RecordatorioByPeriodoSpec(periodo),cancellationToken);
 
-            string estado = "";
             string tipoRecordatorio = "";
             int diasRecodatorio = 0;
 
@@ -89,9 +88,8 @@ public class RecordatorioService : IRecordatorio
             }
             else
             {
-                return ("", 1);
+                return ("No hay nada que procesar", 1);
             }
-
 
             //inicio del mes
             DateTime inicioMes = objRecordatorio.FechaLimite.AddDays(-1 * (double.Parse(objRecordatorio.FechaLimite.Day.ToString()) - 1));
@@ -99,10 +97,6 @@ public class RecordatorioService : IRecordatorio
             DateTime finMes = inicioMes.AddDays((DateTime.DaysInMonth(int.Parse(DateTime.Today.Year.ToString()), int.Parse(DateTime.Today.Month.ToString()))) - 1);
 
             var objColaboradoresJefes = await ConsultarJefes();
-            //List<ColaboradoresConvivencia> colaboradores = await ConsultarUdn();
-
-            //NovedadRecordatorioCab novedadRecordatorioCab = new();
-            //NovedadRecordatorioDet novedadRecordatorioDet = new();
 
             foreach (var jefe in objColaboradoresJefes)
             {
@@ -112,26 +106,26 @@ public class RecordatorioService : IRecordatorio
                 {
                     Id = Guid.NewGuid(),
                     IdJefe = jefe.Id,
-                    FechaEvaluacion = hoy,
+                    FechaEvaluacion = DateTime.Now,
                     TipoRecordatorio = tipoRecordatorio,
                     DiasRecordatorio = diasRecodatorio,
                     Estado = "PR" //PROCESADO
                 };
-                await _repoNovedadRecordatorioCab.AddAsync(novedadRecordatorioCab, cancellationToken);
+                var cab = await _repoNovedadRecordatorioCab.AddAsync(novedadRecordatorioCab, cancellationToken);
 
-                for (DateTime dtm = inicioMes; dtm <= finMes; dtm.AddDays(1))
+                foreach (var col in objColaboradores)
                 {
-                    foreach (var col in objColaboradores)
-                    {
+                    for (DateTime dtm = inicioMes; dtm <= finMes; dtm = dtm.AddDays(1))
+                        {
                         var objTurnoCol = await _repoTurnoCola.ListAsync(new TurnoColaboradorTreeSpec(col.Identificacion, dtm), cancellationToken);
 
-                        if (objTurnoCol == null)
+                        if (objTurnoCol.Count == 0)
                         {
                             NovedadRecordatorioDet novedadRecordatorioDet = new()
                             {
                                 Id = Guid.NewGuid(),
-                                IdNovedadRecordatorioCab = novedadRecordatorioCab.Id,
-                                FechaEvaluacion = hoy,
+                                IdNovedadRecordatorioCab = cab.Id,
+                                FechaEvaluacion = DateTime.Now,
                                 CodBiometricoColaborador = col.CodigoBiometrico,
                                 NombreColaborador = col.Empleado,
                                 IdentificacionColaborador = col.Identificacion,
@@ -147,13 +141,12 @@ public class RecordatorioService : IRecordatorio
 
                 }
             }
-
-            return ("", 1);
+            
+            return ("Se procesa correctamente", 1);
         }
         catch (Exception e)
         {
-
-            throw;
+            return ("Ocurrió un error al procesar " + e.Message, 0);
         }
     }
 
