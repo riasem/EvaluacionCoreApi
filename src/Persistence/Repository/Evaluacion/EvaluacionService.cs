@@ -277,9 +277,9 @@ public class EvaluacionService : IEvaluacion
             }
             if (!string.IsNullOrEmpty(codScosto))
             {
-                query += "' AND subcentroCosto =  '" + codScosto;
+                query += " AND subcentroCosto =  '" + codScosto;
             }
-            query += " order by fechaRegistro desc";
+            query += "' order by fechaRegistro desc";
 
             using IDbConnection con = new SqlConnection(ConnectionString_Marc);
             if (con.State == ConnectionState.Closed) con.Open();
