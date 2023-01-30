@@ -59,6 +59,12 @@ namespace EvaluacionCore.Application.Features.Turnos.Dto
         [JsonPropertyName("margenSalidaGracia")]
         public int? MargenSalidaGracia { get; set; }
 
+        [JsonPropertyName("tiempoMinLaboExtra")]
+        public int? TiempoMinLaboExtra { get; set; }
+
+        [JsonPropertyName("tiempoMaxLaboExtra")]
+        public int? TiempoMaxLaboExtra { get; set; }
+
 
 
 

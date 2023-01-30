@@ -90,7 +90,11 @@ public class Turno
     public int? CodigoSalida { get; set; }
 
 
+    [Column("tiempoMinLaboExtra", TypeName = "int")]
+    public int? TiempoMinLaboExtra { get; set; }
 
+    [Column("tiempoMaxLaboExtra", TypeName = "int")]
+    public int? TiempoMaxLaboExtra { get; set; }
 
 
 

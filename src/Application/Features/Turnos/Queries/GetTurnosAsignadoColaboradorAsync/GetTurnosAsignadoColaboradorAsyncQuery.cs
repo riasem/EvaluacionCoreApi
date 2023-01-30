@@ -69,8 +69,9 @@ public class GetTurnosAsignadoColaboradorAsyncQueryHandler : IRequestHandler<Get
                     MargenEntradaGracia = item.Turno.MargenEntradaGracia,
                     MargenEntradaPrevio = item.Turno.MargenEntradaPrevio,
                     MargenSalidaGracia = item.Turno.MargenSalidaGracia,
-                    MargenSalidaPosterior = item.Turno.MargenSalidaPosterior
-
+                    MargenSalidaPosterior = item.Turno.MargenSalidaPosterior,
+                    TiempoMinLaboExtra = item.Turno.TiempoMinLaboExtra,
+                    TiempoMaxLaboExtra = item.Turno.TiempoMaxLaboExtra
                 });
 
             }
