@@ -6,7 +6,7 @@ using MediatR;
 
 namespace EvaluacionCore.Application.Features.EvalCore.Queries.GetComboPeriodoAsync;
 
-public record GetComboPeriodoAsyncQuery(string CodUdn) : IRequest<ResponseType<List<ComboPeriodoType>>>;
+public record GetComboPeriodoAsyncQuery(string CodUdn, DateTime? fechaConsulta) : IRequest<ResponseType<List<ComboPeriodoType>>>;
 
 public class GetComboNovedadesAsyncHandler : IRequestHandler<GetComboPeriodoAsyncQuery, ResponseType<List<ComboPeriodoType>>>
 {
@@ -25,15 +25,35 @@ public class GetComboNovedadesAsyncHandler : IRequestHandler<GetComboPeriodoAsyn
 
             List<ComboPeriodoType> objResult = new() { };
 
-            objResult = objPeriodo.Where(e => e.Udn == request.CodUdn).Select(e => new ComboPeriodoType
+            if (request.fechaConsulta != null)
             {
-                Id = e.Id,
-                DesPeriodo = e.DesPeriodo,
-                Udn = e.Udn,
-                FechaDesdeCorte = e.FechaDesdeCorte,
-                FechaHastaCorte = e.FechaHastaCorte
 
-            }).ToList();
+                objResult = objPeriodo.Where(e => e.Udn == request.CodUdn &&
+                (request.fechaConsulta >= e.FechaDesdeCorte && request.fechaConsulta <= e.FechaHastaCorte)).Select(e => new ComboPeriodoType
+                {
+                    Id = e.Id,
+                    DesPeriodo = e.DesPeriodo,
+                    Udn = e.Udn,
+                    FechaDesdeCorte = e.FechaDesdeCorte,
+                    FechaHastaCorte = e.FechaHastaCorte
+
+                }).ToList();
+            }
+            else
+            {
+                DateTime fDesde = DateTime.Now.AddMonths(-6);
+                DateTime fHasta = DateTime.Now;
+                objResult = objPeriodo.Where(e => e.Udn == request.CodUdn && fHasta >= e.FechaDesdeCorte).Select(e => new ComboPeriodoType
+                {
+                    Id = e.Id,
+                    DesPeriodo = e.DesPeriodo,
+                    Udn = e.Udn,
+                    FechaDesdeCorte = e.FechaDesdeCorte,
+                    FechaHastaCorte = e.FechaHastaCorte
+
+                }).ToList(); /**/
+            }
+
 
 
             return new ResponseType<List<ComboPeriodoType>>() { Data = objResult, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };

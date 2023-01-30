@@ -141,7 +141,23 @@ public class RecordatorioService : IRecordatorio
 
                 }
             }
-            
+
+
+            //SE REALIZA EL PROCESO DE ENVIO DE CORREOS Y MENSAJES DE RECORDATORIO
+            var objNovedades = await _repoNovedadRecordatorioCab.ListAsync(new NovedadRecordatorioCabByPeriodoSpec(periodo), cancellationToken);
+
+            foreach (var itemNov in objNovedades)
+            {
+                var objNovedadesDet = await _repoNovedadRecordatorioDet.ListAsync(new NovedadRecordatorioDetByCabSpec(itemNov.Id), cancellationToken);
+
+                if (objNovedadesDet.Count > 0)
+                {
+                    //SE REALIZA ENVIO DE CORREO
+                    var objJefe = await _repoCliente.GetByIdAsync(itemNov.IdJefe, cancellationToken);
+                    
+                }
+            }
+
             return ("Se procesa correctamente", 1);
         }
         catch (Exception e)

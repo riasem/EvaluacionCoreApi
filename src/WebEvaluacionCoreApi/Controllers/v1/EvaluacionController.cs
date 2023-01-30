@@ -90,6 +90,7 @@ public class EvaluacionController : ApiControllerBase
     /// Obtener Combo de periodos para control de asistencias
     /// </summary>
     /// <param name="codUdn"></param>
+    /// <param name="fechaConsulta"></param>
     /// <param name="cancellationToken"></param>
     /// <returns>Capacidad que realiza la evaluación de asistencias.</returns>
     /// <response code="201">Consulta Realizada</response>
@@ -99,9 +100,9 @@ public class EvaluacionController : ApiControllerBase
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [Authorize]
-    public async Task<IActionResult> GetComboPeriodo(string codUdn, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetComboPeriodo(string codUdn, DateTime? fechaConsulta, CancellationToken cancellationToken)
     {
-        var objResult = await Mediator.Send(new GetComboPeriodoAsyncQuery(codUdn), cancellationToken);
+        var objResult = await Mediator.Send(new GetComboPeriodoAsyncQuery(codUdn, fechaConsulta), cancellationToken);
         return Ok(objResult);
     }
 }
