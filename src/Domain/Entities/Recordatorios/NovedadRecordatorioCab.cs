@@ -7,6 +7,7 @@ namespace EvaluacionCore.Domain.Entities.Permisos;
 [Table("AS_NovedadRecordatorioCab", Schema = "dbo")]
 public class NovedadRecordatorioCab
 {
+
     [Key]
     [Column("id", TypeName = "uniqueidentifier")]
     public Guid Id { get; set; }
@@ -29,6 +30,9 @@ public class NovedadRecordatorioCab
 
     [Column("diasRecordatorio", TypeName = "int")]
     public int DiasRecordatorio { get; set; }
+
+    [Column("periodo", TypeName = "varchar")]
+    public string Periodo { get; set; }
 
 
     public virtual ICollection<NovedadRecordatorioDet> NovedadRecordatorioDets { get; set; }
