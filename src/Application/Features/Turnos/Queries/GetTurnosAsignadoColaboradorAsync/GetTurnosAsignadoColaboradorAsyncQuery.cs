@@ -65,7 +65,7 @@ public class GetTurnosAsignadoColaboradorAsyncQueryHandler : IRequestHandler<Get
                     NombresColaborador = objColaborador.Nombres,
                     Identificacion = objColaborador.Identificacion,
                     Descripcion = item.Turno.Descripcion,
-                    Mensaje = "AS "+ item.Turno.Entrada.ToString("HH:mm:ss") + " - " + item.Turno.Salida.ToString("HH:mm:ss"),
+                    Mensaje = item.Turno.Descripcion + " " + item.Turno.Entrada.ToString("HH:mm:ss") + " - " + item.Turno.Salida.ToString("HH:mm:ss"),
                     MargenEntradaGracia = item.Turno.MargenEntradaGracia,
                     MargenEntradaPrevio = item.Turno.MargenEntradaPrevio,
                     MargenSalidaGracia = item.Turno.MargenSalidaGracia,
