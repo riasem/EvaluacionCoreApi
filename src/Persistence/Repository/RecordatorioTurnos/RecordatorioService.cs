@@ -231,13 +231,13 @@ public class RecordatorioService : IRecordatorio
                         plantilla,
                         archivoBase64 = base64EncodedPDF,
                         nombreArchivo = "Novedades.xlsx",
-                        asunto = "Recordatorio de turnos",
+                        asunto = "Recordatorio Asignación de turnos",
                     };
                     nombreEnpoint = _config.GetSection("EndPointConsumoApis:ApiUtils:EnviarCorreo").Get<string>();
                     uriEnpoint = UrlBaseApiUtils + nombreEnpoint;
-                    var resultMail = await _repositoryApis.PostEndPoint(objEnviarMail, uriEnpoint, nombreEnpoint);
+                    var (Success, Data) = await _repositoryApis.PostEndPoint(objEnviarMail, uriEnpoint, nombreEnpoint);
 
-                    if (!resultMail.Success)
+                    if (!Success)
                     {
                         return ("Ocurrió un error al enviar el Correo ", 0);
                     }
@@ -305,12 +305,11 @@ public class RecordatorioService : IRecordatorio
     }
     private byte[] ReadFile(string sourcePath)
     {
-        byte[] data = null;
         FileInfo fileInfo = new FileInfo(sourcePath);
         long numBytes = fileInfo.Length;
         FileStream fileStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read);
         BinaryReader br = new BinaryReader(fileStream);
-        data = br.ReadBytes((int)numBytes);
+        byte[] data = br.ReadBytes((int)numBytes);
         fileStream.Close();
         return data;
     }
