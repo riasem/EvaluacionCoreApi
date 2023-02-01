@@ -9,6 +9,7 @@ using EvaluacionCore.Application.Features.Turnos.Commands.UpdateTurnoColaborador
 using EvaluacionCore.Application.Features.Turnos.Queries.GetMaestrosTurnoAsync;
 using EvaluacionCore.Application.Features.Turnos.Queries.GetTurnosAsignadoColaboradorAsync;
 using EvaluacionCore.Application.Features.Turnos.Queries.GetTurnosAsync;
+using EvaluacionCore.Application.Features.Turnos.Queries.GetTurnosByClaseSubAsync;
 using EvaluacionCore.Application.Features.Turnos.Queries.GetTurnosColaborador;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -248,5 +249,24 @@ public class TurnosController : ApiControllerBase
 
         return Ok(objResult);
     }
+
+    /// <summary>
+    /// Consulta del listado de turnos con paramentros de clase y subclase (opcionales)
+    /// </summary>
+    /// <param name="IdClase"></param>
+    /// <param name="IdSubClase"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpGet("GetTurnosByClaseSub")]
+    [EnableCors("AllowOrigin")]
+    [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
+    [Authorize]
+    public async Task<IActionResult> GetTurnosByClaseSub(Guid? IdClase,Guid? IdSubClase ,CancellationToken cancellationToken)
+    {
+        var objResult = await Mediator.Send(new GetTurnosByClaseSubAsyncQuery(IdClase,IdSubClase), cancellationToken);
+        return Ok(objResult);
+    }
+
+
 
 }
