@@ -1,7 +1,7 @@
-﻿using Dapper;
+﻿using ClosedXML.Excel;
+using Dapper;
 using EnrolApp.Application.Features.RecordatorioTurnos.Specifications;
 using EvaluacionCore.Application.Common.Interfaces;
-using EvaluacionCore.Application.Features.Common.Specifications;
 using EvaluacionCore.Application.Features.EvalCore.Interfaces;
 using EvaluacionCore.Application.Features.Turnos.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
@@ -12,6 +12,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Data;
+using Workflow.Persistence.Repository.RecordatorioTurnos;
 
 namespace EvaluacionCore.Persistence.Repository.RecordatorioTurnos;
 
@@ -24,9 +25,13 @@ public class RecordatorioService : IRecordatorio
     private readonly IRepositoryAsync<Recordatorio> _repoRecordatorio;
     private readonly IRepositoryAsync<NovedadRecordatorioCab> _repoNovedadRecordatorioCab;
     private readonly IRepositoryAsync<NovedadRecordatorioDet> _repoNovedadRecordatorioDet;
+    private readonly IApisConsumoAsync _repositoryApis;
     private readonly IConfiguration _config;
     private string ConnectionString_Marc { get; }
     private string ConnectionString { get; }
+    private readonly string UrlBaseApiUtils = string.Empty;
+    private string nombreEnpoint = string.Empty;
+    private string uriEnpoint = string.Empty;
 
 
 
@@ -37,7 +42,8 @@ public class RecordatorioService : IRecordatorio
         ILogger<MarcacionColaborador> log, 
         IRepositoryAsync<TurnoColaborador> repoTurnoCola, 
         IConfiguration config, 
-        IRepositoryAsync<Cliente> repoCliente)
+        IRepositoryAsync<Cliente> repoCliente,
+        IApisConsumoAsync repositoryApis)
     {
         _config = config;
         _log = log;
@@ -48,6 +54,8 @@ public class RecordatorioService : IRecordatorio
         _repoRecordatorio = repoRecordatorio;
         _repoNovedadRecordatorioCab = repoNovedadRecordatorioCab;
         _repoNovedadRecordatorioDet = repoNovedadRecordatorioDet;
+        UrlBaseApiUtils = _config.GetSection("ConsumoApis:UrlBaseApiUtils").Get<string>();
+        _repositoryApis = repositoryApis;
     }
 
     public async Task<(string response, int success)> ProcesarRecordatorios(CancellationToken cancellationToken)
@@ -57,9 +65,14 @@ public class RecordatorioService : IRecordatorio
             DateTime hoy = DateTime.Today;
             string periodo = hoy.ToString("yyyy-MM");
             var objRecordatorio = await _repoRecordatorio.FirstOrDefaultAsync(new RecordatorioByPeriodoSpec(periodo),cancellationToken);
+            var objRecordatorio_ = await _repoNovedadRecordatorioDet.ListAsync(cancellationToken);
+            string messageId = "";
+            string[] dataVariable;
+            string plantilla = "";
 
             string tipoRecordatorio = "";
             int diasRecodatorio = 0;
+
 
             if (objRecordatorio != null)
             {
@@ -68,18 +81,29 @@ public class RecordatorioService : IRecordatorio
                     //RECORDATORIO (RC) -- ENTRE INICIO DE RECORDATORIO Y ANTES DE FECHA LIMITE
                     tipoRecordatorio = "RC";
                     diasRecodatorio = objRecordatorio.FechaLimite.Day - hoy.Day;
+                    messageId = _config.GetSection("Sms:Plantilla:RecordatorioTurnosRC").Get<string>();
+                    //dataVariable[1] = diasRecodatorio.ToString();
+                    //dataVariable[2] = objRecordatorio.FechaLimite.ToString("dd/MM/yyyy");
+                    dataVariable = new string[] { "", diasRecodatorio.ToString(), objRecordatorio.FechaLimite.ToString("dd/MM/yyyy") };
+                    plantilla = "AlertaTurnosRC";
                 }
                 else if (objRecordatorio.FechaLimite == hoy)
                 {
                     //DIA LIMITE (LM)
                     tipoRecordatorio = "LM";
                     diasRecodatorio = 0;
+                    messageId = _config.GetSection("Sms:Plantilla:RecordatorioTurnosLM").Get<string>();
+                    dataVariable = new string[] { "", objRecordatorio.FechaLimite.ToString("dd/MM/yyyy") };
+                    plantilla = "AlertaTurnosLM";
                 }
                 else if (hoy > objRecordatorio.FechaLimite && hoy < objRecordatorio.FinRecordatorio)
                 {
                     //ALERTA (AL) -- PASADO EL DIA LIMITE
                     tipoRecordatorio = "AL";
                     diasRecodatorio = hoy.Day - objRecordatorio.FechaLimite.Day;
+                    messageId = _config.GetSection("Sms:Plantilla:RecordatorioTurnosAL").Get<string>();
+                    dataVariable = new string[] { "", objRecordatorio.FechaLimite.ToString("dd/MM/yyyy"), diasRecodatorio.ToString() };
+                    plantilla = "AlertaTurnosAL";
                 }
                 else
                 {
@@ -152,9 +176,72 @@ public class RecordatorioService : IRecordatorio
 
                 if (objNovedadesDet.Count > 0)
                 {
-                    //SE REALIZA ENVIO DE CORREO
                     var objJefe = await _repoCliente.GetByIdAsync(itemNov.IdJefe, cancellationToken);
+
+                    //SE PROCESA LOS DETALLES DE LA NOVEDAD COMO XLS
+                    #region Generar Xls
+
+                    var objRecordatorioXlsx = objNovedadesDet.Select(x => new
+                    {
+                        x.NombreColaborador,
+                        x.IdentificacionColaborador,
+                        x.Udn,
+                        x.Area,
+                        x.SubcentroCosto,
+                        x.FechaNoAsignada
+                    }).OrderByDescending(x => x.NombreColaborador).ThenByDescending(x => x.FechaNoAsignada).ToList();
+
+                    XLWorkbook workbook = new();
+                    ListtoDataTableConverter converter = new();
+                    DataTable dt = converter.ToDataTable(objRecordatorioXlsx);
+                    workbook.Worksheets.Add(dt, "Novedades");
+                    workbook.SaveAs("Novedades.xlsx");
+
+                    byte[] docBytes = ReadFile("Novedades.xlsx");
+                    String base64EncodedPDF = Convert.ToBase64String(docBytes);
                     
+                    #endregion
+
+                    //SE REALIZA ENVIO DE SMS
+                    dataVariable[0] = objJefe.Alias;
+                    #region Envio Sms
+                    var objEnviarSms = new
+                    {
+                        celular = objJefe.Celular,
+                        messageId,
+                        dataVariable,
+                        identificacion = objJefe.Identificacion
+                    };
+                    nombreEnpoint = _config.GetSection("EndPointConsumoApis:ApiUtils:EnviarSms").Get<string>();
+                    uriEnpoint = UrlBaseApiUtils + nombreEnpoint;
+                    var resultSms = await _repositoryApis.PostEndPoint(objEnviarSms, uriEnpoint, nombreEnpoint);
+
+                    if (!resultSms.Success)
+                    {
+                        return ("Ocurrió un error al enviar el Mensaje ", 0);
+                    }
+                    #endregion
+
+                    //SE REALIZA ENVIO DE CORREO
+                    #region Envio Correo
+                    var objEnviarMail = new
+                    {
+                        para = objJefe.Correo,
+                        alias = objJefe.Alias,
+                        plantilla,
+                        archivoBase64 = base64EncodedPDF,
+                        nombreArchivo = "Novedades.xlsx",
+                        asunto = "Recordatorio de turnos",
+                    };
+                    nombreEnpoint = _config.GetSection("EndPointConsumoApis:ApiUtils:EnviarCorreo").Get<string>();
+                    uriEnpoint = UrlBaseApiUtils + nombreEnpoint;
+                    var resultMail = await _repositoryApis.PostEndPoint(objEnviarMail, uriEnpoint, nombreEnpoint);
+
+                    if (!resultMail.Success)
+                    {
+                        return ("Ocurrió un error al enviar el Correo ", 0);
+                    }
+                    #endregion
                 }
             }
 
@@ -215,5 +302,16 @@ public class RecordatorioService : IRecordatorio
         }
 
         return colaboradores;
+    }
+    private byte[] ReadFile(string sourcePath)
+    {
+        byte[] data = null;
+        FileInfo fileInfo = new FileInfo(sourcePath);
+        long numBytes = fileInfo.Length;
+        FileStream fileStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read);
+        BinaryReader br = new BinaryReader(fileStream);
+        data = br.ReadBytes((int)numBytes);
+        fileStream.Close();
+        return data;
     }
 }
