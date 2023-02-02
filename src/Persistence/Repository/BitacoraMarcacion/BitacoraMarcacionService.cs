@@ -121,6 +121,10 @@ namespace EvaluacionCore.Persistence.Repository.BitacoraMarcacion
             string codUdn = "01";
             string codArea = "02";
             string codScc = "ADMLAF";
+
+            var uidTurnoLibre = Guid.Parse(_config.GetSection("TurnosUid:Libre").Get<string>());
+            var uidTurnoVacacion = Guid.Parse(_config.GetSection("TurnosUid:Vacacion").Get<string>());
+            var uidTurnoFeriado = Guid.Parse(_config.GetSection("TurnosUid:Feriado").Get<string>());
             #endregion
 
             List<BitacoraMarcacionType> lstMarcacion = new();
@@ -139,6 +143,7 @@ namespace EvaluacionCore.Persistence.Repository.BitacoraMarcacion
                 foreach (var col in colConv)
                 {
                     var turnoColaborador = await _repositoryAsyncTc.ListAsync(new GetTurnoColaboradorByIdentificacion(col.Identificacion, fechaDesde, fechaHasta));
+                    turnoColaborador = turnoColaborador.Where(x => x.IdTurno != uidTurnoLibre && x.IdTurno != uidTurnoFeriado && x.IdTurno != uidTurnoVacacion).ToList();
                     lstTurnoColaborador.AddRange(turnoColaborador);
                 }
 
