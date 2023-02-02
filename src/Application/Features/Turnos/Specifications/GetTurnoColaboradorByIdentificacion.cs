@@ -10,7 +10,8 @@ namespace EvaluacionCore.Application.Features.Turnos.Specifications
             Query.Where(p => p.Colaborador.Identificacion == Identificacion &&
                              p.FechaAsignacion.Date >= FechaDesde.Date &&
                              p.FechaAsignacion.Date <= FechaHasta.Date &&
-                             p.Turno.IdTurnoPadre == null)
+                             p.Turno.IdTurnoPadre == null &&
+                             p.Estado == "A")
                 .Include(p => p.Turno)
                 .Include(p => p.Colaborador);
         }
