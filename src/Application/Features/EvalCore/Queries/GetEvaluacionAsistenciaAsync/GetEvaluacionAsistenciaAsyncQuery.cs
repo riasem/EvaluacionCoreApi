@@ -3,6 +3,7 @@ using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Interfaces;
 using EvaluacionCore.Application.Features.EvalCore.Dto;
 using EvaluacionCore.Application.Features.EvalCore.Interfaces;
+using EvaluacionCore.Application.Features.Turnos.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using EvaluacionCore.Domain.Entities.ControlAsistencia;
 using MediatR;
@@ -20,18 +21,20 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
     private readonly IRepositoryAsync<ControlAsistenciaCab> _repositoryCAsisCabAsync;
     private readonly IRepositoryAsync<ControlAsistenciaDet> _repositoryCAsisDetAsync;
     private readonly IRepositoryAsync<ControlAsistenciaNovedad> _repositoryCAsisNovAsync;
+    private readonly IRepositoryGRiasemAsync<ControlAsistenciaSolicitudes> _repositoryCAsisSoliAsync;
     private readonly IConfiguration _config;
     private string ConnectionString { get; }
 
 
 
-    public GetEvaluacionAsistenciaAsyncHandler(IEvaluacion repository, 
-                                                //IRepositoryAsync<Cliente> repositoryCli,
+    public GetEvaluacionAsistenciaAsyncHandler(IEvaluacion repository,
+                                                IRepositoryGRiasemAsync<ControlAsistenciaSolicitudes> repositorySoli,
                                                 IConfiguration config, 
                                                 IBitacoraMarcacion repoBitMarcacionAsync, 
                                                 IApisConsumoAsync apisConsumoAsync)
     {
         _EvaluacionAsync = repository;
+        _repositoryCAsisSoliAsync = repositorySoli;
         _ApiConsumoAsync = apisConsumoAsync;
         _repoBitMarcacionAsync = repoBitMarcacionAsync;
         _config = config;
@@ -67,7 +70,9 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                     {
                         var itemCol = await _EvaluacionAsync.ConsultaColaborador(item.Colaborador);
                         List<Novedad> novedades = new();
-
+                        List<ControlAsistenciaSolicitudes> solicitudes1 = new();
+                        var solicitudes = await _repositoryCAsisSoliAsync.FirstOrDefaultAsync(new ControlAsistenciaSolicitudByIdDetalle(item.Id));
+                        
                         #region consulta y procesamiento de turno laboral
 
                         //SE PREPARA LA INFORMACION DE RETORNO
@@ -131,45 +136,79 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
                         #endregion
 
+                        #region Consulta y procesamiento de solicitudes
+
+                        if (solicitudes != null)
+                        {
+                            solicitudes1.Add(new ControlAsistenciaSolicitudes
+                            {
+                                Id = solicitudes.Id,
+                                IdControlAsistenciaDet = solicitudes.IdControlAsistenciaDet,
+                                Colaborador = solicitudes.Colaborador,
+                                Comentarios = solicitudes.Comentarios,
+                                IdFeature = solicitudes.IdFeature,
+                                IdSolicitud = solicitudes.IdSolicitud
+                            });
+                        }
+                        #endregion
+
                         #region Consulta y procesamiento de novedades
 
                         var listaNovedades = await _EvaluacionAsync.ConsultaControlAsistenciaNovedad(item.Id);
-
+                        bool poseeNovedades = false;
                         foreach (var listaNovedad in listaNovedades)
                         {
-                            novedades.Add(new Novedad
+                            if (filtroNovedades.Contains(listaNovedad.EstadoMarcacion))
                             {
-                                Descripcion = listaNovedad.Descripcion,
-                                MinutosNovedad = listaNovedad.MinutosNovedad,
-                                EstadoMarcacion = listaNovedad.EstadoMarcacion
-                            });
+                                poseeNovedades = true;
+                                novedades.Add(new Novedad
+                                {
+                                    Descripcion = listaNovedad.Descripcion,
+                                    MinutosNovedad = listaNovedad.MinutosNovedad,
+                                    EstadoMarcacion = listaNovedad.EstadoMarcacion
+                                });
+                            }
                         }
 
                         #endregion
 
-                        listaEvaluacionAsistencia.Add(new EvaluacionAsistenciaResponseType()
+                        if (poseeNovedades)
                         {
-                            Colaborador = itemCol?.FirstOrDefault()?.Empleado,
-                            Identificacion = itemCol?.FirstOrDefault()?.Identificacion,
-                            CodBiometrico = itemCol?.FirstOrDefault()?.CodigoBiometrico,
-                            Udn = itemCol?.FirstOrDefault()?.DesUdn,
-                            Area = itemCol?.FirstOrDefault()?.DesArea,
-                            SubCentroCosto = itemCol?.FirstOrDefault()?.DesSubcentroCosto,
-                            Fecha = item.Fecha,
-                            Novedades = novedades,
-                            TurnoLaboral = turnoLaborall,
-                            TurnoReceso = turnoReceso
-                        });
+                            listaEvaluacionAsistencia.Add(new EvaluacionAsistenciaResponseType()
+                            {
+                                Colaborador = itemCol?.FirstOrDefault()?.Empleado,
+                                Identificacion = itemCol?.FirstOrDefault()?.Identificacion,
+                                CodBiometrico = itemCol?.FirstOrDefault()?.CodigoBiometrico,
+                                Udn = itemCol?.FirstOrDefault()?.DesUdn,
+                                Area = itemCol?.FirstOrDefault()?.DesArea,
+                                SubCentroCosto = itemCol?.FirstOrDefault()?.DesSubcentroCosto,
+                                Fecha = item.Fecha,
+                                Novedades = novedades,
+                                TurnoLaboral = turnoLaborall,
+                                TurnoReceso = turnoReceso,
+                                Solicitudes = solicitudes1
+                            });
+                        }
                     }
                 }
             }
+            List<EvaluacionAsistenciaResponseType> listaTmp2;
 
+            for (int i = 0; i < listaEvaluacionAsistencia.Count; i++)
+            {
+                for (int j = 0; j < listaEvaluacionAsistencia[i].Novedades.Count; j++)
+                {
+                    listaTmp2 = listaEvaluacionAsistencia.Where(e => e.Novedades[j].EstadoMarcacion.Equals(filtroNovedades)).ToList();
+                }
+            }
 
-            var lista = listaEvaluacionAsistencia.Where(e => filtroNovedades.Contains(e.TurnoLaboral.EstadoEntrada) || filtroNovedades.Contains(e.TurnoLaboral.EstadoSalida) ||
-                                                 filtroNovedades.Contains(e.TurnoReceso.EstadoEntradaReceso) || filtroNovedades.Contains(e.TurnoReceso.EstadoSalidaReceso) ||
-                                                 filtroNovedades.Contains(e.Novedades.Select(e => e.EstadoMarcacion).ToString())).ToList();
+            //var listaTmp2 = listaEvaluacionAsistencia.Where(e => e.Novedades[0].EstadoMarcacion.Equals(filtroNovedades)).ToList();
 
-            return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = lista, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
+            var listaTmp = listaEvaluacionAsistencia.Where(e => filtroNovedades.Contains(e.Novedades.Select(e => e.EstadoMarcacion).ToString())).ToList();
+
+            var lista = listaEvaluacionAsistencia.Where(e =>   filtroNovedades.Contains(e.Novedades.Select(e => e.EstadoMarcacion).ToString())).ToList();
+
+            return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = listaEvaluacionAsistencia, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
             //return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = listaEvaluacionAsistencia, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
 
         }

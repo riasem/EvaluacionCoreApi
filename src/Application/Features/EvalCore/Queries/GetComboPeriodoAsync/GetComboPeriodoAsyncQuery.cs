@@ -37,7 +37,7 @@ public class GetComboNovedadesAsyncHandler : IRequestHandler<GetComboPeriodoAsyn
                     FechaDesdeCorte = e.FechaDesdeCorte,
                     FechaHastaCorte = e.FechaHastaCorte
 
-                }).ToList();
+                }).OrderByDescending(e => e.FechaDesdeCorte).ToList();
             }
             else
             {
@@ -51,10 +51,8 @@ public class GetComboNovedadesAsyncHandler : IRequestHandler<GetComboPeriodoAsyn
                     FechaDesdeCorte = e.FechaDesdeCorte,
                     FechaHastaCorte = e.FechaHastaCorte
 
-                }).ToList(); /**/
+                }).OrderByDescending(e => e.FechaDesdeCorte).ToList(); /**/
             }
-
-
 
             return new ResponseType<List<ComboPeriodoType>>() { Data = objResult, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
         }

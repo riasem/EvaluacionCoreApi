@@ -2,11 +2,6 @@
 using EvaluacionCore.Domain.Entities.ControlAsistencia;
 using EvaluacionCore.Domain.Entities.Marcaciones;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EvaluacionCore.Persistence.Contexts
 {
@@ -25,6 +20,7 @@ namespace EvaluacionCore.Persistence.Contexts
         public DbSet<ControlAsistenciaCab> ControlAsistenciaCab { get; set; }
         public DbSet<ControlAsistenciaDet> ControlAsistenciaDet { get; set; }
         public DbSet<ControlAsistenciaNovedad> ControlAsistenciaNovedad { get; set; }
+        public DbSet<ControlAsistenciaSolicitudes> ControlAsistenciaSolicitudes { get; set; }
         public DbSet<PeriodosLaborales> PeriodosLaborales { get; set; }
         
 

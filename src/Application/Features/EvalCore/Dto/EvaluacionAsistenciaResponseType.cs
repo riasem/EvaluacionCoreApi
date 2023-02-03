@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using EvaluacionCore.Domain.Entities.ControlAsistencia;
+using System.Text.Json.Serialization;
 
 namespace EvaluacionCore.Application.Features.EvalCore.Dto
 {
@@ -34,8 +35,8 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
         [JsonPropertyName("novedades")]
         public List<Novedad> Novedades { get; set; }
 
-        //[JsonPropertyName("solicitudes")]
-        //public List<Solicitud> Solicitudes { get; set; }
+        [JsonPropertyName("solicitudes")]
+        public List<ControlAsistenciaSolicitudes> Solicitudes { get; set; }
 
     }
 
