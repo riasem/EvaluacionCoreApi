@@ -172,7 +172,11 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
                         #endregion
 
-                        if (poseeNovedades)
+                        if (poseeNovedades ||
+                            filtroNovedades.Contains(turnoLaborall.EstadoEntrada) ||
+                            filtroNovedades.Contains(turnoLaborall.EstadoSalida) ||
+                            filtroNovedades.Contains(turnoReceso.EstadoSalidaReceso) ||
+                            filtroNovedades.Contains(turnoReceso.EstadoEntradaReceso))
                         {
                             listaEvaluacionAsistencia.Add(new EvaluacionAsistenciaResponseType()
                             {
