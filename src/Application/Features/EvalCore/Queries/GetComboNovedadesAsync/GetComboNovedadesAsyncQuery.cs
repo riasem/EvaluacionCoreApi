@@ -14,6 +14,7 @@ public class GetComboNovedadesAsyncHandler : IRequestHandler<GetComboNovedadesAs
     {
         List<ComboNovedadType> objResult = new() { };
 
+        objResult.Add(new ComboNovedadType() { Codigo = "SN" ,Descripcion = "SIN NOVEDAD" }  );
         objResult.Add(new ComboNovedadType() { Codigo = "NT" ,Descripcion = "NO TIENE TURNO ASIGNADO" }  );
         objResult.Add(new ComboNovedadType() { Codigo = "NS", Descripcion = "SIN REGISTRO DE SALIDA Y SIN TURNO ASIGNADO" });
         objResult.Add(new ComboNovedadType() { Codigo = "AI" ,Descripcion = "ATRASO INJUSTIFICADO"});
