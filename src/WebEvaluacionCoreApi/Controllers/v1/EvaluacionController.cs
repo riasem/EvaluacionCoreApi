@@ -49,6 +49,7 @@ public class EvaluacionController : ApiControllerBase
     /// <param name="Departamento"></param>
     /// <param name="Area"></param>
     /// <param name="FiltroNovedades"></param>
+    /// <param name="idCanal"></param>
     /// <param name="cancellationToken"></param>
     /// <returns>Capacidad que realiza la evaluación de asistencias.</returns>
     /// <response code="201">Evaluación Realizada</response>
@@ -58,14 +59,14 @@ public class EvaluacionController : ApiControllerBase
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [Authorize]
-    public async Task<IActionResult> GetAsistencias(string periodo, string? Udn, string? Departamento, string? Area, CancellationToken cancellationToken, string? identificacion, string FiltroNovedades)
+    public async Task<IActionResult> GetAsistencias(string periodo, string? Udn, string? Departamento, string? Area, CancellationToken cancellationToken, string? identificacion, string FiltroNovedades, Guid? idCanal)
     {
         //if (identificacion == "0")
         //{
         //    identificacion = "";
         //}
         var identificacionSession = new JwtSecurityToken(this.HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
-        var objResult = await Mediator.Send(new GetEvaluacionAsistenciaAsyncQuery(identificacion, periodo, Udn, Area, Departamento, FiltroNovedades,identificacionSession), cancellationToken);
+        var objResult = await Mediator.Send(new GetEvaluacionAsistenciaAsyncQuery(identificacion, periodo, Udn, Area, Departamento, FiltroNovedades,identificacionSession,idCanal), cancellationToken);
         return Ok(objResult);
         
     }

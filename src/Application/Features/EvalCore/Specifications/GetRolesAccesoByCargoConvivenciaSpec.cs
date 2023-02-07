@@ -10,7 +10,7 @@ namespace EvaluacionCore.Application.Features.EvalCore.Specifications;
 
 public class GetRolesAccesoByCargoConvivenciaSpec : Specification<RolCargoSG>
 {
-    public GetRolesAccesoByCargoConvivenciaSpec(string codCargoConvivencia, string codScc, Guid uidCanal, string tipoCliente)
+    public GetRolesAccesoByCargoConvivenciaSpec(string codCargoConvivencia, string codScc, Guid? uidCanal, string tipoCliente)
     {
         if (tipoCliente == "EJE")
         {
