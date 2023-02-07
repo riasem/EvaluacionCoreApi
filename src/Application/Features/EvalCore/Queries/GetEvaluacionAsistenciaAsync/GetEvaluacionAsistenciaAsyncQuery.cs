@@ -198,19 +198,24 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
             }
             List<EvaluacionAsistenciaResponseType> listaTmp2;
 
-            for (int i = 0; i < listaEvaluacionAsistencia.Count; i++)
-            {
-                for (int j = 0; j < listaEvaluacionAsistencia[i].Novedades.Count; j++)
-                {
-                    listaTmp2 = listaEvaluacionAsistencia.Where(e => e.Novedades[j].EstadoMarcacion.Equals(filtroNovedades)).ToList();
-                }
-            }
+            //for (int i = 0; i < listaEvaluacionAsistencia.Count; i++)
+            //{
+            //    if (listaEvaluacionAsistencia[i].Novedades.Count > 0)
+            //    {
+            //        for (int j = 0; j < listaEvaluacionAsistencia[i].Novedades.Count; j++)
+            //        {
+            //            //listaTmp2.Add(listaEvaluacionAsistencia.Where(e => e.Novedades[j].EstadoMarcacion.Equals(filtroNovedades)).FirstOrDefault());
+            //            //listaTmp2 = listaEvaluacionAsistencia.Where(e => e.Novedades[j].EstadoMarcacion.Equals(filtroNovedades)).ToList();
+            //            listaTmp2 = listaEvaluacionAsistencia.Where(e => filtroNovedades.Contains(e.Novedades[j].EstadoMarcacion.ToString())).ToList();
+            //        }
+            //    }
+            //}
 
             //var listaTmp2 = listaEvaluacionAsistencia.Where(e => e.Novedades[0].EstadoMarcacion.Equals(filtroNovedades)).ToList();
 
-            var listaTmp = listaEvaluacionAsistencia.Where(e => filtroNovedades.Contains(e.Novedades.Select(e => e.EstadoMarcacion).ToString())).ToList();
+            //var listaTmp = listaEvaluacionAsistencia.Where(e => filtroNovedades.Contains(e.Novedades.Select(e => e.EstadoMarcacion).ToString())).ToList();
 
-            var lista = listaEvaluacionAsistencia.Where(e =>   filtroNovedades.Contains(e.Novedades.Select(e => e.EstadoMarcacion).ToString())).ToList();
+            //var lista = listaEvaluacionAsistencia.Where(e =>   filtroNovedades.Contains(e.Novedades.Select(e => e.EstadoMarcacion).ToString())).ToList();
 
             return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = listaEvaluacionAsistencia, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
             //return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = listaEvaluacionAsistencia, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
