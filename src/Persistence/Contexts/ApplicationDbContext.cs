@@ -5,6 +5,7 @@ using EvaluacionCore.Domain.Entities.Common;
 using EvaluacionCore.Domain.Entities.Justificacion;
 using EvaluacionCore.Domain.Entities.Organizacion;
 using EvaluacionCore.Domain.Entities.Permisos;
+using EvaluacionCore.Domain.Entities.Seguridad;
 using EvaluacionCore.Domain.Entities.Vacaciones;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,6 +40,10 @@ public class ApplicationDbContext : DbContext
     public DbSet<NovedadRecordatorioDet> NovedadRecordatorioDet { get; set; }
     public DbSet<Recordatorio> Recordatorios { get; set; }
     public DbSet<ColaboradorConvivencia> ColaboradorConvivencia { get; set; }
+    public DbSet<CanalSG> CanalSG => Set<CanalSG>();
+    public DbSet<FeatureSG> FeatureSG => Set<FeatureSG>();
+    public DbSet<RolCargoSG> RolCargoSG { get; set; }
+    public DbSet<AtributoRolSG> AtributoRolSG { get; set; }
 
     public DbSet<TurnoColaborador> TurnoColaborador { get; set; }
 

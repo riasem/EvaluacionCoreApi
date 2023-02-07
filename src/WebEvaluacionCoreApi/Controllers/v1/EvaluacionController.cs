@@ -5,6 +5,7 @@ using EvaluacionCore.Application.Features.EvalCore.Queries.GetEvaluacionAsistenc
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 using WebEvaluacionCoreApi.Controllers;
 
 namespace WebEnrolAppApi.Controllers.v1;
@@ -63,7 +64,8 @@ public class EvaluacionController : ApiControllerBase
         //{
         //    identificacion = "";
         //}
-        var objResult = await Mediator.Send(new GetEvaluacionAsistenciaAsyncQuery(identificacion, periodo, Udn, Area, Departamento, FiltroNovedades), cancellationToken);
+        var identificacionSession = new JwtSecurityToken(this.HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
+        var objResult = await Mediator.Send(new GetEvaluacionAsistenciaAsyncQuery(identificacion, periodo, Udn, Area, Departamento, FiltroNovedades,identificacionSession), cancellationToken);
         return Ok(objResult);
         
     }

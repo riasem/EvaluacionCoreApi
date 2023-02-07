@@ -38,6 +38,7 @@
 
   <ItemGroup>
     <Folder Include="Configurations\Asistencia\" />
+    <Folder Include="Configurations\Seguridad\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 </Project>

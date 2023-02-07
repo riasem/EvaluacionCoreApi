@@ -1,17 +1,22 @@
 ﻿using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Interfaces;
+using EvaluacionCore.Application.Features.Common.Specifications;
 using EvaluacionCore.Application.Features.EvalCore.Dto;
 using EvaluacionCore.Application.Features.EvalCore.Interfaces;
+using EvaluacionCore.Application.Features.EvalCore.Specifications;
 using EvaluacionCore.Application.Features.Turnos.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
+using EvaluacionCore.Domain.Entities.Common;
 using EvaluacionCore.Domain.Entities.ControlAsistencia;
+using EvaluacionCore.Domain.Entities.Organizacion;
+using EvaluacionCore.Domain.Entities.Seguridad;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 
 namespace EvaluacionCore.Application.Features.EvalCore.Queries.GetEvaluacionAsistenciaAsync;
 
-public record GetEvaluacionAsistenciaAsyncQuery(string Suscriptor, string Periodo, string Udn, string Area, string Departamento, string FiltroNovedades) : IRequest<ResponseType<List<EvaluacionAsistenciaResponseType>>>;
+public record GetEvaluacionAsistenciaAsyncQuery(string Suscriptor, string Periodo, string Udn, string Area, string Departamento, string FiltroNovedades,string identSession) : IRequest<ResponseType<List<EvaluacionAsistenciaResponseType>>>;
 
 public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacionAsistenciaAsyncQuery, ResponseType<List<EvaluacionAsistenciaResponseType>>>
 {
@@ -19,6 +24,10 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
     private readonly IApisConsumoAsync _ApiConsumoAsync;
     private readonly IBitacoraMarcacion _repoBitMarcacionAsync;
     private readonly IRepositoryAsync<ControlAsistenciaCab> _repositoryCAsisCabAsync;
+    private readonly IRepositoryAsync<ColaboradorConvivencia> _repoColabConvivenciaAync;
+    private readonly IRepositoryAsync<Cliente> _repoClienteAync;
+    private readonly IRepositoryAsync<RolCargoSG> _repoRolCargoAync;
+    private readonly IRepositoryAsync<AtributoRolSG> _repoAtributoRolAync;
     private readonly IRepositoryAsync<ControlAsistenciaDet> _repositoryCAsisDetAsync;
     private readonly IRepositoryAsync<ControlAsistenciaNovedad> _repositoryCAsisNovAsync;
     private readonly IRepositoryGRiasemAsync<ControlAsistenciaSolicitudes> _repositoryCAsisSoliAsync;
@@ -31,7 +40,9 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                                                 IRepositoryGRiasemAsync<ControlAsistenciaSolicitudes> repositorySoli,
                                                 IConfiguration config, 
                                                 IBitacoraMarcacion repoBitMarcacionAsync, 
-                                                IApisConsumoAsync apisConsumoAsync)
+                                                IApisConsumoAsync apisConsumoAsync, IRepositoryAsync<ColaboradorConvivencia> repoColabConvivenciaAync,
+                                                IRepositoryAsync<RolCargoSG> repoRolCargoAync, IRepositoryAsync<AtributoRolSG> repoAtributoRolAync,
+                                                IRepositoryAsync<Cliente> repoClienteAync)
     {
         _EvaluacionAsync = repository;
         _repositoryCAsisSoliAsync = repositorySoli;
@@ -39,6 +50,10 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
         _repoBitMarcacionAsync = repoBitMarcacionAsync;
         _config = config;
         ConnectionString = _config.GetConnectionString("ConnectionStrings:Bd_Marcaciones_GRIAMSE");
+        _repoColabConvivenciaAync = repoColabConvivenciaAync;
+        _repoRolCargoAync = repoRolCargoAync;
+        _repoAtributoRolAync = repoAtributoRolAync;
+        _repoClienteAync = repoClienteAync;
     }
 
 
@@ -53,6 +68,30 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
             List<string> filtroNovedades = request.FiltroNovedades.Split("-").ToList();
 
             var cabecera = await _EvaluacionAsync.ConsultaControlAsistenciaCab(request.Udn, request.Area, request.Departamento, request.Periodo, request.Suscriptor);
+
+            #region Filtro de Colaboradores que se debe presentar en la consulta
+            //obtenemos los datos del cola
+            var colaSesion = await _repoColabConvivenciaAync.FirstOrDefaultAsync(new GetColaboradorConvivenciaByUdnAreaSccSpec("", "", "", request.identSession));
+
+            var uidCanal = Guid.Parse("E59D975F-92DB-444A-A3CE-A91A3D3622E8");
+
+            var rolCargo = await _repoRolCargoAync.FirstOrDefaultAsync(new GetRolesAccesoByCargoConvivenciaSpec(colaSesion.CodCargo, colaSesion.CodSubcentroCosto, uidCanal, ""));
+            var listAttributos = await _repoAtributoRolAync.ListAsync(new GetAtributosByRolSpec(rolCargo.RolSG.Id));
+
+            var atributoTTHH = listAttributos.Where(x => x.Id == Guid.Parse("1B623AF9-9CC7-4E84-9A5E-3B1987AD1F53")).ToList();
+            if (!atributoTTHH.Any())
+            {
+                var objJefe = await _repoClienteAync.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(colaSesion.Identificacion));
+                var objColaboradoresJefe = await _repoClienteAync.ListAsync(new GetColaboradorByJefe(objJefe.Id));
+
+                
+
+            }
+
+
+
+            #endregion
+
 
 
             if (cabecera == null)
