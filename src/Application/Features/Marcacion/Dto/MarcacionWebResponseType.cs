@@ -12,5 +12,8 @@ namespace EvaluacionCore.Application.Features.Marcacion.Dto
 
         [JsonPropertyName("mensaje")]
         public string Mensaje { get; set; }
+        
+        [JsonPropertyName("fotoPerfil")]
+        public string FotoPerfil { get; set; }
     }
 }

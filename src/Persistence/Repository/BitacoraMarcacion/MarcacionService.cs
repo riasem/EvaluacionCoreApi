@@ -40,8 +40,7 @@ public class MarcacionService : IMarcacion
     private readonly string Esquema = null;
     private string ConnectionString_Marc { get; }
     private string NombreStoreProcedure = null;
-
-
+    private string fotoPerfilDefecto = string.Empty;
 
     public MarcacionService(IRepositoryGRiasemAsync<UserInfo> repoUserInfoAsync, IRepositoryGRiasemAsync<CheckInOut> repoCheckInOutAsync,
         IRepositoryAsync<Localidad> repoLocalidad, ILogger<MarcacionColaborador> log,
@@ -64,6 +63,7 @@ public class MarcacionService : IMarcacion
         _repoMonitoLogRiasemAsync = repoMonitoLogRiasemAsync;
         NombreStoreProcedure = _config.GetSection("StoredProcedure:Marcacion:ReprocesaMarcaciones").Get<string>();
         _repoLocalColab = repoLocalColab;
+        fotoPerfilDefecto = _config.GetSection("Imagenes:FotoPerfilDefecto").Get<string>();
     }
     public async Task<ResponseType<MarcacionResponseType>> CreateMarcacion(CreateMarcacionRequest Request, CancellationToken cancellationToken)
     {
@@ -359,7 +359,8 @@ public class MarcacionService : IMarcacion
             {
                 Colaborador = string.Concat(colaborador.Apellidos, " ", colaborador.Nombres),
                 Identificacion = colaborador.Identificacion,
-                Mensaje = string.Concat("Has registrado una marcación el ", fechaDesde.ToString("dd/MM/yyyy"), " a las ", marcacionColaborador.ToString("HH:mm:ss"), " exitosamente.")
+                Mensaje = string.Concat("Has registrado una marcación el ", fechaDesde.ToString("dd/MM/yyyy"), " a las ", marcacionColaborador.ToString("HH:mm:ss"), " exitosamente."),
+                FotoPerfil = colaborador.ImagenPerfil is not null ? colaborador.ImagenPerfil.RutaAcceso : fotoPerfilDefecto
             };
 
             return new ResponseType<MarcacionWebResponseType>() { Data = reponse, Message = CodeMessageResponse.GetMessageByCode("100"), StatusCode = "100", Succeeded = true };
