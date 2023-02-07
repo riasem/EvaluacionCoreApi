@@ -1,13 +1,14 @@
 ﻿using EvaluacionCore.Application.Common.Exceptions;
 using EvaluacionCore.Application.Common.Wrappers;
+using EvaluacionCore.Application.Features.Marcacion.Dto;
 using EvaluacionCore.Application.Features.Marcacion.Interfaces;
 using MediatR;
 
 namespace EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionWeb
 {
-    public record CreateMarcacionWebCommand(CreateMarcacionWebRequest CreateMarcacion) : IRequest<ResponseType<string>>;
+    public record CreateMarcacionWebCommand(CreateMarcacionWebRequest CreateMarcacion) : IRequest<ResponseType<MarcacionWebResponseType>>;
 
-    public class CreateMarcacionWebCommandHandler : IRequestHandler<CreateMarcacionWebCommand, ResponseType<string>>
+    public class CreateMarcacionWebCommandHandler : IRequestHandler<CreateMarcacionWebCommand, ResponseType<MarcacionWebResponseType>>
     {
         private readonly IMarcacion _repository;
 
@@ -16,7 +17,7 @@ namespace EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacion
             _repository = repository;
         }
 
-        public async Task<ResponseType<string>> Handle(CreateMarcacionWebCommand request, CancellationToken cancellationToken)
+        public async Task<ResponseType<MarcacionWebResponseType>> Handle(CreateMarcacionWebCommand request, CancellationToken cancellationToken)
         {
             try
             {
@@ -26,7 +27,7 @@ namespace EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacion
             }
             catch (Exception)
             {
-                return new ResponseType<string>() { Data = null, Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
+                return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
             }
         }
     }

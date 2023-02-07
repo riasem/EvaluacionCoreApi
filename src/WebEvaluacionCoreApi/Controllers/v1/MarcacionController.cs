@@ -135,7 +135,7 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         /// <returns></returns>
         [HttpPost("GenerarMarcacionWeb")]
         [EnableCors("AllowOrigin")]
-        [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ResponseType<MarcacionWebResponseType>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateMarcacionWeb([FromBody] CreateMarcacionWebRequest request, CancellationToken cancellationToken)
         {

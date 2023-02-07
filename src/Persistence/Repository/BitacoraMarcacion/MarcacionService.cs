@@ -294,34 +294,37 @@ public class MarcacionService : IMarcacion
         return estadoMarcacion;
     }
 
-    public async Task<ResponseType<string>> CreateMarcacionWeb(CreateMarcacionWebRequest Request, CancellationToken cancellationToken)
+    public async Task<ResponseType<MarcacionWebResponseType>> CreateMarcacionWeb(CreateMarcacionWebRequest Request, CancellationToken cancellationToken)
     {
         try
         {
             var jefe = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Request.IdentificacionJefe), cancellationToken);
 
             if (jefe == null)
-                return new ResponseType<string>() { Data = null, Message = "No se pudo consultar localidad principal", StatusCode = "101", Succeeded = false };
+                return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = "No se pudo consultar localidad principal", StatusCode = "101", Succeeded = false };
 
             var colaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Request.IdentificacionColaborador), cancellationToken);
 
             if (colaborador == null)
-                return new ResponseType<string>() { Data = null, Message = "No se pudo encontrar información del colaborador", StatusCode = "101", Succeeded = false };
+                return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = "No se pudo encontrar información del colaborador", StatusCode = "101", Succeeded = false };
 
             var jefeLocalidad = await _repoLocalColab.ListAsync(new GetLocationByColaboradorSpec(Request.IdentificacionJefe), cancellationToken);
 
             if (!jefeLocalidad.Any())
-                return new ResponseType<string>() { Data = null, Message = "No se pudo encontrar localidad principal asignada", StatusCode = "101", Succeeded = false };
+                return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = "No se pudo encontrar localidad principal asignada", StatusCode = "101", Succeeded = false };
 
             var colaboradorLocalidad = await _repoLocalColab.ListAsync(new GetLocationByColaboradorSpec(Request.IdentificacionColaborador), cancellationToken);
 
             if (!colaboradorLocalidad.Any())
-                return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene localidades asignadas", StatusCode = "101", Succeeded = false };
+                return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = "Colaborador no tiene localidades asignadas", StatusCode = "101", Succeeded = false };
 
             var localidades = jefeLocalidad.Where(jl => colaboradorLocalidad.Any(cl => cl.IdLocalidad == jl.IdLocalidad)).ToList();
 
             if (!localidades.Any())
-                return new ResponseType<string>() { Data = null, Message = "Colaborador no corresponde a la localidad", StatusCode = "101", Succeeded = false };
+                return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = "Colaborador no corresponde a la localidad", StatusCode = "101", Succeeded = false };
+
+            if (colaborador.CodigoConvivencia != Request.PinColaborador)
+                return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = "Credenciales incorrectas", StatusCode = "101", Succeeded = false };
 
             #region Registro de la marcación 
             var marcacionColaborador = DateTime.Now;
@@ -341,7 +344,7 @@ public class MarcacionService : IMarcacion
             var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
 
             if (objResultado == null)
-                return new ResponseType<string>() { Data = null, Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = false };
+                return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = false };
 
             DateTime fechaDesde = marcacionColaborador.Date;
 
@@ -352,12 +355,19 @@ public class MarcacionService : IMarcacion
             if (con.State == ConnectionState.Open) con.Close();
             #endregion
 
-            return new ResponseType<string>() { Data = null, Message = string.Concat("Has registrado una marcación el ", fechaDesde.ToString("dd/MM/yyyy"), " a las ", marcacionColaborador.ToString("HH:mm:ss"), " exitosamente."), StatusCode = "100", Succeeded = true };
+            var reponse = new MarcacionWebResponseType()
+            {
+                Colaborador = string.Concat(colaborador.Apellidos, " ", colaborador.Nombres),
+                Identificacion = colaborador.Identificacion,
+                Mensaje = string.Concat("Has registrado una marcación el ", fechaDesde.ToString("dd/MM/yyyy"), " a las ", marcacionColaborador.ToString("HH:mm:ss"), " exitosamente.")
+            };
+
+            return new ResponseType<MarcacionWebResponseType>() { Data = reponse, Message = CodeMessageResponse.GetMessageByCode("100"), StatusCode = "100", Succeeded = true };
         }
         catch (Exception ex)
         {
             _log.LogError(ex, string.Empty);
-            return new ResponseType<string>() { Data = null, Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
+            return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
         }
     }
 }
