@@ -97,6 +97,13 @@ public class Cliente
     [Column("nombreUsuario", Order = 22, TypeName = "varchar")]
     public string NombreUsuario { get; set; }
 
+    [Column("imagenPerfilId", Order = 23, TypeName = "uniqueidentifier")]
+    public Guid? ImagenPerfilId { get; set; }
+    public virtual Adjunto ImagenPerfil { get; set; }
+
+    [Column("colaboradorReemplazoId", Order = 24, TypeName = "uniqueidentifier")]
+    public Guid? ColaboradorReemplazoId { get; set; }
+
     public virtual ICollection<TurnoColaborador> TurnoColaboradores { get; set; }
     public virtual ICollection<LocalidadColaborador> LocalidadColaboradores { get; set; }
     //public virtual ICollection<NovedadRecordatorioCab> NovedadRecordatorioCabs { get; set; }

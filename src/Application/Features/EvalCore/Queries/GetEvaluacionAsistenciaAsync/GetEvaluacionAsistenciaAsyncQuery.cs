@@ -129,7 +129,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                             UsuarioSolicitudEntrada = item.UsuarioSolicitudEntradaLaboral,
                             IdSolicitudEntrada = item.IdSolicitudEntradaLaboral,
                             IdFeatureEntrada = item.IdFeatureEntradaLaboral,
-                            TipoSolicitudEntrada = item.TipoSolicitudEntradaLaboral,
+                            TipoSolicitudEntrada = EvaluaTipoSolicitud(item.IdFeatureEntradaLaboral),
 
                             MarcacionSalida = item.MarcacionSalidaLaboral,
                             EstadoSalida = item.EstadoSalidaLaboral,
@@ -137,7 +137,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                             UsuarioSolicitudSalida = item.UsuarioSolicitudSalidaLaboral,
                             IdSolicitudSalida = item.IdSolicitudSalidaLaboral,
                             IdFeatureSalida = item.IdFeatureSalidaLaboral,
-                            TipoSolicitudSalida = item.TipoSolicitudSalidaLaboral
+                            TipoSolicitudSalida = EvaluaTipoSolicitud(item.IdFeatureSalidaLaboral)
                         };
 
 
@@ -274,6 +274,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
         Guid permiso = Guid.Parse("DE4D17BD-9F03-4CCB-A3C0-3F37629CEA6A");
         Guid justificacion = Guid.Parse("16D8E575-51A2-442D-889C-1E93E9F786B2");
         Guid vacacion = Guid.Parse("26A08EC8-40FE-435C-8655-3F570278879E");
+        Guid hextra = Guid.Parse("B0BE0865-5C82-40FE-A48A-491154CA6368");
         if (idFeature != null)
         {
             if (idFeature == permiso)
@@ -287,6 +288,10 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
             else if (idFeature == vacacion)
             {
                 return "VAC";
+            }
+            else if (idFeature == hextra)
+            {
+                return "HEX";
             }
             else
             {
