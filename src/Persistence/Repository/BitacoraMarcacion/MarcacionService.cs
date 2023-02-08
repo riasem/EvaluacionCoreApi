@@ -359,7 +359,7 @@ public class MarcacionService : IMarcacion
             {
                 Colaborador = string.Concat(colaborador.Apellidos, " ", colaborador.Nombres),
                 Identificacion = colaborador.Identificacion,
-                Mensaje = string.Concat("Has registrado una marcación el ", fechaDesde.ToString("dd/MM/yyyy"), " a las ", marcacionColaborador.ToString("HH:mm:ss"), " exitosamente."),
+                Mensaje = string.Concat("Has registrado exitosamente una marcación el ", fechaDesde.ToString("dd/MM/yyyy"), " a las ", marcacionColaborador.ToString("HH:mm:ss"), "."),
                 FotoPerfil = colaborador.ImagenPerfil is not null ? colaborador.ImagenPerfil.RutaAcceso : fotoPerfilDefecto
             };
 
