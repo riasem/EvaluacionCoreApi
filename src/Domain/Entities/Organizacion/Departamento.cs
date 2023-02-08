@@ -21,7 +21,13 @@ public class Departamento
     [StringLength(50)]
     public string Nombre { get; set; }
 
-    [Column("estado", Order = 4, TypeName = "varchar")]
+    [Column("codigoHomologacion", Order = 4, TypeName = "varchar")]
+    public string CodigoHomologacion { get; set; }
+
+    [Column("nombreHomologacion", Order = 5, TypeName = "varchar")]
+    public string NombreHomologacion { get; set; }
+
+    [Column("estado", Order = 6, TypeName = "varchar")]
     [StringLength(1)]
     public string Estado { get; set; }
 
