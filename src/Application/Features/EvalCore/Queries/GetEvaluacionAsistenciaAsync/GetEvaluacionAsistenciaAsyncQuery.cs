@@ -9,7 +9,6 @@ using EvaluacionCore.Application.Features.Turnos.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using EvaluacionCore.Domain.Entities.Common;
 using EvaluacionCore.Domain.Entities.ControlAsistencia;
-using EvaluacionCore.Domain.Entities.Organizacion;
 using EvaluacionCore.Domain.Entities.Seguridad;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -21,15 +20,10 @@ public record GetEvaluacionAsistenciaAsyncQuery(string Suscriptor, string Period
 public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacionAsistenciaAsyncQuery, ResponseType<List<EvaluacionAsistenciaResponseType>>>
 {
     private readonly IEvaluacion _EvaluacionAsync;
-    private readonly IApisConsumoAsync _ApiConsumoAsync;
-    private readonly IBitacoraMarcacion _repoBitMarcacionAsync;
-    private readonly IRepositoryAsync<ControlAsistenciaCab> _repositoryCAsisCabAsync;
     private readonly IRepositoryAsync<ColaboradorConvivencia> _repoColabConvivenciaAync;
     private readonly IRepositoryAsync<Cliente> _repoClienteAync;
     private readonly IRepositoryAsync<RolCargoSG> _repoRolCargoAync;
     private readonly IRepositoryAsync<AtributoRolSG> _repoAtributoRolAync;
-    private readonly IRepositoryAsync<ControlAsistenciaDet> _repositoryCAsisDetAsync;
-    private readonly IRepositoryAsync<ControlAsistenciaNovedad> _repositoryCAsisNovAsync;
     private readonly IRepositoryGRiasemAsync<ControlAsistenciaSolicitudes> _repositoryCAsisSoliAsync;
     private readonly IConfiguration _config;
     private string ConnectionString { get; }
@@ -38,16 +32,12 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
     public GetEvaluacionAsistenciaAsyncHandler(IEvaluacion repository,
                                                 IRepositoryGRiasemAsync<ControlAsistenciaSolicitudes> repositorySoli,
-                                                IConfiguration config, 
-                                                IBitacoraMarcacion repoBitMarcacionAsync, 
-                                                IApisConsumoAsync apisConsumoAsync, IRepositoryAsync<ColaboradorConvivencia> repoColabConvivenciaAync,
+                                                IConfiguration config,  IRepositoryAsync<ColaboradorConvivencia> repoColabConvivenciaAync,
                                                 IRepositoryAsync<RolCargoSG> repoRolCargoAync, IRepositoryAsync<AtributoRolSG> repoAtributoRolAync,
                                                 IRepositoryAsync<Cliente> repoClienteAync)
     {
         _EvaluacionAsync = repository;
         _repositoryCAsisSoliAsync = repositorySoli;
-        _ApiConsumoAsync = apisConsumoAsync;
-        _repoBitMarcacionAsync = repoBitMarcacionAsync;
         _config = config;
         ConnectionString = _config.GetConnectionString("ConnectionStrings:Bd_Marcaciones_GRIAMSE");
         _repoColabConvivenciaAync = repoColabConvivenciaAync;
@@ -276,7 +266,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
     }
 
 
-    private string EvaluaTipoSolicitud(Guid? idFeature)
+    private static string EvaluaTipoSolicitud(Guid? idFeature)
     {
         Guid permiso = Guid.Parse("DE4D17BD-9F03-4CCB-A3C0-3F37629CEA6A");
         Guid justificacion = Guid.Parse("16D8E575-51A2-442D-889C-1E93E9F786B2");

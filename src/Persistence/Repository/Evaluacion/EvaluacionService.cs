@@ -272,7 +272,9 @@ public class EvaluacionService : IEvaluacion
             }
             else
             {
-                query += "SELECT * FROM GRIAMSE.dbo.controlAsistenciaCab WHERE udn = '"
+                query += "select id, periodo, fechaDesde, fechaHasta, identificacion, idColaborador, udn, area, subcentroCosto, fechaRegistro, usuarioRegistro " +
+                         "from (SELECT *, ROW_NUMBER() OVER(PARTITION BY identificacion ORDER BY fechaRegistro DESC) rn " +
+                         "FROM GRIAMSE.dbo.controlAsistenciaCab) a WHERE rn > 1 and udn = '"
                             + codUdn + "' AND area= '" + codArea +  "'  AND periodo= '" + periodo + "' ";
             }
             if (!string.IsNullOrEmpty(codScosto))
