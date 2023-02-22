@@ -119,8 +119,10 @@ public class RecordatorioService : IRecordatorio
             DateTime inicioMes = objRecordatorio.FechaLimite.AddDays(-1 * (double.Parse(objRecordatorio.FechaLimite.Day.ToString()) - 1));
             //fin del mes
             DateTime finMes = inicioMes.AddDays((DateTime.DaysInMonth(int.Parse(DateTime.Today.Year.ToString()), int.Parse(DateTime.Today.Month.ToString()))) - 1);
+            DateTime fechaEvaluacion = DateTime.Now;
 
             var objColaboradoresJefes = await ConsultarJefes();
+            objColaboradoresJefes = objColaboradoresJefes.Where(e => e.CodigoConvivencia == "16007").ToList();
 
             foreach (var jefe in objColaboradoresJefes)
             {
@@ -130,10 +132,11 @@ public class RecordatorioService : IRecordatorio
                 {
                     Id = Guid.NewGuid(),
                     IdJefe = jefe.Id,
-                    FechaEvaluacion = DateTime.Now,
+                    FechaEvaluacion = fechaEvaluacion,
                     TipoRecordatorio = tipoRecordatorio,
                     DiasRecordatorio = diasRecodatorio,
-                    Estado = "PR" //PROCESADO
+                    Estado = "PR", //PROCESADO
+                    Periodo = periodo
                 };
                 var cab = await _repoNovedadRecordatorioCab.AddAsync(novedadRecordatorioCab, cancellationToken);
 
@@ -168,7 +171,7 @@ public class RecordatorioService : IRecordatorio
 
 
             //SE REALIZA EL PROCESO DE ENVIO DE CORREOS Y MENSAJES DE RECORDATORIO
-            var objNovedades = await _repoNovedadRecordatorioCab.ListAsync(new NovedadRecordatorioCabByPeriodoSpec(periodo), cancellationToken);
+            var objNovedades = await _repoNovedadRecordatorioCab.ListAsync(new NovedadRecordatorioCabByPeriodoSpec(periodo, fechaEvaluacion), cancellationToken);
 
             foreach (var itemNov in objNovedades)
             {
@@ -303,7 +306,7 @@ public class RecordatorioService : IRecordatorio
 
         return colaboradores;
     }
-    private byte[] ReadFile(string sourcePath)
+    private static byte[] ReadFile(string sourcePath)
     {
         FileInfo fileInfo = new FileInfo(sourcePath);
         long numBytes = fileInfo.Length;
