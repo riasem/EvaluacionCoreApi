@@ -1,0 +1,28 @@
+﻿using EvaluacionCore.Application.Common.Wrappers;
+using EvaluacionCore.Application.Features.Biometria.Commands.GetFaceVerification;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
+
+namespace WebEvaluacionCoreApi.Controllers.v1
+{
+    [ApiVersion("1.0")]
+    public class BiometriaController : ApiControllerBase
+    {
+        /// <summary>
+        /// Verificación facial 
+        /// </summary>
+        /// <param name="biometriaRequest"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpPost("VerificacionFacial")]
+        [EnableCors("AllowOrigin")]
+        [AllowAnonymous]
+        [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> VerificacionFacial(GetFaceVerificationRequest biometriaRequest, CancellationToken cancellationToken)
+        {
+            var objResult = await Mediator.Send(new GetFaceVerificationCommand(biometriaRequest), cancellationToken);
+            return Ok(objResult);
+        }
+    }
+}
