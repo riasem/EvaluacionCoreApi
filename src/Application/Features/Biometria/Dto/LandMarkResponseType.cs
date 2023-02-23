@@ -2,7 +2,7 @@
 
 namespace EvaluacionCore.Application.Features.Biometria.Dto
 {
-    public class LandMarkResponse
+    public class LandMarkResponseType
     {
         [JsonProperty("status")]
         public string Status { get; set; }
