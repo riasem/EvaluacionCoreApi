@@ -417,7 +417,7 @@ public class MarcacionService : IMarcacion
             var novedadesMarcacion = await _repoNovedadMarcacion.ListAsync(cancellationToken);
 
 
-            foreach (var item in novedadesMarcacion)
+            foreach (var item in novedadesMarcacion.Take(20))
             {
                 DateTime fechaTurno = new(item.FechaMarcacion.Year, item.FechaMarcacion.Month, item.FechaMarcacion.Day, 0, 0, 0);
                 var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByCodBiometrico(item.UsuarioMarcacion.ToString()), cancellationToken);
