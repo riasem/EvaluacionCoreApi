@@ -405,6 +405,7 @@ public class MarcacionService : IMarcacion
     {
         try
         {
+            List<NovedadMarcacionType> ListaNovedadMarcacion = new();
             FDesde = DateTime.Parse("2023-02-27 00:00:00");
             FHasta = DateTime.Parse("2023-02-27 10:00:00");
             var objCliente = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Identificacion), cancellationToken);
@@ -415,19 +416,36 @@ public class MarcacionService : IMarcacion
 
             var novedadesMarcacion = await _repoNovedadMarcacion.ListAsync(cancellationToken);
 
+
+            foreach (var item in novedadesMarcacion)
+            {
+                DateTime fechaTurno = new(item.FechaMarcacion.Year, item.FechaMarcacion.Month, item.FechaMarcacion.Day, 0, 0, 0);
+                var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByCodBiometrico(item.UsuarioMarcacion.ToString()), cancellationToken);
+
+                var objTurnoCol = await _repoTurnoCola.FirstOrDefaultAsync(new TurnoColaboradorByIdentificacionSpec(objColaborador.Identificacion, fechaTurno, fechaTurno), cancellationToken);
+
+                DateTime entrada = fechaTurno.AddHours(objTurnoCol.Turno.Entrada.Hour).AddMinutes(objTurnoCol.Turno.Entrada.Minute);
+                DateTime salida = fechaTurno.AddHours(objTurnoCol.Turno.Salida.Hour).AddMinutes(objTurnoCol.Turno.Salida.Minute);
+
+                ListaNovedadMarcacion.Add(new NovedadMarcacionType()
+                {
+                    IdMarcacion = item.IdMarcacion,
+                    FechaMarcacion = item.FechaMarcacion,
+                    TipoNovedad = item.TipoNovedad,
+                    DescripcionMensaje = item.DescripcionMensaje,
+                    Canal = item.Canal,
+                    Dispositivo = item.Dispositivo,
+                    Colaborador = objColaborador.Nombres + ' ' + objColaborador.Apellidos,
+                    TurnoEntrada = entrada,
+                    TurnoSalida = salida
+                });
+            }
+
             return new ResponseType<List<NovedadMarcacionType>>()
             {
-                Data = novedadesMarcacion.Select(n => new NovedadMarcacionType()
-                {
-                    IdMarcacion = n.IdMarcacion,
-                    FechaMarcacion = n.FechaMarcacion,
-                    TipoNovedad = n.TipoNovedad,
-                    DescripcionMensaje = n.DescripcionMensaje,
-                    Canal = n.Canal,
-                    Dispositivo = n.Dispositivo
-                }).ToList(),
-                Message = CodeMessageResponse.GetMessageByCode("100"),
-                StatusCode = "100",
+                Data = ListaNovedadMarcacion,
+                Message = "Consulta generada exitosamente.",
+                StatusCode = "000",
                 Succeeded = true
             };
         }
