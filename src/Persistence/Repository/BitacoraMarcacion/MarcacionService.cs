@@ -41,6 +41,7 @@ public class MarcacionService : IMarcacion
     private readonly IRepositoryAsync<LocalidadColaborador> _repoLocalColab;
     private readonly IConfiguration _config;
     private readonly IBiometria _repoBiometriaAsync;
+    private readonly IRepositoryAsync<CargoEje> _repoEje;
 
     private readonly string Esquema = null;
     private string ConnectionString_Marc { get; }
@@ -49,7 +50,7 @@ public class MarcacionService : IMarcacion
 
     public MarcacionService(IRepositoryGRiasemAsync<UserInfo> repoUserInfoAsync, IRepositoryGRiasemAsync<CheckInOut> repoCheckInOutAsync,
         IRepositoryAsync<Localidad> repoLocalidad, ILogger<MarcacionColaborador> log,
-        IRepositoryAsync<TurnoColaborador> repoTurnoCola, IConfiguration config,
+        IRepositoryAsync<TurnoColaborador> repoTurnoCola, IConfiguration config, IRepositoryAsync<CargoEje> repoEje,
         IRepositoryAsync<MarcacionColaborador> repoMarcacionCola, IRepositoryGRiasemAsync<AccMonitorLog> repoMonitorLogAsync,
         IRepositoryAsync<Cliente> repoCliente, IRepositoryAsync<LocalidadColaborador> repoLocalColab,
         IRepositoryGRiasemAsync<AccMonitoLogRiasem> repoMonitoLogRiasemAsync, IRepositoryGRiasemAsync<AlertasNovedadMarcacion> repoNovedadMarcacion, IBiometria repoBiometriaAsync)
@@ -71,6 +72,7 @@ public class MarcacionService : IMarcacion
         _repoLocalColab = repoLocalColab;
         fotoPerfilDefecto = _config.GetSection("Imagenes:FotoPerfilDefecto").Get<string>();
         _repoBiometriaAsync = repoBiometriaAsync;
+        _repoEje = repoEje;
     }
     public async Task<ResponseType<MarcacionResponseType>> CreateMarcacion(CreateMarcacionRequest Request, CancellationToken cancellationToken)
     {
@@ -280,7 +282,7 @@ public class MarcacionService : IMarcacion
         }
         return tipoMarcacion;
     }
-    
+
     public static string EvaluaEstadoMarcacion(string desciption)
     {
         string estadoMarcacion = "";
@@ -305,11 +307,24 @@ public class MarcacionService : IMarcacion
         try
         {
             string tipoMarcacion = string.IsNullOrEmpty(Request.TipoMarcacion) ? string.Empty : Request.TipoMarcacion.ToUpper();
+            int deviceId = 998;
+            string deviceName = "ENROLAPP WEB";
 
             var jefe = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Request.IdentificacionJefe), cancellationToken);
 
             if (jefe == null)
                 return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = "No se pudo consultar localidad principal", StatusCode = "101", Succeeded = false };
+
+            var infoBiometrico = await _repoEje.FirstOrDefaultAsync(new GetEjeByIdentificacionSpec(jefe.Identificacion), cancellationToken);
+
+            if (infoBiometrico != null)
+            {
+                if(infoBiometrico.DeviceId != null)
+                {
+                    deviceId = (int)infoBiometrico.DeviceId;
+                    deviceName = infoBiometrico.DeviceName;
+                }
+            }
 
             var colaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Request.IdentificacionColaborador), cancellationToken);
 
@@ -363,9 +378,9 @@ public class MarcacionService : IMarcacion
                 State = 0,
                 Time = marcacionColaborador,
                 Pin = string.IsNullOrEmpty(colaborador.CodigoConvivencia) ? string.Empty : colaborador.CodigoConvivencia,
-                Device_Id = 998, //Device ID para en EnrolApp Web
+                Device_Id = deviceId, //Device ID para en EnrolApp Web
                 Verified = 0,
-                Device_Name = "ENROLAPP WEB",
+                Device_Name = deviceName,
                 Status = 1,
                 Create_Time = DateTime.Now
             };
@@ -411,7 +426,7 @@ public class MarcacionService : IMarcacion
             var objCliente = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Identificacion), cancellationToken);
 
             if (objCliente is null) return new ResponseType<List<NovedadMarcacionType>>() { Message = "Colaborador no registrado", StatusCode = "001", Succeeded = false };
-                        
+
             //var novedadesMarcacion = await _repoNovedadMarcacion.ListAsync(new NovedadMarcacionByColaboradorSpec(int.Parse(objCliente.CodigoConvivencia), FDesde, FHasta), cancellationToken);
 
             var novedadesMarcacion = await _repoNovedadMarcacion.ListAsync(cancellationToken);
