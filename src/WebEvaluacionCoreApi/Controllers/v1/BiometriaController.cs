@@ -1,4 +1,5 @@
 ﻿using EvaluacionCore.Application.Common.Wrappers;
+using EvaluacionCore.Application.Features.Biometria.Commands.AuthenticationFacial;
 using EvaluacionCore.Application.Features.Biometria.Commands.CreateFacePerson;
 using EvaluacionCore.Application.Features.Biometria.Commands.GetFaceVerification;
 using Microsoft.AspNetCore.Authorization;
@@ -39,6 +40,22 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         public async Task<IActionResult> CreacionFacialPersona(CreateFacePersonRequest biometriaRequest, CancellationToken cancellationToken)
         {
             var objResult = await Mediator.Send(new CreateFacePersonCommand(biometriaRequest), cancellationToken);
+            return Ok(objResult);
+        }
+
+        /// <summary>
+        /// Autenticación facial
+        /// </summary>
+        /// <param name="biometriaRequest"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpPost("AutenticacionFacialPersona")]
+        [EnableCors("AllowOrigin")]
+        //[AllowAnonymous]
+        [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> AutenticacionFacialPersona(AuthenticationFacialRequest biometriaRequest, CancellationToken cancellationToken)
+        {
+            var objResult = await Mediator.Send(new AuthenticationFacialCommand(biometriaRequest), cancellationToken);
             return Ok(objResult);
         }
     }

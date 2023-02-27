@@ -104,6 +104,9 @@ public class Cliente
     [Column("colaboradorReemplazoId", Order = 24, TypeName = "uniqueidentifier")]
     public Guid? ColaboradorReemplazoId { get; set; }
 
+    [Column("facialPersonId", Order = 25, TypeName = "uniqueidentifier")]
+    public Guid? FacialPersonId { get; set; }
+
     public virtual ICollection<TurnoColaborador> TurnoColaboradores { get; set; }
     public virtual ICollection<LocalidadColaborador> LocalidadColaboradores { get; set; }
     //public virtual ICollection<NovedadRecordatorioCab> NovedadRecordatorioCabs { get; set; }

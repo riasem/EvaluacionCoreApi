@@ -7,6 +7,8 @@ using EnrolApp.Domain.Entities.Horario;
 using EvaluacionCore.Application.Common.Exceptions;
 using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
+using EvaluacionCore.Application.Features.Biometria.Commands.AuthenticationFacial;
+using EvaluacionCore.Application.Features.Biometria.Interfaces;
 using EvaluacionCore.Application.Features.Common.Specifications;
 using EvaluacionCore.Application.Features.Locacions.Specifications;
 using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionWeb;
@@ -37,6 +39,8 @@ public class MarcacionService : IMarcacion
     private readonly IRepositoryAsync<MarcacionColaborador> _repoMarcacionCola;
     private readonly IRepositoryAsync<LocalidadColaborador> _repoLocalColab;
     private readonly IConfiguration _config;
+    private readonly IBiometria _repoBiometriaAsync;
+
     private readonly string Esquema = null;
     private string ConnectionString_Marc { get; }
     private string NombreStoreProcedure = null;
@@ -47,7 +51,7 @@ public class MarcacionService : IMarcacion
         IRepositoryAsync<TurnoColaborador> repoTurnoCola, IConfiguration config,
         IRepositoryAsync<MarcacionColaborador> repoMarcacionCola, IRepositoryGRiasemAsync<AccMonitorLog> repoMonitorLogAsync,
         IRepositoryAsync<Cliente> repoCliente, IRepositoryAsync<LocalidadColaborador> repoLocalColab,
-        IRepositoryGRiasemAsync<AccMonitoLogRiasem> repoMonitoLogRiasemAsync)
+        IRepositoryGRiasemAsync<AccMonitoLogRiasem> repoMonitoLogRiasemAsync, IBiometria repoBiometriaAsync)
     {
         _repoUserInfoAsync = repoUserInfoAsync;
         _repoCheckInOutAsync = repoCheckInOutAsync;
@@ -64,6 +68,7 @@ public class MarcacionService : IMarcacion
         NombreStoreProcedure = _config.GetSection("StoredProcedure:Marcacion:ReprocesaMarcaciones").Get<string>();
         _repoLocalColab = repoLocalColab;
         fotoPerfilDefecto = _config.GetSection("Imagenes:FotoPerfilDefecto").Get<string>();
+        _repoBiometriaAsync = repoBiometriaAsync;
     }
     public async Task<ResponseType<MarcacionResponseType>> CreateMarcacion(CreateMarcacionRequest Request, CancellationToken cancellationToken)
     {
@@ -298,6 +303,8 @@ public class MarcacionService : IMarcacion
     {
         try
         {
+            string tipoMarcacion = string.IsNullOrEmpty(Request.TipoMarcacion) ? string.Empty : Request.TipoMarcacion.ToUpper();
+
             var jefe = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Request.IdentificacionJefe), cancellationToken);
 
             if (jefe == null)
@@ -323,8 +330,29 @@ public class MarcacionService : IMarcacion
             if (!localidades.Any())
                 return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = "Colaborador no corresponde a la localidad", StatusCode = "101", Succeeded = false };
 
-            if (colaborador.CodigoConvivencia != Request.PinColaborador)
-                return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = "Credenciales incorrectas", StatusCode = "101", Succeeded = false };
+            if (tipoMarcacion == "F")
+            {
+                if (colaborador.FacialPersonId == null)
+                    return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = "Colaborador no tiene registro facial", StatusCode = "101", Succeeded = false };
+
+                AuthenticationFacialRequest objAuth = new()
+                {
+                    Base64 = Request.Base64Archivo,
+                    Nombre = Request.NombreArchivo,
+                    Extension = Request.ExtensionArchivo,
+                    FacialPersonUid = colaborador.FacialPersonId.ToString(),
+                };
+
+                var respAuth = await _repoBiometriaAsync.AuthenticationFacialAsync(objAuth);
+
+                if (!respAuth.Succeeded)
+                    return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = respAuth.Message, StatusCode = "101", Succeeded = false };
+            }
+            else
+            {
+                if (colaborador.CodigoConvivencia != Request.PinColaborador)
+                    return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = "Credenciales incorrectas", StatusCode = "101", Succeeded = false };
+            }
 
             #region Registro de la marcación 
             var marcacionColaborador = DateTime.Now;

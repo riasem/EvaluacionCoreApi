@@ -1,5 +1,6 @@
 ﻿using EvaluacionCore.Application.Common.Exceptions;
 using EvaluacionCore.Application.Common.Wrappers;
+using EvaluacionCore.Application.Features.Biometria.Commands.AuthenticationFacial;
 using EvaluacionCore.Application.Features.Biometria.Commands.CreateFacePerson;
 using EvaluacionCore.Application.Features.Biometria.Commands.GetFaceVerification;
 using EvaluacionCore.Application.Features.Biometria.Dto;
@@ -26,6 +27,50 @@ namespace Workflow.Persistence.Repository.Biometria
             _config = config;
             apiBaseLuxand = _config.GetSection("Luxand:ApiBase").Get<string>();
             apiKeyLuxand = _config.GetSection("Luxand:ApiKey").Get<string>();
+        }
+
+        public async Task<ResponseType<string>> AuthenticationFacialAsync(AuthenticationFacialRequest request)
+        {
+            try
+            {
+                nombreEnpoint = _config.GetSection("Luxand:FaceVerification").Get<string>();
+                uriEndPoint = string.Concat(apiBaseLuxand, nombreEnpoint);
+
+                using var client = new HttpClient();
+                client.DefaultRequestHeaders.Add("token", apiKeyLuxand ?? string.Empty);
+
+                #region Parametros archivo y nombre persona
+                byte[] bytes = Convert.FromBase64String(request.Base64);
+
+                Stream stream = new MemoryStream(bytes);
+
+                using var multipartFormContent = new MultipartFormDataContent();
+
+                var fileStreamContent = new StreamContent(stream);
+                fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue(string.Concat("image/", request.Extension));
+
+                multipartFormContent.Add(fileStreamContent, name: "photo", fileName: string.Concat(request.Nombre, ".", request.Extension));
+                #endregion
+
+                var resLuxand = await client.PostAsync(string.Concat(uriEndPoint, "/", request.FacialPersonUid), multipartFormContent);
+
+                var responseType = resLuxand.Content.ReadFromJsonAsync<AuthenticationFacialResponseType>().Result;
+
+                if (responseType.Status == "success")
+                {
+                    if (responseType.Probability > 0.96)
+                        return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
+                    else
+                        return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
+                }
+                else
+                    return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
+            }
+            catch (Exception ex)
+            {
+                _log.LogError(ex, string.Empty);
+                return new ResponseType<string>() { Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
+            }
         }
 
         public async Task<ResponseType<string>> CreateFacePersonAsync(CreateFacePersonRequest request)
@@ -125,7 +170,7 @@ namespace Workflow.Persistence.Repository.Biometria
                 {
                     using var client = new HttpClient();
                     client.DefaultRequestHeaders.Add("token", apiKeyLuxand ?? string.Empty);
-                    
+
                     var resDeleteLuxand = await client.DeleteAsync(string.Concat(uriEndPoint, "/", uidPerson));
                 }
 
