@@ -6,6 +6,7 @@ using EvaluacionCore.Application.Features.EvalCore.Interfaces;
 using EvaluacionCore.Application.Features.Turnos.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using EvaluacionCore.Domain.Entities.Common;
+using EvaluacionCore.Domain.Entities.Marcaciones;
 using EvaluacionCore.Domain.Entities.Organizacion;
 using EvaluacionCore.Domain.Entities.Permisos;
 using Microsoft.Data.SqlClient;
@@ -25,6 +26,7 @@ public class RecordatorioService : IRecordatorio
     private readonly IRepositoryAsync<Recordatorio> _repoRecordatorio;
     private readonly IRepositoryAsync<NovedadRecordatorioCab> _repoNovedadRecordatorioCab;
     private readonly IRepositoryAsync<NovedadRecordatorioDet> _repoNovedadRecordatorioDet;
+    private readonly IRepositoryGRiasemAsync<AlertasNovedadMarcacion> _repoAlertaMarcacon;
     private readonly IApisConsumoAsync _repositoryApis;
     private readonly IConfiguration _config;
     private string ConnectionString_Marc { get; }
@@ -38,7 +40,8 @@ public class RecordatorioService : IRecordatorio
     public RecordatorioService(
         IRepositoryAsync<Recordatorio> repoRecordatorio, 
         IRepositoryAsync<NovedadRecordatorioCab> repoNovedadRecordatorioCab,
-        IRepositoryAsync<NovedadRecordatorioDet> repoNovedadRecordatorioDet, 
+        IRepositoryAsync<NovedadRecordatorioDet> repoNovedadRecordatorioDet,
+        IRepositoryGRiasemAsync<AlertasNovedadMarcacion> repoNovedadMarcacion, 
         ILogger<MarcacionColaborador> log, 
         IRepositoryAsync<TurnoColaborador> repoTurnoCola, 
         IConfiguration config, 
@@ -52,6 +55,7 @@ public class RecordatorioService : IRecordatorio
         _repoTurnoCola = repoTurnoCola;
         _repoCliente = repoCliente;
         _repoRecordatorio = repoRecordatorio;
+        _repoAlertaMarcacon = repoNovedadMarcacion;
         _repoNovedadRecordatorioCab = repoNovedadRecordatorioCab;
         _repoNovedadRecordatorioDet = repoNovedadRecordatorioDet;
         UrlBaseApiUtils = _config.GetSection("ConsumoApis:UrlBaseApiUtils").Get<string>();
@@ -255,7 +259,11 @@ public class RecordatorioService : IRecordatorio
             return ("Ocurrió un error al procesar " + e.Message, 0);
         }
     }
-
+    
+    public Task<(string response, int success)> ProcesarAlarmasMarcacion(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
 
     private async Task<List<Cliente>> ConsultarJefes()
     {
@@ -306,6 +314,7 @@ public class RecordatorioService : IRecordatorio
 
         return colaboradores;
     }
+    
     private static byte[] ReadFile(string sourcePath)
     {
         FileInfo fileInfo = new FileInfo(sourcePath);
@@ -316,4 +325,5 @@ public class RecordatorioService : IRecordatorio
         fileStream.Close();
         return data;
     }
+
 }

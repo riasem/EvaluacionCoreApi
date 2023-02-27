@@ -33,6 +33,7 @@ public class MarcacionService : IMarcacion
     private readonly IRepositoryGRiasemAsync<CheckInOut> _repoCheckInOutAsync;
     private readonly IRepositoryGRiasemAsync<AccMonitorLog> _repoMonitorLogAsync;
     private readonly IRepositoryGRiasemAsync<AccMonitoLogRiasem> _repoMonitoLogRiasemAsync;
+    private readonly IRepositoryGRiasemAsync<AlertasNovedadMarcacion> _repoNovedadMarcacion;
     private readonly IRepositoryAsync<Localidad> _repoLocalidad;
     private readonly IRepositoryAsync<Cliente> _repoCliente;
     private readonly IRepositoryAsync<TurnoColaborador> _repoTurnoCola;
@@ -51,8 +52,9 @@ public class MarcacionService : IMarcacion
         IRepositoryAsync<TurnoColaborador> repoTurnoCola, IConfiguration config,
         IRepositoryAsync<MarcacionColaborador> repoMarcacionCola, IRepositoryGRiasemAsync<AccMonitorLog> repoMonitorLogAsync,
         IRepositoryAsync<Cliente> repoCliente, IRepositoryAsync<LocalidadColaborador> repoLocalColab,
-        IRepositoryGRiasemAsync<AccMonitoLogRiasem> repoMonitoLogRiasemAsync, IBiometria repoBiometriaAsync)
+        IRepositoryGRiasemAsync<AccMonitoLogRiasem> repoMonitoLogRiasemAsync, IRepositoryGRiasemAsync<AlertasNovedadMarcacion> repoNovedadMarcacion, IBiometria repoBiometriaAsync)
     {
+        _repoNovedadMarcacion = repoNovedadMarcacion;
         _repoUserInfoAsync = repoUserInfoAsync;
         _repoCheckInOutAsync = repoCheckInOutAsync;
         _config = config;
@@ -278,8 +280,7 @@ public class MarcacionService : IMarcacion
         }
         return tipoMarcacion;
     }
-
-
+    
     public static string EvaluaEstadoMarcacion(string desciption)
     {
         string estadoMarcacion = "";
@@ -399,4 +400,42 @@ public class MarcacionService : IMarcacion
             return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
         }
     }
+
+    public async Task<ResponseType<List<NovedadMarcacionType>>> ConsultaNovedadMarcacion(string Identificacion, DateTime FDesde, DateTime FHasta, CancellationToken cancellationToken)
+    {
+        try
+        {
+            FDesde = DateTime.Parse("2023-02-27 00:00:00");
+            FHasta = DateTime.Parse("2023-02-27 10:00:00");
+            var objCliente = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Identificacion), cancellationToken);
+
+            if (objCliente is null) return new ResponseType<List<NovedadMarcacionType>>() { Message = "Colaborador no registrado", StatusCode = "001", Succeeded = false };
+                        
+            //var novedadesMarcacion = await _repoNovedadMarcacion.ListAsync(new NovedadMarcacionByColaboradorSpec(int.Parse(objCliente.CodigoConvivencia), FDesde, FHasta), cancellationToken);
+
+            var novedadesMarcacion = await _repoNovedadMarcacion.ListAsync(cancellationToken);
+
+            return new ResponseType<List<NovedadMarcacionType>>()
+            {
+                Data = novedadesMarcacion.Select(n => new NovedadMarcacionType()
+                {
+                    IdMarcacion = n.IdMarcacion,
+                    FechaMarcacion = n.FechaMarcacion,
+                    TipoNovedad = n.TipoNovedad,
+                    DescripcionMensaje = n.DescripcionMensaje,
+                    Canal = n.Canal,
+                    Dispositivo = n.Dispositivo
+                }).ToList(),
+                Message = CodeMessageResponse.GetMessageByCode("100"),
+                StatusCode = "100",
+                Succeeded = true
+            };
+        }
+        catch (Exception e)
+        {
+            return new ResponseType<List<NovedadMarcacionType>>() { Message = "Ocurrió un error", StatusCode = "001", Succeeded = false };
+
+        }
+    }
+
 }

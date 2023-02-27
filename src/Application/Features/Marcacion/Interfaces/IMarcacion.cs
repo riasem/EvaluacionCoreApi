@@ -12,4 +12,6 @@ public interface IMarcacion
     Task<ResponseType<List<ConsultaRecursoType>>> ConsultarRecursos(Guid IdCliente, DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken);
 
     Task<ResponseType<MarcacionWebResponseType>> CreateMarcacionWeb(CreateMarcacionWebRequest Request, CancellationToken cancellationToken);
+    
+    Task<ResponseType<List<NovedadMarcacionType>>> ConsultaNovedadMarcacion(string Identificacion, DateTime FDesde, DateTime FHasta, CancellationToken cancellationToken);
 }

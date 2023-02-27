@@ -23,6 +23,22 @@ namespace WebEvaluacionCoreApi.Controllers.v1
             var objResult = await Mediator.Send(new RecordarTurnosNoAsignadosCommand(), cancellationToken);
             return Ok(objResult);
         }
+        
+
+        /// <summary>
+        /// Proceso batch que genera alertas de novedades de los colaboradores a sus jefes
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpGet("AlertatNovedades")]
+        [EnableCors("AllowOrigin")]
+        [AllowAnonymous]
+        [ProducesResponseType(typeof(ResponseType<List<string>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> AlertarNovedades(CancellationToken cancellationToken)
+        {
+            var objResult = await Mediator.Send(new AlertarNovedadesMarcacionCommand(), cancellationToken);
+            return Ok(objResult);
+        }
 
     }
 }
