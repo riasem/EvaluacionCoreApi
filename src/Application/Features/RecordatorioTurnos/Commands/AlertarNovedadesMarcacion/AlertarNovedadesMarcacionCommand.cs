@@ -20,7 +20,7 @@ public class AlertarNovedadesMarcacionCommandHandler : IRequestHandler<AlertarNo
     {
         try
         {
-            var (objResult, sucess) = await _repository.ProcesarRecordatorios(cancellationToken);
+            var (objResult, sucess) = await _repository.ProcesarAlarmasMarcacion(cancellationToken);
 
             return new ResponseType<string>() { Data = null, Message = objResult, StatusCode = sucess == 1 ? "000" : "001", Succeeded = sucess == 1 };
             

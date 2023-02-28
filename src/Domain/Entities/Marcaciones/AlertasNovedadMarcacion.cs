@@ -34,6 +34,11 @@ public class AlertasNovedadMarcacion
     
     [Column("usuarioCreacion", Order = 0, TypeName = "varchar")]
     public string UsuarioCreacion { get; set; }
-
-
+    
+    [Column("fechaModificacion", Order = 0, TypeName = "datetime")]
+    public DateTime? FechaModificacion { get; set; }
+    
+    [Column("usuarioModificacion", Order = 0, TypeName = "varchar")]
+    public string UsuarioModificacion { get; set; }
+    
 }
