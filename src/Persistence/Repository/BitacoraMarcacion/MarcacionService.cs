@@ -416,45 +416,51 @@ public class MarcacionService : IMarcacion
         }
     }
 
-    public async Task<ResponseType<List<NovedadMarcacionType>>> ConsultaNovedadMarcacion(string Identificacion, DateTime FDesde, DateTime FHasta, CancellationToken cancellationToken)
+    public async Task<ResponseType<List<NovedadMarcacionType>>> ConsultaNovedadMarcacion(string Identificacion, string FiltroNovedades, DateTime FDesde, DateTime FHasta, CancellationToken cancellationToken)
     {
         try
         {
             List<NovedadMarcacionType> ListaNovedadMarcacion = new();
-            FDesde = DateTime.Parse("2023-02-27 00:00:00");
-            FHasta = DateTime.Parse("2023-02-27 10:00:00");
-            var objCliente = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Identificacion), cancellationToken);
 
-            if (objCliente is null) return new ResponseType<List<NovedadMarcacionType>>() { Message = "Colaborador no registrado", StatusCode = "001", Succeeded = false };
+            string[] Identificaciones = Identificacion.Split(",");
+            string[] Novedades = FiltroNovedades.Split(",");
 
-            //var novedadesMarcacion = await _repoNovedadMarcacion.ListAsync(new NovedadMarcacionByColaboradorSpec(int.Parse(objCliente.CodigoConvivencia), FDesde, FHasta), cancellationToken);
-
-            var novedadesMarcacion = await _repoNovedadMarcacion.ListAsync(cancellationToken);
-
-
-            foreach (var item in novedadesMarcacion.Take(20))
+            foreach (var col in Identificaciones)
             {
-                DateTime fechaTurno = new(item.FechaMarcacion.Year, item.FechaMarcacion.Month, item.FechaMarcacion.Day, 0, 0, 0);
-                var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByCodBiometrico(item.UsuarioMarcacion.ToString()), cancellationToken);
+                var objCliente = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(col), cancellationToken);
 
-                var objTurnoCol = await _repoTurnoCola.FirstOrDefaultAsync(new TurnoColaboradorByIdentificacionSpec(objColaborador.Identificacion, fechaTurno, fechaTurno), cancellationToken);
+                if (objCliente is null) return new ResponseType<List<NovedadMarcacionType>>() { Message = "Colaborador no registrado", StatusCode = "001", Succeeded = false };
 
-                DateTime entrada = fechaTurno.AddHours(objTurnoCol.Turno.Entrada.Hour).AddMinutes(objTurnoCol.Turno.Entrada.Minute);
-                DateTime salida = fechaTurno.AddHours(objTurnoCol.Turno.Salida.Hour).AddMinutes(objTurnoCol.Turno.Salida.Minute);
+                var novedadesMarcacion = await _repoNovedadMarcacion.ListAsync(new NovedadMarcacionByColaboradorSpec(int.Parse(objCliente.CodigoConvivencia), Novedades, FDesde, FHasta), cancellationToken);
 
-                ListaNovedadMarcacion.Add(new NovedadMarcacionType()
+                //var novedadesMarcacion = await _repoNovedadMarcacion.ListAsync(cancellationToken);
+
+
+                foreach (var item in novedadesMarcacion)
                 {
-                    IdMarcacion = item.IdMarcacion,
-                    FechaMarcacion = item.FechaMarcacion,
-                    TipoNovedad = item.TipoNovedad,
-                    DescripcionMensaje = item.DescripcionMensaje,
-                    Canal = item.Canal,
-                    Dispositivo = item.Dispositivo,
-                    Colaborador = objColaborador.Nombres + ' ' + objColaborador.Apellidos,
-                    TurnoEntrada = entrada,
-                    TurnoSalida = salida
-                });
+                    DateTime fechaTurno = new(item.FechaMarcacion.Year, item.FechaMarcacion.Month, item.FechaMarcacion.Day, 0, 0, 0);
+                    var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByCodBiometrico(item.UsuarioMarcacion.ToString()), cancellationToken);
+
+                    var objTurnoCol = await _repoTurnoCola.FirstOrDefaultAsync(new TurnoLabColaboradorByIdentificacionSpec(objColaborador.Identificacion, fechaTurno, fechaTurno), cancellationToken);
+
+                    DateTime entrada = fechaTurno.AddHours(objTurnoCol.Turno.Entrada.Hour).AddMinutes(objTurnoCol.Turno.Entrada.Minute);
+                    DateTime salida = fechaTurno.AddHours(objTurnoCol.Turno.Salida.Hour).AddMinutes(objTurnoCol.Turno.Salida.Minute);
+
+                    ListaNovedadMarcacion.Add(new NovedadMarcacionType()
+                    {
+                        IdMarcacion = item.IdMarcacion,
+                        FechaMarcacion = item.FechaMarcacion,
+                        TipoNovedad = item.TipoNovedad,
+                        DescripcionMensaje = item.DescripcionMensaje,
+                        Canal = item.Canal,
+                        Dispositivo = item.Dispositivo,
+                        Colaborador = objColaborador.Nombres + ' ' + objColaborador.Apellidos,
+                        TurnoEntrada = entrada,
+                        TurnoSalida = salida
+                    });
+                }
             }
+           
 
             return new ResponseType<List<NovedadMarcacionType>>()
             {
