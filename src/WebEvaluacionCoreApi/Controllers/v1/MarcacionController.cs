@@ -1,5 +1,6 @@
 ﻿using EnrolApp.Application.Features.Marcacion.Commands.CreateMarcacion;
 using EnrolApp.Application.Features.Marcacion.Commands.NovedadMarcacion;
+using EnrolApp.Application.Features.Marcacion.Commands.NovedadMarcacionWeb;
 using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetBitacoraMarcacion;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetBitacoraMarcacionCapacidadesEspeciales;
@@ -161,12 +162,36 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         [EnableCors("AllowOrigin")]
         [ProducesResponseType(typeof(ResponseType<MarcacionWebResponseType>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateMarcacionWeb(string Identificacion, string FiltroNovedades, DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetNovedadMarcacion(string Identificacion, string FiltroNovedades, DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken)
         {
             //var Identificacion = new JwtSecurityToken(HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
             //request.IdentificacionJefe = Identificacion;
 
             var query = new NovedadMarcacionCommand(Identificacion, FiltroNovedades, fechaDesde, fechaHasta);
+            var objResult = await Mediator.Send(query, cancellationToken);
+            return Ok(objResult);
+        }
+
+
+        /// <summary>
+        /// Consulta de novedades de marcaciones para Web
+        /// </summary>
+        /// <param name="Identificacion"></param>
+        /// <param name="FiltroNovedades"></param>
+        /// <param name="fechaDesde"></param>
+        /// <param name="fechaHasta"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpGet("GetNovedadesMarcacionesWeb")]
+        [EnableCors("AllowOrigin")]
+        [ProducesResponseType(typeof(ResponseType<MarcacionWebResponseType>), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetNovedadMarcacionWeb(string Identificacion, string FiltroNovedades, DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken)
+        {
+            //var Identificacion = new JwtSecurityToken(HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
+            //request.IdentificacionJefe = Identificacion;
+
+            var query = new NovedadMarcacionWebCommand(Identificacion, FiltroNovedades, fechaDesde, fechaHasta);
             var objResult = await Mediator.Send(query, cancellationToken);
             return Ok(objResult);
         }
