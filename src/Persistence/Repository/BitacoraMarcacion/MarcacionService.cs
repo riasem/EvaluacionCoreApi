@@ -504,7 +504,7 @@ public class MarcacionService : IMarcacion
 
                 var itemCol = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(col), cancellationToken);
 
-                if (itemCol is null) return new ResponseType<List<NovedadMarcacionWebType>>() { Message = "Colaborador no registrado", StatusCode = "001", Succeeded = false };
+                if (itemCol is null) continue;
                 
                 for (DateTime dtm = FDesde; dtm <= FHasta; dtm = dtm.AddDays(1))
                 {
