@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace EnrolApp.Application.Features.Marcacion.Commands.NovedadMarcacion;
 
-public record NovedadMarcacionCommand(string Identificacion, DateTime fechaDesde, DateTime fechaHasta) : IRequest<ResponseType<List<NovedadMarcacionType>>>;
+public record NovedadMarcacionCommand(string Identificacion, string FiltroNovedades, DateTime fechaDesde, DateTime fechaHasta) : IRequest<ResponseType<List<NovedadMarcacionType>>>;
 
 public class NovedadMarcacionCommandHandler : IRequestHandler<NovedadMarcacionCommand, ResponseType<List<NovedadMarcacionType>>>
 {
@@ -26,7 +26,7 @@ public class NovedadMarcacionCommandHandler : IRequestHandler<NovedadMarcacionCo
 
     public async Task<ResponseType<List<NovedadMarcacionType>>> Handle(NovedadMarcacionCommand request, CancellationToken cancellationToken)
     {
-        var objResult = await _repository.ConsultaNovedadMarcacion(request.Identificacion, request.fechaDesde, request.fechaHasta, cancellationToken);
+        var objResult = await _repository.ConsultaNovedadMarcacion(request.Identificacion, request.FiltroNovedades, request.fechaDesde, request.fechaHasta, cancellationToken);
 
         return objResult;
 
