@@ -438,7 +438,7 @@ public class MarcacionService : IMarcacion
             {
                 var objCliente = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(col), cancellationToken);
 
-                if (objCliente is null) return new ResponseType<List<NovedadMarcacionType>>() { Message = "Colaborador no registrado", StatusCode = "001", Succeeded = false };
+                if (objCliente is null) continue;
 
                 var novedadesMarcacion = await _repoNovedadMarcacion.ListAsync(new NovedadMarcacionByColaboradorSpec(int.Parse(objCliente.CodigoConvivencia), Novedades, FDesde, FHasta), cancellationToken);
 
@@ -490,13 +490,14 @@ public class MarcacionService : IMarcacion
     {
         try
         {
+            FHasta = FHasta.AddHours(23).AddMinutes(59).AddSeconds(59);
             List<NovedadMarcacionWebType> listaEvaluacionAsistencia = new();
             TurnoColaborador turnoRecesoFiltro = new();
             string[] Identificaciones = Identificacion.Split(",");
             bool poseeTurnoReceso = false;
             //var listaColaboradores = await _EvaluacionAsync.ConsultaColaboradores(request.Udn, request.Area, request.Departamento, request.Suscriptor);
 
-            List<string> filtroNovedades = FiltroNovedades.Split("-").ToList();
+            string[] filtroNovedades = FiltroNovedades.Split(",");
 
 
             foreach (var col in Identificaciones)
@@ -581,58 +582,7 @@ public class MarcacionService : IMarcacion
                         TipoSolicitudSalida = EvaluaTipoSolicitud(objMarcacionColSalida?.IdFeature)
 
                     };
-
-                    //#region marcacion ENTRADA TURNO LABORAL
-
-                    //if (objMarcacionColEntrada?.EstadoMarcacion != null && filtroNovedades.Contains(objMarcacionColEntrada?.EstadoMarcacion))
-                    //{
-                    //    turnoLaborall.MarcacionEntrada = fechaEntrada;
-                    //    turnoLaborall.EstadoEntrada = objMarcacionColEntrada?.EstadoMarcacion ?? "";
-                    //    turnoLaborall.FechaSolicitudEntrada = objMarcacionColEntrada?.FechaSolicitud != null ? DateTime.ParseExact(objMarcacionColEntrada.FechaSolicitud, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : DateTime.Parse("01-01-1900");
-                    //    turnoLaborall.UsuarioSolicitudEntrada = objMarcacionColEntrada?.UsuarioSolicitud ?? "0";
-                    //    turnoLaborall.IdSolicitudEntrada = objMarcacionColEntrada?.IdSolicitud ?? Guid.Empty;
-                    //    turnoLaborall.IdFeatureEntrada = objMarcacionColEntrada?.IdFeature ?? Guid.Empty;
-                    //    turnoLaborall.TipoSolicitudEntrada = EvaluaTipoSolicitud(objMarcacionColEntrada?.IdFeature);
-                    //}
-                    //else
-                    //{
-                    //    turnoLaborall.MarcacionEntrada = fechaEntrada;
-                    //    turnoLaborall.EstadoEntrada = "";
-                    //    turnoLaborall.FechaSolicitudEntrada = DateTime.Parse("01-01-1900");
-                    //    turnoLaborall.UsuarioSolicitudEntrada = "";
-                    //    turnoLaborall.IdSolicitudEntrada = Guid.Empty;
-                    //    turnoLaborall.IdFeatureEntrada = Guid.Empty;
-                    //    turnoLaborall.TipoSolicitudEntrada = "";
-                    //}
-
-                    //#endregion
-
-                    //#region MARCACION SALIDA TURNO LABORAL
-
-                    //if (objMarcacionColSalida?.EstadoMarcacion != null && filtroNovedades.Contains(objMarcacionColSalida?.EstadoMarcacion))
-                    //{
-                    //    turnoLaborall.MarcacionSalida = fechaSalida;
-                    //    turnoLaborall.EstadoSalida = objMarcacionColSalida?.EstadoMarcacion ?? "";
-                    //    turnoLaborall.FechaSolicitudSalida = objMarcacionColSalida?.FechaSolicitud != null ? DateTime.ParseExact(objMarcacionColSalida.FechaSolicitud, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : DateTime.Parse("01-01-1900");
-                    //    turnoLaborall.UsuarioSolicitudSalida = objMarcacionColSalida?.UsuarioSolicitud ?? "0";
-                    //    turnoLaborall.IdSolicitudSalida = objMarcacionColSalida?.IdSolicitud ?? Guid.Empty;
-                    //    turnoLaborall.IdFeatureSalida = objMarcacionColSalida?.IdFeature ?? Guid.Empty;
-                    //    turnoLaborall.TipoSolicitudSalida = EvaluaTipoSolicitud(objMarcacionColSalida?.IdFeature);
-
-                    //}
-                    //else
-                    //{
-                    //    turnoLaborall.MarcacionSalida = fechaSalida;
-                    //    turnoLaborall.EstadoSalida = "";
-                    //    turnoLaborall.FechaSolicitudSalida = DateTime.Parse("01-01-1900");
-                    //    turnoLaborall.UsuarioSolicitudSalida = "";
-                    //    turnoLaborall.IdSolicitudSalida = Guid.Empty;
-                    //    turnoLaborall.IdFeatureSalida = Guid.Empty;
-                    //    turnoLaborall.TipoSolicitudSalida = "";
-                    //}
-
-                    //#endregion
-
+                    
 
                     #endregion
 
@@ -685,124 +635,35 @@ public class MarcacionService : IMarcacion
 
                     };
 
-                    //#region marcaciones de receso salida
-
-                    //if (marcacionSalidaRecesoFiltro?.EstadoMarcacion != null && filtroNovedades.Contains(marcacionSalidaRecesoFiltro?.EstadoMarcacion))
-                    //{
-                    //    turnoReceso.MarcacionSalida = marcacionSalidaRecesoFiltro?.Time != null ? DateTime.ParseExact(marcacionSalidaRecesoFiltro.Time, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : null;
-                    //    turnoReceso.FechaSolicitudSalidaReceso = marcacionSalidaRecesoFiltro?.FechaSolicitud != null ? DateTime.ParseExact(marcacionSalidaRecesoFiltro.FechaSolicitud, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : DateTime.Parse("01-01-1900");
-                    //    turnoReceso.UsuarioSolicitudSalidaReceso = marcacionSalidaRecesoFiltro?.UsuarioSolicitud ?? "";
-                    //    turnoReceso.IdSolicitudSalidaReceso = marcacionSalidaRecesoFiltro?.IdSolicitud ?? Guid.Empty;
-                    //    turnoReceso.EstadoSalidaReceso = marcacionSalidaRecesoFiltro?.EstadoMarcacion ?? "";
-                    //    turnoReceso.IdFeatureSalidaReceso = marcacionSalidaRecesoFiltro?.IdFeature ?? Guid.Empty;
-                    //    turnoReceso.TipoSolicitudSalidaReceso = EvaluaTipoSolicitud(marcacionSalidaRecesoFiltro?.IdFeature);
-                    //}
-                    //else
-                    //{
-
-                    //    turnoReceso.MarcacionSalida = fechaSalida;
-                    //    turnoReceso.EstadoSalidaReceso = "";
-                    //    turnoReceso.FechaSolicitudSalidaReceso = DateTime.Parse("01-01-1900");
-                    //    turnoReceso.UsuarioSolicitudSalidaReceso = "";
-                    //    turnoReceso.IdSolicitudSalidaReceso = Guid.Empty;
-                    //    turnoReceso.IdFeatureSalidaReceso = Guid.Empty;
-                    //    turnoReceso.TipoSolicitudSalidaReceso = "";
-                    //}
-
-                    //#endregion
-
                     #endregion
 
 
                     #region Consulta y procesamiento de novedades
 
-                    if (turnoFiltro?.Turno?.ClaseTurno?.CodigoClaseturno == "LABORA")
-                    {
-                        if (!string.IsNullOrEmpty(objMarcacionColEntrada?.Novedad) && filtroNovedades.Contains("AI"))
-                        {
-                            novedades.Add(new Novedad
-                            {
-                                Descripcion = objMarcacionColEntrada?.Novedad,
-                                MinutosNovedad = objMarcacionColEntrada?.Minutos_Novedad,
-                                EstadoMarcacion = objMarcacionColEntrada?.EstadoMarcacion
-                            });
-                        }
+                    var novedadesMarcacion = await _repoNovedadMarcacion.ListAsync(new NovedadMarcacionByColaboradorSpec(int.Parse(itemCol.CodigoConvivencia), filtroNovedades, FDesde, FHasta), cancellationToken);
 
-                        if (!string.IsNullOrEmpty(objMarcacionColSalida?.Novedad) && filtroNovedades.Contains("SI"))
-                        {
-                            novedades.Add(new Novedad
-                            {
-                                Descripcion = objMarcacionColSalida?.Novedad,
-                                MinutosNovedad = objMarcacionColSalida?.Minutos_Novedad,
-                                EstadoMarcacion = objMarcacionColSalida?.EstadoMarcacion
-                            });
-                        }
-
-                        if (objMarcacionColEntrada == null && filtroNovedades.Contains("FI"))
-                        {
-                            novedades.Add(new Novedad
-                            {
-                                Descripcion = "Falta injustificada, no tiene registro de entrada. Fecha: " + dtm.ToShortDateString(),
-                                MinutosNovedad = "",
-                                EstadoMarcacion = "FI"
-                            });
-                        } //SI TIENE TURNO Y NO REALIZA MARCACION (FALTA) /FJ /FI
-
-                        if (objMarcacionColEntrada != null && objMarcacionColSalida == null && filtroNovedades.Contains("NS"))
-                        {
-                            novedades.Add(new Novedad
-                            {
-                                Descripcion = "No tiene registro de salida. Fecha: " + objMarcacionColEntrada.Fecha,
-                                MinutosNovedad = "",
-                                EstadoMarcacion = "NS"
-                            });
-                        } //NO REGISTRA MARCACION DE SALIDA
-                    }
-
-                    if (turnoRecesoFiltro != null)
-                    {
-                        if (!string.IsNullOrEmpty(marcacionSalidaRecesoFiltro?.Novedad) && filtroNovedades.Contains("ER"))
-                        {
-                            novedades.Add(new Novedad
-                            {
-                                Descripcion = marcacionSalidaRecesoFiltro?.Novedad,
-                                MinutosNovedad = marcacionSalidaRecesoFiltro?.Minutos_Novedad,
-                                EstadoMarcacion = marcacionSalidaRecesoFiltro?.EstadoMarcacion
-                            });
-                        }
-
-                        if (marcacionEntradaRecesoFiltro != null && marcacionSalidaRecesoFiltro == null && filtroNovedades.Contains("NR"))
-                        {
-                            novedades.Add(new Novedad
-                            {
-                                Descripcion = "No tiene registro de retorno del receso",
-                                MinutosNovedad = "",
-                                EstadoMarcacion = "NR" //RETORNO INJUSTIFICADO DE RECESO
-                            });
-                        }
-                    }
-
-                    if (turnoRecesoFiltro == null && (marcacionEntradaRecesoFiltro != null || marcacionSalidaRecesoFiltro != null) && filtroNovedades.Contains("NT"))
+                    foreach (var item in novedadesMarcacion)
                     {
                         novedades.Add(new Novedad
                         {
-                            Descripcion = "No ha sido asignado el turno de receso, pero registra marcacion de receso.",
-                            MinutosNovedad = "",
-                            EstadoMarcacion = "NT"
+                            Descripcion = objMarcacionColEntrada?.Novedad,
+                            MinutosNovedad = objMarcacionColEntrada?.Minutos_Novedad,
+                            EstadoMarcacion = objMarcacionColEntrada?.EstadoMarcacion
                         });
                     }
 
                     #endregion
 
+                    var colaborador = await _EvaluacionAsync.ConsultaColaborador(itemCol.Identificacion);
 
                     listaEvaluacionAsistencia.Add(new NovedadMarcacionWebType()
                     {
                         Colaborador = itemCol.Nombres + " " + itemCol.Apellidos,
                         Identificacion = itemCol.Identificacion,
                         CodBiometrico = itemCol.CodigoConvivencia,
-                        //Udn = itemCol.DesUdn,
-                        //Area = itemCol.DesArea,
-                        //SubCentroCosto = itemCol.DesSubcentroCosto,
+                        Udn = colaborador[0].DesUdn,
+                        Area = colaborador[0].DesArea,
+                        SubCentroCosto = colaborador[0].DesSubcentroCosto,
                         Fecha = dtm,
                         Novedades = novedades,
                         TurnoLaboral = turnoLaborall,
@@ -813,11 +674,11 @@ public class MarcacionService : IMarcacion
 
             }
 
-            var lista = listaEvaluacionAsistencia.Where(e => filtroNovedades.Contains(e.TurnoLaboral.EstadoEntrada) || filtroNovedades.Contains(e.TurnoLaboral.EstadoSalida) ||
-                                                 filtroNovedades.Contains(e.TurnoReceso.EstadoEntradaReceso) || filtroNovedades.Contains(e.TurnoReceso.EstadoSalidaReceso) ||
-                                                 filtroNovedades.Contains(e.Novedades.Select(e => e.EstadoMarcacion).ToString())).ToList();
+            //var lista = listaEvaluacionAsistencia.Where(e => filtroNovedades.Contains(e.TurnoLaboral.EstadoEntrada) || filtroNovedades.Contains(e.TurnoLaboral.EstadoSalida) ||
+            //                                     filtroNovedades.Contains(e.TurnoReceso.EstadoEntradaReceso) || filtroNovedades.Contains(e.TurnoReceso.EstadoSalidaReceso) ||
+            //                                     filtroNovedades.Contains(e.Novedades.Select(e => e.EstadoMarcacion).ToString())).ToList();
 
-            return new ResponseType<List<NovedadMarcacionWebType>>() { Data = lista, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
+            return new ResponseType<List<NovedadMarcacionWebType>>() { Data = listaEvaluacionAsistencia, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
             //return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = listaEvaluacionAsistencia, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
 
         }

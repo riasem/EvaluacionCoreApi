@@ -167,6 +167,16 @@ namespace WebEvaluacionCoreApi.Controllers.v1
             //var Identificacion = new JwtSecurityToken(HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
             //request.IdentificacionJefe = Identificacion;
 
+            if (Identificacion.Contains('[') || Identificacion.Contains(']'))
+            {
+                Identificacion = Identificacion[1..^1];
+            }
+            
+            if (FiltroNovedades.Contains('[') || FiltroNovedades.Contains(']'))
+            {
+                FiltroNovedades = FiltroNovedades[1..^1];
+            }
+
             var query = new NovedadMarcacionCommand(Identificacion, FiltroNovedades, fechaDesde, fechaHasta);
             var objResult = await Mediator.Send(query, cancellationToken);
             return Ok(objResult);

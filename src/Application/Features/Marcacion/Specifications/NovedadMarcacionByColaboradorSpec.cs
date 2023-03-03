@@ -9,10 +9,9 @@ public class NovedadMarcacionByColaboradorSpec : Specification<AlertasNovedadMar
     public NovedadMarcacionByColaboradorSpec(int CodigoBiometrico, string[] Novedades, DateTime FDesde, DateTime FHasta)
     {
         Query.Where(p => p.UsuarioMarcacion == CodigoBiometrico && 
-                         p.FechaMarcacion >= FDesde && 
-                         p.FechaMarcacion <= FHasta && 
-                         p.FechaModificacion == null &&
-                         Novedades.Contains(p.TipoNovedad));
+                            p.FechaMarcacion >= FDesde  && 
+                            p.FechaMarcacion <= FHasta  && 
+                            Novedades.Contains(p.TipoNovedad));
 
     }
 }
