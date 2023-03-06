@@ -22,6 +22,7 @@ namespace EvaluacionCore.Persistence.Contexts
         public DbSet<ControlAsistenciaNovedad> ControlAsistenciaNovedad { get; set; }
         public DbSet<ControlAsistenciaSolicitudes> ControlAsistenciaSolicitudes { get; set; }
         public DbSet<PeriodosLaborales> PeriodosLaborales { get; set; }
+        public DbSet<AlertasNovedadMarcacion> AlertasNovedadMarcacion { get; set; }
         
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) =>

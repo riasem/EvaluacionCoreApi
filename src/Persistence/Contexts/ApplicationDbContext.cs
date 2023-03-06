@@ -46,6 +46,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<AtributoRolSG> AtributoRolSG { get; set; }
 
     public DbSet<TurnoColaborador> TurnoColaborador { get; set; }
+    public DbSet<CargoEje> CargoEje { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);

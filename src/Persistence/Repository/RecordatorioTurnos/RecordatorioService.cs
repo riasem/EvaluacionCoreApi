@@ -2,10 +2,12 @@
 using Dapper;
 using EnrolApp.Application.Features.RecordatorioTurnos.Specifications;
 using EvaluacionCore.Application.Common.Interfaces;
+using EvaluacionCore.Application.Features.Common.Specifications;
 using EvaluacionCore.Application.Features.EvalCore.Interfaces;
 using EvaluacionCore.Application.Features.Turnos.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using EvaluacionCore.Domain.Entities.Common;
+using EvaluacionCore.Domain.Entities.Marcaciones;
 using EvaluacionCore.Domain.Entities.Organizacion;
 using EvaluacionCore.Domain.Entities.Permisos;
 using Microsoft.Data.SqlClient;
@@ -25,6 +27,7 @@ public class RecordatorioService : IRecordatorio
     private readonly IRepositoryAsync<Recordatorio> _repoRecordatorio;
     private readonly IRepositoryAsync<NovedadRecordatorioCab> _repoNovedadRecordatorioCab;
     private readonly IRepositoryAsync<NovedadRecordatorioDet> _repoNovedadRecordatorioDet;
+    private readonly IRepositoryGRiasemAsync<AlertasNovedadMarcacion> _repoAlertaMarcacion;
     private readonly IApisConsumoAsync _repositoryApis;
     private readonly IConfiguration _config;
     private string ConnectionString_Marc { get; }
@@ -38,7 +41,8 @@ public class RecordatorioService : IRecordatorio
     public RecordatorioService(
         IRepositoryAsync<Recordatorio> repoRecordatorio, 
         IRepositoryAsync<NovedadRecordatorioCab> repoNovedadRecordatorioCab,
-        IRepositoryAsync<NovedadRecordatorioDet> repoNovedadRecordatorioDet, 
+        IRepositoryAsync<NovedadRecordatorioDet> repoNovedadRecordatorioDet,
+        IRepositoryGRiasemAsync<AlertasNovedadMarcacion> repoNovedadMarcacion, 
         ILogger<MarcacionColaborador> log, 
         IRepositoryAsync<TurnoColaborador> repoTurnoCola, 
         IConfiguration config, 
@@ -52,8 +56,10 @@ public class RecordatorioService : IRecordatorio
         _repoTurnoCola = repoTurnoCola;
         _repoCliente = repoCliente;
         _repoRecordatorio = repoRecordatorio;
+        _repoAlertaMarcacion = repoNovedadMarcacion;
         _repoNovedadRecordatorioCab = repoNovedadRecordatorioCab;
         _repoNovedadRecordatorioDet = repoNovedadRecordatorioDet;
+        _repoAlertaMarcacion = repoNovedadMarcacion;
         UrlBaseApiUtils = _config.GetSection("ConsumoApis:UrlBaseApiUtils").Get<string>();
         _repositoryApis = repositoryApis;
     }
@@ -119,8 +125,10 @@ public class RecordatorioService : IRecordatorio
             DateTime inicioMes = objRecordatorio.FechaLimite.AddDays(-1 * (double.Parse(objRecordatorio.FechaLimite.Day.ToString()) - 1));
             //fin del mes
             DateTime finMes = inicioMes.AddDays((DateTime.DaysInMonth(int.Parse(DateTime.Today.Year.ToString()), int.Parse(DateTime.Today.Month.ToString()))) - 1);
+            DateTime fechaEvaluacion = DateTime.Now;
 
             var objColaboradoresJefes = await ConsultarJefes();
+            objColaboradoresJefes = objColaboradoresJefes.Where(e => e.CodigoConvivencia == "16007").ToList();
 
             foreach (var jefe in objColaboradoresJefes)
             {
@@ -130,10 +138,11 @@ public class RecordatorioService : IRecordatorio
                 {
                     Id = Guid.NewGuid(),
                     IdJefe = jefe.Id,
-                    FechaEvaluacion = DateTime.Now,
+                    FechaEvaluacion = fechaEvaluacion,
                     TipoRecordatorio = tipoRecordatorio,
                     DiasRecordatorio = diasRecodatorio,
-                    Estado = "PR" //PROCESADO
+                    Estado = "PR", //PROCESADO
+                    Periodo = periodo
                 };
                 var cab = await _repoNovedadRecordatorioCab.AddAsync(novedadRecordatorioCab, cancellationToken);
 
@@ -168,7 +177,7 @@ public class RecordatorioService : IRecordatorio
 
 
             //SE REALIZA EL PROCESO DE ENVIO DE CORREOS Y MENSAJES DE RECORDATORIO
-            var objNovedades = await _repoNovedadRecordatorioCab.ListAsync(new NovedadRecordatorioCabByPeriodoSpec(periodo), cancellationToken);
+            var objNovedades = await _repoNovedadRecordatorioCab.ListAsync(new NovedadRecordatorioCabByPeriodoSpec(periodo, fechaEvaluacion), cancellationToken);
 
             foreach (var itemNov in objNovedades)
             {
@@ -252,7 +261,105 @@ public class RecordatorioService : IRecordatorio
             return ("Ocurrió un error al procesar " + e.Message, 0);
         }
     }
+    
+    public async Task<(string response, int success)> ProcesarAlarmasMarcacion(CancellationToken cancellationToken)
+    {
+        try
+        {
+            string messageId = ""; 
+            string[] dataVariable;
+            string plantilla = "";
+            var objNovedadesMarcacion = await _repoAlertaMarcacion.ListAsync(new AlertasNovedadSpec(), cancellationToken);
 
+            foreach (var item in objNovedadesMarcacion)
+            {
+
+                DateTime fechaTurno = new(item.FechaMarcacion.Year, item.FechaMarcacion.Month, item.FechaMarcacion.Day, 0, 0, 0);
+                
+                var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByCodBiometrico(item.UsuarioMarcacion.ToString()), cancellationToken);
+
+                if (objColaborador is null) return ("No se encuentra el colaborador", 0);
+
+                var objJefe = await _repoCliente.GetByIdAsync(objColaborador.ClientePadreId, cancellationToken);
+
+                if (objJefe is null) return ("No se encuentra el jefe inmediato de " + objColaborador.Apellidos, 0);
+
+                var objTurnoCol = await _repoTurnoCola.FirstOrDefaultAsync(new GetTurnoColaboradorByIdentificacion(objColaborador.Identificacion, fechaTurno, fechaTurno), cancellationToken);
+
+                DateTime entrada = fechaTurno.AddHours(objTurnoCol.Turno.Entrada.Hour).AddMinutes(objTurnoCol.Turno.Entrada.Minute);
+                DateTime salida = fechaTurno.AddHours(objTurnoCol.Turno.Salida.Hour).AddMinutes(objTurnoCol.Turno.Salida.Minute);
+
+                messageId = ProcesarPlantillaSms(item.TipoNovedad);
+
+                string nombresColaborador = objColaborador.Nombres + " " + objColaborador.Apellidos;
+                string fechaIngresoEgreso = "";
+                string horaIngresoEgreso = "";
+                string horaMarcacion = item.FechaMarcacion.ToString("HH:mm");
+
+                if (item.TipoNovedad.StartsWith("A")) //CASO ATRASO
+                {
+                    fechaIngresoEgreso = item.FechaMarcacion.ToString("dddd, dd MMMM yyyy");
+                    horaIngresoEgreso = objTurnoCol.Turno.Entrada.ToString("HH:mm");
+                }
+                else if (item.TipoNovedad.StartsWith("S")) //CASO SALIDA ANTICIPADA
+                {
+                    fechaIngresoEgreso = item.FechaMarcacion.ToString("dddd, dd MMMM yyyy");
+                    horaIngresoEgreso = objTurnoCol.Turno.Salida.ToString("HH:mm");
+                }
+
+                dataVariable = new string[] { nombresColaborador, fechaIngresoEgreso, horaIngresoEgreso, horaMarcacion };
+
+
+                #region Envio Sms
+                var objEnviarSms = new
+                {
+                    celular = objJefe.Celular,
+                    messageId,
+                    dataVariable,
+                    identificacion = objJefe.Identificacion
+                };
+                nombreEnpoint = _config.GetSection("EndPointConsumoApis:ApiUtils:EnviarSms").Get<string>();
+                uriEnpoint = UrlBaseApiUtils + nombreEnpoint;
+                var (Success, Data) = await _repositoryApis.PostEndPoint(objEnviarSms, uriEnpoint, nombreEnpoint);
+
+                if (!Success)
+                {
+                    return ("Ocurrió un error al enviar el Mensaje ", 0);
+                }
+                #endregion
+
+
+                //SE ACTUALIZA EL ESTADO DE LA NOVEDAD
+                item.FechaModificacion = DateTime.Now;
+                item.UsuarioModificacion = "SYSTEM";                
+                await _repoAlertaMarcacion.UpdateAsync(item, cancellationToken);
+
+            }
+
+            return ("oka", 1);
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
+
+    private string ProcesarPlantillaSms(string codigoMarcacion)
+    {
+        return codigoMarcacion switch
+        {
+            //ATRASO INJUS
+            "AI" => _config.GetSection("Sms:Plantilla:AlertaNovedadAtraso").Get<string>(),
+            //ATRASO JUS
+            "AJ" => _config.GetSection("Sms:Plantilla:AlertaNovedadAtraso").Get<string>(),
+            //ANTICIPADA INJUS
+            "SI" => _config.GetSection("Sms:Plantilla:AlertaNovedadAnticipada").Get<string>(),
+            //ANTICIPADA JUS
+            "SJ" => _config.GetSection("Sms:Plantilla:AlertaNovedadAnticipada").Get<string>(),
+            _ => "",
+        };
+    }
 
     private async Task<List<Cliente>> ConsultarJefes()
     {
@@ -303,7 +410,8 @@ public class RecordatorioService : IRecordatorio
 
         return colaboradores;
     }
-    private byte[] ReadFile(string sourcePath)
+    
+    private static byte[] ReadFile(string sourcePath)
     {
         FileInfo fileInfo = new FileInfo(sourcePath);
         long numBytes = fileInfo.Length;
@@ -313,4 +421,5 @@ public class RecordatorioService : IRecordatorio
         fileStream.Close();
         return data;
     }
+
 }

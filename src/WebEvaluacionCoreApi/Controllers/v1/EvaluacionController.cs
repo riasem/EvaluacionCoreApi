@@ -74,6 +74,7 @@ public class EvaluacionController : ApiControllerBase
     /// <summary>
     /// Obtener Combo de novedades para control de asistencias
     /// </summary>
+    /// <param name="filtroNovedad"></param>
     /// <param name="cancellationToken"></param>
     /// <returns>Capacidad que realiza la evaluación de asistencias.</returns>
     /// <response code="201">Consulta Realizada</response>
@@ -83,9 +84,10 @@ public class EvaluacionController : ApiControllerBase
     [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [Authorize]
-    public async Task<IActionResult> GetComboNovedades( CancellationToken cancellationToken)
+    public async Task<IActionResult> GetComboNovedades(CancellationToken cancellationToken, string? filtroNovedad = "")
     {
-        var objResult = await Mediator.Send(new GetComboNovedadesAsyncQuery(), cancellationToken);
+        if (string.IsNullOrEmpty(filtroNovedad)) filtroNovedad = "";
+        var objResult = await Mediator.Send(new GetComboNovedadesAsyncQuery(filtroNovedad), cancellationToken);
         return Ok(objResult);
     }
 

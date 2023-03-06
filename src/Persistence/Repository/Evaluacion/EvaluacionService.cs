@@ -197,6 +197,7 @@ public class EvaluacionService : IEvaluacion
 
         return bitacoraMarcacion;
     }
+
     public async Task<List<ColaboradorConvivenciaType>> ConsultaColaboradores(string codUdn, string codArea, string codScosto, string suscriptor)
     {
         List<ColaboradorConvivenciaType> bitacoraMarcacion = new();
@@ -228,6 +229,7 @@ public class EvaluacionService : IEvaluacion
 
         return bitacoraMarcacion;
     }
+
     public async Task<List<ColaboradorConvivenciaType>> ConsultaColaborador(string suscriptor)
     {
         List<ColaboradorConvivenciaType> bitacoraMarcacion = new();
