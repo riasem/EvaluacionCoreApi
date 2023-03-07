@@ -1,5 +1,6 @@
 ﻿using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Features.Biometria.Interfaces;
+using EvaluacionCore.Application.Features.Biometrico.Interfaces;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Interfaces;
 using EvaluacionCore.Application.Features.Calendario.Interfaces;
 using EvaluacionCore.Application.Features.EvalCore.Interfaces;
@@ -15,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Workflow.Persistence.Repository.Biometria;
+using Workflow.Persistence.Repository.Biometrico;
 using Workflow.Persistence.Repository.Calendario;
 using Workflow.Persistence.Repository.TurnosAsignadosExcel;
 
@@ -42,6 +44,7 @@ public static class ServiceExtensions
         services.AddTransient<ICalendario, CalendarioServices>();
         services.AddTransient<IRecordatorio, RecordatorioService>();
         services.AddTransient<IBiometria, BiometriaService>();
+        services.AddTransient<IBiometrico, BiometricoService>();
 
         #endregion
         return services;
