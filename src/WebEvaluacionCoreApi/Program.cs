@@ -42,7 +42,7 @@ try
         c.SwaggerDoc("v1", new OpenApiInfo
         {
             Version = "v1",
-            Title = " EvaluacionCore - API",
+            Title = " EvaluacionCore - API - Des",
             Description = "Web API que incluye el core para evaluar las marcaciones",
             Contact = new OpenApiContact
             {

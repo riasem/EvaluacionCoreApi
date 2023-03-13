@@ -27,6 +27,9 @@
 
   <ItemGroup>
     <Folder Include="Common\Filters\" />
+    <Folder Include="Features\Biometrico\Dto\" />
+    <Folder Include="Features\Biometrico\Queries\" />
+    <Folder Include="Features\Biometrico\Specifications\" />
     <Folder Include="Features\RecordatorioTurnos\Dto\" />
     <Folder Include="Features\RecordatorioTurnos\Queries\" />
   </ItemGroup>

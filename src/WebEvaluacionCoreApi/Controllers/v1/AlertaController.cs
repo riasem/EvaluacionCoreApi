@@ -1,5 +1,6 @@
 ﻿using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.AlertaTurnos.Commands.AlertaTurnosNoAsignados;
+using EvaluacionCore.Application.Features.Marcacion.Commands.AlertarNovedadBiometrico;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -32,11 +33,28 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         /// <returns></returns>
         [HttpGet("AlertatNovedades")]
         [EnableCors("AllowOrigin")]
-        [Authorize]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(ResponseType<List<string>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> AlertarNovedades(CancellationToken cancellationToken)
         {
             var objResult = await Mediator.Send(new AlertarNovedadesMarcacionCommand(), cancellationToken);
+            return Ok(objResult);
+        }
+        
+        
+
+        /// <summary>
+        /// EndPoint que realiza la alerta de novedades de un biométrico
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpGet("AlertatNovedadesBiometrico")]
+        [EnableCors("AllowOrigin")]
+        [Authorize]
+        [ProducesResponseType(typeof(ResponseType<List<string>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> AlertarNovedadesBiometrico(CancellationToken cancellationToken)
+        {
+            var objResult = await Mediator.Send(new AlertarNovedadBiometricoCommand(""), cancellationToken);
             return Ok(objResult);
         }
 
