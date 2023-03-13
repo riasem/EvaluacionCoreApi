@@ -268,8 +268,8 @@ public class EvaluacionService : IEvaluacion
         {
             if (!string.IsNullOrEmpty(suscriptor))
             {
-                query += "SELECT top 1 * FROM GRIAMSE.dbo.controlAsistenciaCab WHERE udn = ISNULL("
-                            + codUdn + ", udn) AND area= '" + codArea + "' AND periodo= '" + periodo + "' ";
+                query += "SELECT top 1 * FROM GRIAMSE.dbo.controlAsistenciaCab WHERE udn = '"
+                            + codUdn + "' AND area= '" + codArea + "' AND periodo= '" + periodo + "' ";
                 query += " and identificacion =  '" + suscriptor + "' ";
             }
             else

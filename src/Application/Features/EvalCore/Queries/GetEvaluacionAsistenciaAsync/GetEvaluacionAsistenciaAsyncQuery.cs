@@ -91,7 +91,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
             #endregion
 
-            if (cabecera == null)
+            if (cabecera.Count == 0)
             {
                 return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = null, Succeeded = false, StatusCode = "001", Message = "La consulta no retorna datos." };
             }
