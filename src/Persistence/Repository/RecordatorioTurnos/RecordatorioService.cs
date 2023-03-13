@@ -68,10 +68,10 @@ public class RecordatorioService : IRecordatorio
     {
         try
         {
-            DateTime hoy = DateTime.Today;
+            DateTime hoy = DateTime.Now;
             string periodo = hoy.ToString("yyyy-MM");
             var objRecordatorio = await _repoRecordatorio.FirstOrDefaultAsync(new RecordatorioByPeriodoSpec(periodo),cancellationToken);
-            var objRecordatorio_ = await _repoNovedadRecordatorioDet.ListAsync(cancellationToken);
+            //var objRecordatorio_ = await _repoNovedadRecordatorioDet.ListAsync(cancellationToken);
             string messageId = "";
             string[] dataVariable;
             string plantilla = "";
@@ -82,7 +82,7 @@ public class RecordatorioService : IRecordatorio
 
             if (objRecordatorio != null)
             {
-                if (objRecordatorio.InicioRecordatorio >= hoy && objRecordatorio.FechaLimite <= hoy)
+                if ( hoy >= objRecordatorio.InicioRecordatorio && hoy <= objRecordatorio.FechaLimite)
                 {
                     //RECORDATORIO (RC) -- ENTRE INICIO DE RECORDATORIO Y ANTES DE FECHA LIMITE
                     tipoRecordatorio = "RC";
@@ -93,7 +93,7 @@ public class RecordatorioService : IRecordatorio
                     dataVariable = new string[] { "", diasRecodatorio.ToString(), objRecordatorio.FechaLimite.ToString("dd/MM/yyyy") };
                     plantilla = "AlertaTurnosRC";
                 }
-                else if (objRecordatorio.FechaLimite == hoy)
+                else if (objRecordatorio.FechaLimite == hoy.Date)
                 {
                     //DIA LIMITE (LM)
                     tipoRecordatorio = "LM";
@@ -128,11 +128,13 @@ public class RecordatorioService : IRecordatorio
             DateTime fechaEvaluacion = DateTime.Now;
 
             var objColaboradoresJefes = await ConsultarJefes();
-            objColaboradoresJefes = objColaboradoresJefes.Where(e => e.CodigoConvivencia == "16007").ToList();
+            //objColaboradoresJefes = objColaboradoresJefes.Where(e => e.CodigoConvivencia == "16007").ToList();
 
             foreach (var jefe in objColaboradoresJefes)
             {
                 var objColaboradores = await ConsultarColaboradores(jefe.Id);
+
+                if (objColaboradores.Count == 0) continue;
 
                 NovedadRecordatorioCab novedadRecordatorioCab = new()
                 {
@@ -278,13 +280,15 @@ public class RecordatorioService : IRecordatorio
                 
                 var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByCodBiometrico(item.UsuarioMarcacion.ToString()), cancellationToken);
 
-                if (objColaborador is null) return ("No se encuentra el colaborador", 0);
+                if (objColaborador is null) continue;
 
                 var objJefe = await _repoCliente.GetByIdAsync(objColaborador.ClientePadreId, cancellationToken);
 
-                if (objJefe is null) return ("No se encuentra el jefe inmediato de " + objColaborador.Apellidos, 0);
+                if (objJefe is null) continue;
 
                 var objTurnoCol = await _repoTurnoCola.FirstOrDefaultAsync(new GetTurnoColaboradorByIdentificacion(objColaborador.Identificacion, fechaTurno, fechaTurno), cancellationToken);
+
+                if (objTurnoCol is null) continue;
 
                 DateTime entrada = fechaTurno.AddHours(objTurnoCol.Turno.Entrada.Hour).AddMinutes(objTurnoCol.Turno.Entrada.Minute);
                 DateTime salida = fechaTurno.AddHours(objTurnoCol.Turno.Salida.Hour).AddMinutes(objTurnoCol.Turno.Salida.Minute);

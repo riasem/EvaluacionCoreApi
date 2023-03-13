@@ -33,7 +33,7 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         /// <returns></returns>
         [HttpGet("AlertatNovedades")]
         [EnableCors("AllowOrigin")]
-        [Authorize]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(ResponseType<List<string>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> AlertarNovedades(CancellationToken cancellationToken)
         {

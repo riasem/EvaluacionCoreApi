@@ -452,6 +452,8 @@ public class MarcacionService : IMarcacion
 
                     var objTurnoCol = await _repoTurnoCola.FirstOrDefaultAsync(new TurnoLabColaboradorByIdentificacionSpec(objColaborador.Identificacion, fechaTurno, fechaTurno), cancellationToken);
 
+                    if (objTurnoCol is null) continue;
+
                     DateTime entrada = fechaTurno.AddHours(objTurnoCol.Turno.Entrada.Hour).AddMinutes(objTurnoCol.Turno.Entrada.Minute);
                     DateTime salida = fechaTurno.AddHours(objTurnoCol.Turno.Salida.Hour).AddMinutes(objTurnoCol.Turno.Salida.Minute);
 
