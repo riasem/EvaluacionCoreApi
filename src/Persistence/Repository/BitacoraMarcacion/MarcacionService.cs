@@ -655,7 +655,8 @@ public class MarcacionService : IMarcacion
                             {
                                 Descripcion = item.DescripcionMensaje,
                                 MinutosNovedad = "",
-                                EstadoMarcacion = item.TipoNovedad
+                                EstadoMarcacion = item.TipoNovedad,
+                                FechaAprobacion = item.FechaMarcacion
                             });
 
                         }
