@@ -641,22 +641,31 @@ public class MarcacionService : IMarcacion
 
 
                     #region Consulta y procesamiento de novedades
+                    DateTime novedadDesde = dtm;
+                    DateTime novedadHasta = dtm.AddHours(23).AddMinutes(59).AddSeconds(59);
 
-                    var novedadesMarcacion = await _repoNovedadMarcacion.ListAsync(new NovedadMarcacionByColaboradorSpec(int.Parse(itemCol.CodigoConvivencia), filtroNovedades, FDesde, FHasta), cancellationToken);
+
+                    var novedadesMarcacion = await _repoNovedadMarcacion.ListAsync(new NovedadMarcacionByColaboradorSpec(int.Parse(itemCol.CodigoConvivencia), filtroNovedades, novedadDesde, novedadHasta), cancellationToken);
 
                     foreach (var item in novedadesMarcacion)
                     {
-                        novedades.Add(new Novedad
+                        if (filtroNovedades.Contains(item.TipoNovedad))
                         {
-                            Descripcion = objMarcacionColEntrada?.Novedad,
-                            MinutosNovedad = objMarcacionColEntrada?.Minutos_Novedad,
-                            EstadoMarcacion = objMarcacionColEntrada?.EstadoMarcacion
-                        });
+                            novedades.Add(new Novedad
+                            {
+                                Descripcion = item.DescripcionMensaje,
+                                MinutosNovedad = "",
+                                EstadoMarcacion = item.TipoNovedad
+                            });
+
+                        }
                     }
 
                     #endregion
 
                     var colaborador = await _EvaluacionAsync.ConsultaColaborador(itemCol.Identificacion);
+
+                    if (novedades.Count == 0) continue;
 
                     listaEvaluacionAsistencia.Add(new NovedadMarcacionWebType()
                     {
