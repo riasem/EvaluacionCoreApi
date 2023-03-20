@@ -2,6 +2,7 @@
 using EvaluacionCore.Domain.Entities.Asistencia;
 using EvaluacionCore.Domain.Entities.Calendario;
 using EvaluacionCore.Domain.Entities.Common;
+using EvaluacionCore.Domain.Entities.ControlAsistencia;
 using EvaluacionCore.Domain.Entities.Justificacion;
 using EvaluacionCore.Domain.Entities.Organizacion;
 using EvaluacionCore.Domain.Entities.Permisos;
