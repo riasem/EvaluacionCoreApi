@@ -12,10 +12,12 @@ public record CreateTurnoColaboradorCommand(CreateTurnoColaboradorRequest TurnoR
 public class CreateTurnoColaboradorCommandHandler : IRequestHandler<CreateTurnoColaboradorCommand, ResponseType<string>>
 {
     private readonly IRepositoryAsync<TurnoColaborador> _repoTurnoAsync;
+    private readonly IRepositoryAsync<Turno> _repoTurAsync;
 
-    public CreateTurnoColaboradorCommandHandler(IRepositoryAsync<TurnoColaborador> repository)
+    public CreateTurnoColaboradorCommandHandler(IRepositoryAsync<TurnoColaborador> repository, IRepositoryAsync<Turno> repositoryTur)
     {
         _repoTurnoAsync = repository;
+        _repoTurAsync = repositoryTur;
     }
 
     public async Task<ResponseType<string>> Handle(CreateTurnoColaboradorCommand request, CancellationToken cancellationToken)
@@ -40,6 +42,8 @@ public class CreateTurnoColaboradorCommandHandler : IRequestHandler<CreateTurnoC
                     if (filtro.Count > 0)
                         return new ResponseType<string>() { Data = null, Message = "Ya existen turnos asignados en el rango de las fechas indicadas", StatusCode = "101", Succeeded = false };
 
+                    var subturno = await _repoTurAsync.GetBySpecAsync(new TurnoByIdPadreSpec(request.TurnoRequest.IdTurno), cancellationToken);
+                    
                     TurnoColaborador objClient = new()
                     {
                         Id = Guid.NewGuid(),
@@ -51,7 +55,21 @@ public class CreateTurnoColaboradorCommandHandler : IRequestHandler<CreateTurnoC
                     };
 
                     turnos.Add(objClient);
-
+                    
+                    if (subturno != null)
+                    {
+                        TurnoColaborador objSubturno = new()
+                        {
+                            Id = Guid.NewGuid(),
+                            Estado = "A",
+                            UsuarioCreacion = "SYSTEM",
+                            IdTurno = subturno.Id,
+                            IdColaborador = item.IdCliente,
+                            FechaAsignacion = fechaDesde.AddDays(i)
+                        };
+                        turnos.Add(objSubturno);
+                    }
+                    
                     if (item.Subturnos.Count > 0)
                     {
                         foreach (var item2 in item.Subturnos)
