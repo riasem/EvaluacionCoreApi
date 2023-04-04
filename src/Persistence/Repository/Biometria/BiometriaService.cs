@@ -1,10 +1,13 @@
 ﻿using EvaluacionCore.Application.Common.Exceptions;
+using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.Biometria.Commands.AuthenticationFacial;
 using EvaluacionCore.Application.Features.Biometria.Commands.CreateFacePerson;
 using EvaluacionCore.Application.Features.Biometria.Commands.GetFaceVerification;
 using EvaluacionCore.Application.Features.Biometria.Dto;
 using EvaluacionCore.Application.Features.Biometria.Interfaces;
+using EvaluacionCore.Application.Features.Common.Specifications;
+using EvaluacionCore.Domain.Entities.Common;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
@@ -16,15 +19,17 @@ namespace Workflow.Persistence.Repository.Biometria
     {
         private readonly IConfiguration _config;
         private readonly ILogger<BiometriaService> _log;
+        private readonly IRepositoryAsync<Cliente> _repoCliente;
         private readonly string apiKeyLuxand = string.Empty;
         private readonly string apiBaseLuxand = string.Empty;
         private string nombreEnpoint = string.Empty;
         private string uriEndPoint = string.Empty;
 
-        public BiometriaService(IConfiguration config, ILogger<BiometriaService> log)
+        public BiometriaService(IConfiguration config, ILogger<BiometriaService> log, IRepositoryAsync<Cliente> repoCliente)
         {
             _log = log;
             _config = config;
+            _repoCliente = repoCliente;
             apiBaseLuxand = _config.GetSection("Luxand:ApiBase").Get<string>();
             apiKeyLuxand = _config.GetSection("Luxand:ApiKey").Get<string>();
         }
@@ -51,8 +56,10 @@ namespace Workflow.Persistence.Repository.Biometria
 
                 multipartFormContent.Add(fileStreamContent, name: "photo", fileName: string.Concat(request.Nombre, ".", request.Extension));
                 #endregion
+                //Consultamos los datos del colaborador
+                var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(request.Identificacion));
 
-                var resLuxand = await client.PostAsync(string.Concat(uriEndPoint, "/", request.FacialPersonUid), multipartFormContent);
+                var resLuxand = await client.PostAsync(string.Concat(uriEndPoint, "/", objColaborador.FacialPersonId), multipartFormContent);
 
                 var responseType = resLuxand.Content.ReadFromJsonAsync<AuthenticationFacialResponseType>().Result;
 
