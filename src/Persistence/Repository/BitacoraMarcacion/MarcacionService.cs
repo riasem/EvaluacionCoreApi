@@ -47,7 +47,7 @@ public class MarcacionService : IMarcacion
     private readonly IRepositoryAsync<LocalidadColaborador> _repoLocalColab;
     private readonly IConfiguration _config;
     private readonly IBiometria _repoBiometriaAsync;
-    private readonly IMarcacion _repoMarcacionAsync;
+
     private readonly IRepositoryAsync<CargoEje> _repoEje;
     private readonly IEvaluacion _EvaluacionAsync;
 
@@ -61,11 +61,10 @@ public class MarcacionService : IMarcacion
         IRepositoryAsync<TurnoColaborador> repoTurnoCola, IConfiguration config, IRepositoryAsync<CargoEje> repoEje,
         IRepositoryAsync<MarcacionColaborador> repoMarcacionCola, IRepositoryGRiasemAsync<AccMonitorLog> repoMonitorLogAsync,
         IRepositoryAsync<Cliente> repoCliente, IRepositoryAsync<LocalidadColaborador> repoLocalColab,
-        IRepositoryGRiasemAsync<AccMonitoLogRiasem> repoMonitoLogRiasemAsync, IRepositoryGRiasemAsync<AlertasNovedadMarcacion> repoNovedadMarcacion, IBiometria repoBiometriaAsync,
-        IMarcacion repoMarcacionAsync)
+        IRepositoryGRiasemAsync<AccMonitoLogRiasem> repoMonitoLogRiasemAsync, IRepositoryGRiasemAsync<AlertasNovedadMarcacion> repoNovedadMarcacion, IBiometria repoBiometriaAsync)
     {
         _EvaluacionAsync = repository;
-        _repoMarcacionAsync = repoMarcacionAsync;
+        
         _repoNovedadMarcacion = repoNovedadMarcacion;
         _repoUserInfoAsync = repoUserInfoAsync;
         _repoCheckInOutAsync = repoCheckInOutAsync;
@@ -194,7 +193,7 @@ public class MarcacionService : IMarcacion
         };
 
 
-        var resultMarcacion = await _repoMarcacionAsync.CreateMarcacion(requestMarcacion,cancellationToken);
+        var resultMarcacion = await CreateMarcacion(requestMarcacion,cancellationToken);
 
 
         return new ResponseType<string>() { Message = resultMarcacion.Message ,StatusCode = resultMarcacion.StatusCode, Succeeded = resultMarcacion.Succeeded };
