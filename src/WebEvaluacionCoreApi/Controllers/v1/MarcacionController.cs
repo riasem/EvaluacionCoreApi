@@ -6,6 +6,7 @@ using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetBitacora
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetBitacoraMarcacionCapacidadesEspeciales;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetComboBitacoraMarcacion;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Dto;
+using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionApp;
 using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionWeb;
 using EvaluacionCore.Application.Features.Marcacion.Commands.GetBitacoraMarcacion;
 using EvaluacionCore.Application.Features.Marcacion.Dto;
@@ -205,6 +206,26 @@ namespace WebEvaluacionCoreApi.Controllers.v1
             var objResult = await Mediator.Send(query, cancellationToken);
             return Ok(objResult);
         }
+
+
+        /// <summary>
+        /// Marcacion App EnrolApp diferentes CD's
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpPost("GenerarMarcacionApp")]
+        [EnableCors("AllowOrigin")]
+        [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CreateMarcacionApp([FromBody] CreateMarcacionAppRequest request, CancellationToken cancellationToken)
+        {
+            var query = new CreateMarcacionAppCommand(request);
+            var objResult = await Mediator.Send(query, cancellationToken);
+            return Ok(objResult);
+        }
+
+
 
     }
 }

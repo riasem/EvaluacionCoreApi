@@ -57,9 +57,9 @@ namespace Workflow.Persistence.Repository.Biometria
                 multipartFormContent.Add(fileStreamContent, name: "photo", fileName: string.Concat(request.Nombre, ".", request.Extension));
                 #endregion
                 //Consultamos los datos del colaborador
-                var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(request.Identificacion));
+                //var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(request.Identificacion));
 
-                var resLuxand = await client.PostAsync(string.Concat(uriEndPoint, "/", objColaborador.FacialPersonId), multipartFormContent);
+                var resLuxand = await client.PostAsync(string.Concat(uriEndPoint, "/", request.FacialPersonUid), multipartFormContent);
 
                 var responseType = resLuxand.Content.ReadFromJsonAsync<AuthenticationFacialResponseType>().Result;
 

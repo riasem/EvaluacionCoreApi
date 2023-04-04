@@ -13,6 +13,7 @@ using EvaluacionCore.Application.Features.BitacoraMarcacion.Dto;
 using EvaluacionCore.Application.Features.Common.Specifications;
 using EvaluacionCore.Application.Features.EvalCore.Interfaces;
 using EvaluacionCore.Application.Features.Locacions.Specifications;
+using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionApp;
 using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionWeb;
 using EvaluacionCore.Application.Features.Marcacion.Dto;
 using EvaluacionCore.Application.Features.Marcacion.Interfaces;
@@ -46,6 +47,7 @@ public class MarcacionService : IMarcacion
     private readonly IRepositoryAsync<LocalidadColaborador> _repoLocalColab;
     private readonly IConfiguration _config;
     private readonly IBiometria _repoBiometriaAsync;
+    private readonly IMarcacion _repoMarcacionAsync;
     private readonly IRepositoryAsync<CargoEje> _repoEje;
     private readonly IEvaluacion _EvaluacionAsync;
 
@@ -59,9 +61,11 @@ public class MarcacionService : IMarcacion
         IRepositoryAsync<TurnoColaborador> repoTurnoCola, IConfiguration config, IRepositoryAsync<CargoEje> repoEje,
         IRepositoryAsync<MarcacionColaborador> repoMarcacionCola, IRepositoryGRiasemAsync<AccMonitorLog> repoMonitorLogAsync,
         IRepositoryAsync<Cliente> repoCliente, IRepositoryAsync<LocalidadColaborador> repoLocalColab,
-        IRepositoryGRiasemAsync<AccMonitoLogRiasem> repoMonitoLogRiasemAsync, IRepositoryGRiasemAsync<AlertasNovedadMarcacion> repoNovedadMarcacion, IBiometria repoBiometriaAsync)
+        IRepositoryGRiasemAsync<AccMonitoLogRiasem> repoMonitoLogRiasemAsync, IRepositoryGRiasemAsync<AlertasNovedadMarcacion> repoNovedadMarcacion, IBiometria repoBiometriaAsync,
+        IMarcacion repoMarcacionAsync)
     {
         _EvaluacionAsync = repository;
+        _repoMarcacionAsync = repoMarcacionAsync;
         _repoNovedadMarcacion = repoNovedadMarcacion;
         _repoUserInfoAsync = repoUserInfoAsync;
         _repoCheckInOutAsync = repoCheckInOutAsync;
@@ -163,6 +167,41 @@ public class MarcacionService : IMarcacion
 
 
     }
+
+
+    public async Task<ResponseType<string>> CreateMarcacionApp(CreateMarcacionAppRequest Request, CancellationToken cancellationToken)
+    {
+        var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Request.Identificacion));
+        if (objColaborador is null) return new ResponseType<string>() { Message = "No existe el colaborador", StatusCode = "101", Succeeded = true };
+        AuthenticationFacialRequest requestFacial = new()
+        {
+            Base64 = Request.Base64,
+            Extension = Request.Extension,
+            FacialPersonUid = objColaborador.FacialPersonId.ToString(),
+            Nombre = Request.Nombre
+        };
+        ResponseType<string> resultBiometria = await _repoBiometriaAsync.AuthenticationFacialAsync(requestFacial);
+
+        if (resultBiometria.StatusCode != "100") return new ResponseType<string>() { Message = resultBiometria.Message , StatusCode = resultBiometria.StatusCode, Succeeded = resultBiometria.Succeeded };
+
+
+
+        CreateMarcacionRequest requestMarcacion = new()
+        {
+            CodigoEmpleado = objColaborador.CodigoConvivencia,
+            DispositivoId = Request.DispositivoId,
+            LocalidadId = Request.LocalidadId
+        };
+
+
+        var resultMarcacion = await _repoMarcacionAsync.CreateMarcacion(requestMarcacion,cancellationToken);
+
+
+        return new ResponseType<string>() { Message = resultMarcacion.Message ,StatusCode = resultMarcacion.StatusCode, Succeeded = resultMarcacion.Succeeded };
+
+
+    }
+
 
     public async Task<ResponseType<List<ConsultaRecursoType>>> ConsultarRecursos(Guid Identificacion, DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken)
     {
