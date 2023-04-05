@@ -10,7 +10,7 @@ public interface IMarcacion
 {
     Task<ResponseType<MarcacionResponseType>> CreateMarcacion(CreateMarcacionRequest Request, CancellationToken cancellationToken);
 
-    Task<ResponseType<string>> CreateMarcacionApp(CreateMarcacionAppRequest Request, CancellationToken cancellationToken);
+    Task<ResponseType<string>> CreateMarcacionApp(CreateMarcacionAppRequest Request,string IdentificacionSesion, CancellationToken cancellationToken);
 
     Task<ResponseType<List<ConsultaRecursoType>>> ConsultarRecursos(Guid IdCliente, DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken);
 

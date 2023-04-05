@@ -220,7 +220,9 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateMarcacionApp([FromBody] CreateMarcacionAppRequest request, CancellationToken cancellationToken)
         {
-            var query = new CreateMarcacionAppCommand(request);
+            var Identificacion = new JwtSecurityToken(HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
+
+            var query = new CreateMarcacionAppCommand(request,Identificacion);
             var objResult = await Mediator.Send(query, cancellationToken);
             return Ok(objResult);
         }

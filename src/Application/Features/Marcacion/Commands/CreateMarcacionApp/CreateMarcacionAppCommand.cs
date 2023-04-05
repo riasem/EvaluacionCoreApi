@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionApp;
 
-public record CreateMarcacionAppCommand(CreateMarcacionAppRequest CreateMarcacion) : IRequest<ResponseType<string>>;
+public record CreateMarcacionAppCommand(CreateMarcacionAppRequest CreateMarcacion,string IdentificacionSesion) : IRequest<ResponseType<string>>;
 public class CreateMarcacionAppCommandHandler : IRequestHandler<CreateMarcacionAppCommand, ResponseType<string>>
 {
 
@@ -29,7 +29,7 @@ public class CreateMarcacionAppCommandHandler : IRequestHandler<CreateMarcacionA
 
     public async Task<ResponseType<string>> Handle(CreateMarcacionAppCommand request, CancellationToken cancellationToken)
     {
-        var objResult = await _repository.CreateMarcacionApp(request.CreateMarcacion, cancellationToken);
+        var objResult = await _repository.CreateMarcacionApp(request.CreateMarcacion,request.IdentificacionSesion, cancellationToken);
 
         return objResult;
 

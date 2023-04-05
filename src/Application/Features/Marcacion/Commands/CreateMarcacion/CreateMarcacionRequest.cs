@@ -19,5 +19,8 @@ public class CreateMarcacionRequest
     [JsonPropertyName("localidadId")]
     public Guid LocalidadId { get; set; }
 
+    [JsonPropertyName("identificacionSesion")]
+    public string IdentificacionSesion { get; set; }
+
 
 }

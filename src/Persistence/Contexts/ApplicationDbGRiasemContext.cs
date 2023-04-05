@@ -1,4 +1,5 @@
 ﻿using EnrolApp.Domain.Entities.Horario;
+using EvaluacionCore.Domain.Entities.Common;
 using EvaluacionCore.Domain.Entities.ControlAsistencia;
 using EvaluacionCore.Domain.Entities.Marcaciones;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +27,8 @@ namespace EvaluacionCore.Persistence.Contexts
         public DbSet<ControlAsistenciaCab_V> ControlAsistenciaCabV { get; set; }
         public DbSet<ControlAsistenciaNovedad_V> ControlAsistenciaNovedadV { get; set; }
         public DbSet<ControlAsistenciaSolicitudes_V> ControlAsistenciaSolicitudesV { get; set; }
+        public DbSet<Machines> Machines { get; set; }
+        
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) =>

@@ -35,6 +35,7 @@ public class MarcacionService : IMarcacion
 {
     private readonly ILogger<MarcacionColaborador> _log;
     private readonly IRepositoryGRiasemAsync<UserInfo> _repoUserInfoAsync;
+    private readonly IRepositoryGRiasemAsync<Machines> _repoMachinesAsync;
     private readonly IRepositoryGRiasemAsync<CheckInOut> _repoCheckInOutAsync;
     private readonly IRepositoryGRiasemAsync<AccMonitorLog> _repoMonitorLogAsync;
     private readonly IRepositoryGRiasemAsync<AccMonitoLogRiasem> _repoMonitoLogRiasemAsync;
@@ -61,10 +62,10 @@ public class MarcacionService : IMarcacion
         IRepositoryAsync<TurnoColaborador> repoTurnoCola, IConfiguration config, IRepositoryAsync<CargoEje> repoEje,
         IRepositoryAsync<MarcacionColaborador> repoMarcacionCola, IRepositoryGRiasemAsync<AccMonitorLog> repoMonitorLogAsync,
         IRepositoryAsync<Cliente> repoCliente, IRepositoryAsync<LocalidadColaborador> repoLocalColab,
-        IRepositoryGRiasemAsync<AccMonitoLogRiasem> repoMonitoLogRiasemAsync, IRepositoryGRiasemAsync<AlertasNovedadMarcacion> repoNovedadMarcacion, IBiometria repoBiometriaAsync)
+        IRepositoryGRiasemAsync<AccMonitoLogRiasem> repoMonitoLogRiasemAsync, IRepositoryGRiasemAsync<AlertasNovedadMarcacion> repoNovedadMarcacion, IBiometria repoBiometriaAsync, IRepositoryGRiasemAsync<Machines> repoMachinesAsync)
     {
         _EvaluacionAsync = repository;
-        
+
         _repoNovedadMarcacion = repoNovedadMarcacion;
         _repoUserInfoAsync = repoUserInfoAsync;
         _repoCheckInOutAsync = repoCheckInOutAsync;
@@ -84,6 +85,7 @@ public class MarcacionService : IMarcacion
         _repoBiometriaAsync = repoBiometriaAsync;
         _repositoryTurnoColAsync = repositoryTurnoCol;
         _repoEje = repoEje;
+        _repoMachinesAsync = repoMachinesAsync;
     }
     public async Task<ResponseType<MarcacionResponseType>> CreateMarcacion(CreateMarcacionRequest Request, CancellationToken cancellationToken)
     {
@@ -100,15 +102,26 @@ public class MarcacionService : IMarcacion
 
             //if (Request.DispositivoId == objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.DispositivoId)
             //{
+            var deviceId = 999;
+            var deviceName = "EnrolApp";
+
+            var objUserSesion = await _repoEje.FirstOrDefaultAsync(new GetEjeByIdentificacionSpec(Request.IdentificacionSesion));
+            if (objUserSesion != null)
+            {
+                var objMachines = await _repoMachinesAsync.GetByIdAsync(objUserSesion.DeviceId);
+                deviceId = objMachines.ID;
+                deviceName = objMachines.MachineAlias;
+            }
+
 
             AccMonitorLog accMonitorLog = new()
             {
                 State = 0,
                 Time = marcacionColaborador,
                 Pin = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador?.CodigoConvivencia,
-                Device_Id = 999, //parametrizar desde el request
+                Device_Id = deviceId, //parametrizar desde el request
                 Verified = 0,
-                Device_Name = "EnrolApp", //parametrizar desde el request
+                Device_Name = deviceName, //parametrizar desde el request
                 Status = 1,
                 Create_Time = DateTime.Now
             };
@@ -168,7 +181,7 @@ public class MarcacionService : IMarcacion
     }
 
 
-    public async Task<ResponseType<string>> CreateMarcacionApp(CreateMarcacionAppRequest Request, CancellationToken cancellationToken)
+    public async Task<ResponseType<string>> CreateMarcacionApp(CreateMarcacionAppRequest Request,string IdentificacionSesion, CancellationToken cancellationToken)
     {
         var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Request.Identificacion));
         if (objColaborador is null) return new ResponseType<string>() { Message = "No existe el colaborador", StatusCode = "101", Succeeded = true };
@@ -189,7 +202,8 @@ public class MarcacionService : IMarcacion
         {
             CodigoEmpleado = objColaborador.CodigoConvivencia,
             DispositivoId = Request.DispositivoId,
-            LocalidadId = Request.LocalidadId
+            LocalidadId = Request.LocalidadId,
+            IdentificacionSesion = IdentificacionSesion
         };
 
 
