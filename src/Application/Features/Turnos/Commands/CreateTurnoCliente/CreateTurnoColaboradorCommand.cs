@@ -35,6 +35,7 @@ public class CreateTurnoColaboradorCommandHandler : IRequestHandler<CreateTurnoC
     {
         List<TurnoColaborador> turnos = new();
         List<TurnoColaborador> subturnos = new();
+        bool subturnoAsignado = false;
 
         try
         {
@@ -49,12 +50,36 @@ public class CreateTurnoColaboradorCommandHandler : IRequestHandler<CreateTurnoC
 
                 foreach (var item in request.TurnoRequest.ClienteSubturnos)
                 {
-                    var filtro = consulta.Where(e => e.FechaAsignacion == fechaDesde.AddDays(i) && e.IdColaborador == item.IdCliente).ToList();
+                    var filtro = consulta.Where(e => e.FechaAsignacion == fechaDesde.AddDays(i) && e.IdColaborador == item.IdCliente && e.Estado == "A").ToList();
 
                     if (filtro.Count > 0)
-                        return new ResponseType<string>() { Data = null, Message = "Ya existen turnos asignados en el rango de las fechas indicadas", StatusCode = "101", Succeeded = false };
+                    {
+                        foreach (var item2 in filtro)
+                        {
+                            item2.Estado = "I";
+                            await _repoTurnoAsync.UpdateAsync(item2);
+                        }
+                    }
+                    //return new ResponseType<string>() { Data = null, Message = "Ya existen turnos asignados en el rango de las fechas indicadas", StatusCode = "101", Succeeded = false };
 
                     var subturno = await _repoTurAsync.GetBySpecAsync(new TurnoByIdPadreSpec(request.TurnoRequest.IdTurno), cancellationToken);
+
+
+                    if (subturno is not null)
+                    {
+                        subturnoAsignado = true;
+                        TurnoColaborador objClient3 = new()
+                        {
+                            Id = Guid.NewGuid(),
+                            Estado = "A",
+                            UsuarioCreacion = "SYSTEM",
+                            IdTurno = subturno.Id,
+                            IdColaborador = item.IdCliente,
+                            FechaAsignacion = fechaDesde.AddDays(i)
+                        };
+
+                        subturnos.Add(objClient3);
+                    }
 
                     //Consulta de Días Feriados
                     var objCliente = await _repoCliente.GetByIdAsync(item.IdCliente);
@@ -94,7 +119,7 @@ public class CreateTurnoColaboradorCommandHandler : IRequestHandler<CreateTurnoC
 
                             turnos.Add(objClient);
 
-                            if (item.Subturnos.Count > 0)
+                            if (item.Subturnos.Count > 0 && subturnoAsignado == false)
                             {
                                 foreach (var item2 in item.Subturnos)
                                 {
