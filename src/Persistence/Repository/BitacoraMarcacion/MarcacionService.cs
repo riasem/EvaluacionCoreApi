@@ -157,11 +157,11 @@ public class MarcacionService : IMarcacion
 
 
 
-            string query = "EXEC [dbo].[EAPP_SP_REPROCESA_MARCACIONES] NULL, NULL, NULL, '" + fechaDesde.ToString("yyyy/MM/dd HH:mm:ss") + "' , '" + marcacionColaborador.ToString("yyyy/MM/dd HH:mm:ss") + "',  '" + colaborador.Identificacion + "';";
-            using IDbConnection con = new SqlConnection(ConnectionString_Marc);
-            if (con.State == ConnectionState.Closed) con.Open();
-            con.Query(query);
-            if (con.State == ConnectionState.Open) con.Close();
+            //string query = "EXEC [dbo].[EAPP_SP_REPROCESA_MARCACIONES] NULL, NULL, NULL, '" + fechaDesde.ToString("yyyy/MM/dd HH:mm:ss") + "' , '" + marcacionColaborador.ToString("yyyy/MM/dd HH:mm:ss") + "',  '" + colaborador.Identificacion + "';";
+            //using IDbConnection con = new SqlConnection(ConnectionString_Marc);
+            //if (con.State == ConnectionState.Closed) con.Open();
+            //con.Query(query);
+            //if (con.State == ConnectionState.Open) con.Close();
 
             return new ResponseType<MarcacionResponseType>() { Data = objResultFinal, Message = "Marcación registrada correctamente", StatusCode = "100", Succeeded = true };
 
