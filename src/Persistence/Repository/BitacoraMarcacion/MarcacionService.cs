@@ -181,11 +181,11 @@ public class MarcacionService : IMarcacion
     }
 
 
-    public async Task<ResponseType<string>> CreateMarcacionApp(CreateMarcacionAppRequest Request, string IdentificacionSesion, CancellationToken cancellationToken)
+    public async Task<ResponseType<CreateMarcacionResponseType>> CreateMarcacionApp(CreateMarcacionAppRequest Request, string IdentificacionSesion, CancellationToken cancellationToken)
     {
         var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Request.Identificacion));
-        if (objColaborador is null) return new ResponseType<string>() { Message = "No existe el colaborador", StatusCode = "101", Succeeded = true };
-        if (objColaborador.FacialPersonId is null) return new ResponseType<string>() { Message = "Debes registrar tus datos biométricos", StatusCode = "101", Succeeded = true };
+        if (objColaborador is null) return new ResponseType<CreateMarcacionResponseType>() { Message = "No existe el colaborador", StatusCode = "101", Succeeded = true };
+        if (objColaborador.FacialPersonId is null) return new ResponseType<CreateMarcacionResponseType>() { Message = "Debes registrar tus datos biométricos", StatusCode = "101", Succeeded = true };
 
         AuthenticationFacialRequest requestFacial = new()
         {
@@ -196,7 +196,7 @@ public class MarcacionService : IMarcacion
         };
         ResponseType<string> resultBiometria = await _repoBiometriaAsync.AuthenticationFacialAsync(requestFacial);
 
-        if (resultBiometria.StatusCode != "100") return new ResponseType<string>() { Message = resultBiometria.Message, StatusCode = resultBiometria.StatusCode, Succeeded = resultBiometria.Succeeded };
+        if (resultBiometria.StatusCode != "100") return new ResponseType<CreateMarcacionResponseType>() { Message = resultBiometria.Message, StatusCode = resultBiometria.StatusCode, Succeeded = resultBiometria.Succeeded };
 
 
         CreateMarcacionRequest requestMarcacion = new()
@@ -209,18 +209,12 @@ public class MarcacionService : IMarcacion
 
 
         var resultMarcacion = await CreateMarcacion(requestMarcacion, cancellationToken);
-        string colaborador = objColaborador.Nombres + " " + objColaborador.Apellidos;
-        string rutaImagen = objColaborador.ImagenPerfilId is null ? objColaborador.ImagenPerfil.RutaAcceso : "";
-        DateTime marcacion = DateTime.Now;
-        var data = new
-        {
-            colaborador,
-            rutaImagen,
-            marcacion
-        };
+        CreateMarcacionResponseType data = new();
+        data.Colaborador = objColaborador.Nombres + " " + objColaborador.Apellidos;
+        data.RutaImagen = objColaborador.ImagenPerfilId is null ? objColaborador.ImagenPerfil.RutaAcceso : "";
+        data.Marcacion = DateTime.Now;
 
-
-        return new ResponseType<string>() { Message = resultMarcacion.Message ,StatusCode = resultMarcacion.StatusCode, Data = data.ToString(), Succeeded = resultMarcacion.Succeeded };
+        return new ResponseType<CreateMarcacionResponseType>() { Message = resultMarcacion.Message ,StatusCode = resultMarcacion.StatusCode, Data = data,  Succeeded = resultMarcacion.Succeeded };
 
 
     }
