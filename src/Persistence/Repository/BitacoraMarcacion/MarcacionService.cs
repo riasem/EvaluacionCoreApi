@@ -93,9 +93,10 @@ public class MarcacionService : IMarcacion
         {
             var marcacionColaborador = DateTime.Now;
             MarcacionResponseType objResultFinal = new();
-            var objLocalidad = await _repoLocalidad.FirstOrDefaultAsync(new GetLocalidadByIdSpec(Request.LocalidadId, Request.CodigoEmpleado), cancellationToken);
 
-            if (objLocalidad == null) return new ResponseType<MarcacionResponseType>() { Message = "Localidad incorrecta", Succeeded = true, StatusCode = "101" };
+            //var objLocalidad = await _repoLocalidad.FirstOrDefaultAsync(new GetLocalidadByIdSpec(Request.LocalidadId, Request.CodigoEmpleado), cancellationToken);
+
+            //if (objLocalidad == null) return new ResponseType<MarcacionResponseType>() { Message = "Localidad incorrecta", Succeeded = true, StatusCode = "101" };
 
             //Validación de turno que corresponde
             //var objTurno = await _repoTurnoCola.ListAsync(new TurnosByIdClienteSpec(objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.Id), cancellationToken);
@@ -118,7 +119,7 @@ public class MarcacionService : IMarcacion
             {
                 State = 0,
                 Time = marcacionColaborador,
-                Pin = objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador?.CodigoConvivencia,
+                Pin = Request.CodigoEmpleado, /*objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador?.CodigoConvivencia,*/
                 Device_Id = deviceId, //parametrizar desde el request
                 Verified = 0,
                 Device_Name = deviceName, //parametrizar desde el request
@@ -131,8 +132,8 @@ public class MarcacionService : IMarcacion
             {
                 return new ResponseType<MarcacionResponseType>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
             }
-            await Task.Delay(1500, cancellationToken);
-            var marcacionEmpl = await _repoMonitoLogRiasemAsync.FirstOrDefaultAsync(new MarcacionByColaboradorAndTime(objResultado.Pin, objResultado.Time), cancellationToken);
+            //await Task.Delay(1500, cancellationToken);
+            var marcacionEmpl = await _repoMonitoLogRiasemAsync.FirstOrDefaultAsync(new MarcacionByColaboradorAndTime(objResultado.Pin, objResultado.Time, deviceId), cancellationToken);
 
             if (marcacionEmpl is not null)
             {
@@ -152,8 +153,8 @@ public class MarcacionService : IMarcacion
                 objResultFinal = null;
             }
 
-            var colaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByCodBiometrico(Request.CodigoEmpleado), cancellationToken);
-            DateTime fechaDesde = marcacionColaborador.Date;
+            //var colaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByCodBiometrico(Request.CodigoEmpleado), cancellationToken);
+            //DateTime fechaDesde = marcacionColaborador.Date;
 
 
 
@@ -183,15 +184,23 @@ public class MarcacionService : IMarcacion
 
     public async Task<ResponseType<CreateMarcacionResponseType>> CreateMarcacionApp(CreateMarcacionAppRequest Request, string IdentificacionSesion, CancellationToken cancellationToken)
     {
-        var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Request.Identificacion));
-        if (objColaborador is null) return new ResponseType<CreateMarcacionResponseType>() { Message = "No existe el colaborador", StatusCode = "101", Succeeded = true };
-        if (objColaborador.FacialPersonId is null) return new ResponseType<CreateMarcacionResponseType>() { Message = "Debes registrar tus datos biométricos", StatusCode = "101", Succeeded = true };
+        var objLocalidadColaborador = await _repoLocalColab.ListAsync(new GetLocationByColaboradorSpec(Request.Identificacion));
+        if (!objLocalidadColaborador.Any()) return new ResponseType<CreateMarcacionResponseType>() { Message = "No tiene Localidad Asignada", StatusCode = "101", Succeeded = true };
+        var localidadSesion = await _repoLocalColab.ListAsync(new GetLocationByColaboradorSpec(IdentificacionSesion));
+        //if (!objLocalidadColaborador.Any()) return new ResponseType<CreateMarcacionResponseType>() { Message = "No existe el colaborador", StatusCode = "101", Succeeded = true };
+        if (objLocalidadColaborador.ElementAt(0).Colaborador.FacialPersonId is null) return new ResponseType<CreateMarcacionResponseType>() { Message = "Debes registrar tus datos biométricos", StatusCode = "101", Succeeded = true };
+
+        #region Validacion de localidades
+        var resultLocalidad = objLocalidadColaborador.Any(x => localidadSesion.Any(ls => ls.IdLocalidad == x.IdLocalidad));
+        if (!resultLocalidad) return new ResponseType<CreateMarcacionResponseType>() { Message = "No puede registrar marcación en esta localidad", StatusCode = "101", Succeeded = true };
+
+        #endregion
 
         AuthenticationFacialRequest requestFacial = new()
         {
             Base64 = Request.Base64,
             Extension = Request.Extension,
-            FacialPersonUid = objColaborador.FacialPersonId.ToString(),
+            FacialPersonUid = objLocalidadColaborador.ElementAt(0).Colaborador.FacialPersonId.ToString(),
             Nombre = Request.Nombre
         };
         ResponseType<string> resultBiometria = await _repoBiometriaAsync.AuthenticationFacialAsync(requestFacial);
@@ -199,9 +208,10 @@ public class MarcacionService : IMarcacion
         if (resultBiometria.StatusCode != "100") return new ResponseType<CreateMarcacionResponseType>() { Message = resultBiometria.Message, StatusCode = resultBiometria.StatusCode, Succeeded = resultBiometria.Succeeded };
 
 
+
         CreateMarcacionRequest requestMarcacion = new()
         {
-            CodigoEmpleado = objColaborador.CodigoConvivencia,
+            CodigoEmpleado = objLocalidadColaborador.ElementAt(0).Colaborador.CodigoConvivencia,
             DispositivoId = Request.DispositivoId,
             LocalidadId = Request.LocalidadId,
             IdentificacionSesion = IdentificacionSesion
@@ -210,8 +220,8 @@ public class MarcacionService : IMarcacion
 
         var resultMarcacion = await CreateMarcacion(requestMarcacion, cancellationToken);
         CreateMarcacionResponseType data = new();
-        data.Colaborador = objColaborador.Nombres + " " + objColaborador.Apellidos;
-        data.RutaImagen = objColaborador.ImagenPerfilId is null ? "" : objColaborador.ImagenPerfil.RutaAcceso;
+        data.Colaborador = objLocalidadColaborador.ElementAt(0).Colaborador.Nombres + " " + objLocalidadColaborador.ElementAt(0).Colaborador.Apellidos;
+        data.RutaImagen = objLocalidadColaborador.ElementAt(0).Colaborador.ImagenPerfilId is null ? "" : objLocalidadColaborador.ElementAt(0).Colaborador.ImagenPerfil.RutaAcceso;
         data.Marcacion = DateTime.Now;
 
         return new ResponseType<CreateMarcacionResponseType>() { Message = resultMarcacion.Message ,StatusCode = resultMarcacion.StatusCode, Data = data,  Succeeded = resultMarcacion.Succeeded };

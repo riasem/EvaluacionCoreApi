@@ -14,6 +14,7 @@ namespace EvaluacionCore.Application.Features.Locacions.Specifications
         {
             Query.Where(p => p.Colaborador.Identificacion == Identificacion && p.Estado == "A")
                 .Include(p => p.Colaborador)
+                .ThenInclude(p => p.ImagenPerfil)
                 .Include(p => p.Localidad)
                 .ThenInclude(p => p.Canton)
                 .ThenInclude(p => p.Provincia)
