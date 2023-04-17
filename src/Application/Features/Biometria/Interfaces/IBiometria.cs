@@ -10,5 +10,6 @@ namespace EvaluacionCore.Application.Features.Biometria.Interfaces
         Task<ResponseType<string>> GetFaceVerificationAsync(GetFaceVerificationRequest request);
         Task<ResponseType<string>> CreateFacePersonAsync(CreateFacePersonRequest request);
         Task<ResponseType<string>> AuthenticationFacialAsync(AuthenticationFacialRequest request);
+        Task<ResponseType<string>> AuthenticationFacialLastAsync(AuthenticationFacialLastRequest request);
     }
 }

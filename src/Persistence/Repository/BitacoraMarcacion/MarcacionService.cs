@@ -229,6 +229,50 @@ public class MarcacionService : IMarcacion
 
     }
 
+    public async Task<ResponseType<CreateMarcacionResponseType>> CreateMarcacionAppLast(CreateMarcacionAppLastRequest Request, string IdentificacionSesion, CancellationToken cancellationToken)
+    {
+        var objLocalidadColaborador = await _repoLocalColab.ListAsync(new GetLocationByColaboradorSpec(Request.Identificacion));
+        if (!objLocalidadColaborador.Any()) return new ResponseType<CreateMarcacionResponseType>() { Message = "No tiene Localidad Asignada", StatusCode = "101", Succeeded = true };
+        var localidadSesion = await _repoLocalColab.ListAsync(new GetLocationByColaboradorSpec(IdentificacionSesion));
+        //if (!objLocalidadColaborador.Any()) return new ResponseType<CreateMarcacionResponseType>() { Message = "No existe el colaborador", StatusCode = "101", Succeeded = true };
+        if (objLocalidadColaborador.ElementAt(0).Colaborador.FacialPersonId is null) return new ResponseType<CreateMarcacionResponseType>() { Message = "Debes registrar tus datos biométricos", StatusCode = "101", Succeeded = true };
+
+        #region Validacion de localidades
+        var resultLocalidad = objLocalidadColaborador.Any(x => localidadSesion.Any(ls => ls.IdLocalidad == x.IdLocalidad));
+        if (!resultLocalidad) return new ResponseType<CreateMarcacionResponseType>() { Message = "No puede registrar marcación en esta localidad", StatusCode = "101", Succeeded = true };
+
+        #endregion
+
+        AuthenticationFacialLastRequest requestFacial = new()
+        {
+
+            FacialPersonUid = objLocalidadColaborador.ElementAt(0).Colaborador.FacialPersonId.ToString(),
+            AdjuntoFiles = Request.Adjunto
+
+        };
+        ResponseType<string> resultBiometria = await _repoBiometriaAsync.AuthenticationFacialLastAsync(requestFacial);
+
+        if (resultBiometria.StatusCode != "100") return new ResponseType<CreateMarcacionResponseType>() { Message = resultBiometria.Message, StatusCode = resultBiometria.StatusCode, Succeeded = resultBiometria.Succeeded };
+
+
+
+        CreateMarcacionRequest requestMarcacion = new()
+        {
+            CodigoEmpleado = objLocalidadColaborador.ElementAt(0).Colaborador.CodigoConvivencia,
+            DispositivoId = Request.DispositivoId,
+            //LocalidadId = Request.LocalidadId,
+            IdentificacionSesion = IdentificacionSesion
+        };
+
+
+        var resultMarcacion = await CreateMarcacion(requestMarcacion, cancellationToken);
+        CreateMarcacionResponseType data = new();
+        data.Colaborador = objLocalidadColaborador.ElementAt(0).Colaborador.Nombres + " " + objLocalidadColaborador.ElementAt(0).Colaborador.Apellidos;
+        data.RutaImagen = objLocalidadColaborador.ElementAt(0).Colaborador.ImagenPerfilId is null ? "" : objLocalidadColaborador.ElementAt(0).Colaborador.ImagenPerfil.RutaAcceso;
+        data.Marcacion = DateTime.Now;
+
+        return new ResponseType<CreateMarcacionResponseType>() { Message = resultMarcacion.Message, StatusCode = resultMarcacion.StatusCode, Data = data, Succeeded = resultMarcacion.Succeeded };
+    }
 
     public async Task<ResponseType<List<ConsultaRecursoType>>> ConsultarRecursos(Guid Identificacion, DateTime fechaDesde, DateTime fechaHasta, CancellationToken cancellationToken)
     {

@@ -80,6 +80,56 @@ namespace Workflow.Persistence.Repository.Biometria
             }
         }
 
+        public async Task<ResponseType<string>> AuthenticationFacialLastAsync(AuthenticationFacialLastRequest request)
+        {
+            try
+            {
+                nombreEnpoint = _config.GetSection("Luxand:FaceVerification").Get<string>();
+                uriEndPoint = string.Concat(apiBaseLuxand, nombreEnpoint);
+
+                using var client = new HttpClient();
+                client.DefaultRequestHeaders.Add("token", apiKeyLuxand ?? string.Empty);
+
+                #region Parametros archivo y nombre persona
+                //byte[] bytes = Convert.FromBase64String(request.Base64);
+
+                //Stream stream = new MemoryStream(bytes);
+
+                //var local = request.AdjuntoFiles[0].OpenReadStream();
+
+                using var multipartFormContent = new MultipartFormDataContent();
+                var fileStreamContent = new StreamContent(request.AdjuntoFiles.OpenReadStream());
+                //var fileStreamContent = new StreamContent(stream);
+                //fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue(string.Concat("image/", request.Extension));
+                //string.Concat(request.Nombre, ".", request.Extension
+
+                multipartFormContent.Add(fileStreamContent, name: "photo", fileName: request.AdjuntoFiles.FileName);
+                #endregion
+                //Consultamos los datos del colaborador
+                //var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(request.Identificacion));
+
+                var resLuxand = await client.PostAsync(string.Concat(uriEndPoint, "/", request.FacialPersonUid), multipartFormContent);
+
+                var responseType = resLuxand.Content.ReadFromJsonAsync<AuthenticationFacialResponseType>().Result;
+
+                if (responseType.Status == "success")
+                {
+                    if (responseType.Probability > 0.96)
+                        return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
+                    else
+                        return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
+                }
+                else
+                    return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
+            }
+            catch (Exception ex)
+            {
+                _log.LogError(ex, string.Empty);
+                return new ResponseType<string>() { Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
+            }
+        }
+
+
         public async Task<ResponseType<string>> CreateFacePersonAsync(CreateFacePersonRequest request)
         {
             try

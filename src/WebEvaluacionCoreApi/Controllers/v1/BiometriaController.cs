@@ -58,5 +58,23 @@ namespace WebEvaluacionCoreApi.Controllers.v1
             var objResult = await Mediator.Send(new AuthenticationFacialCommand(biometriaRequest), cancellationToken);
             return Ok(objResult);
         }
+
+
+        [HttpPost("AutenticacionFacialPersonaLast")]
+        [EnableCors("AllowOrigin")]
+        //[AllowAnonymous]
+        [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> AutenticacionFacialPersonaLast([FromForm] AuthenticationFacialLastRequest biometriaRequest, CancellationToken cancellationToken)
+        {
+
+            var objResult = await Mediator.Send(new AuthenticationFacialLastCommand(biometriaRequest), cancellationToken);
+            return Ok(objResult);
+        }
+
+
+
+
+
+
     }
 }
