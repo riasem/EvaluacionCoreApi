@@ -201,7 +201,8 @@ public class MarcacionService : IMarcacion
             Base64 = Request.Base64,
             Extension = Request.Extension,
             FacialPersonUid = objLocalidadColaborador.ElementAt(0).Colaborador.FacialPersonId.ToString(),
-            Nombre = Request.Nombre
+            Nombre = Request.Nombre,
+            Identificacion = Request.Identificacion
         };
         ResponseType<string> resultBiometria = await _repoBiometriaAsync.AuthenticationFacialAsync(requestFacial);
 
@@ -247,7 +248,8 @@ public class MarcacionService : IMarcacion
         {
 
             FacialPersonUid = objLocalidadColaborador.ElementAt(0).Colaborador.FacialPersonId.ToString(),
-            AdjuntoFiles = Request.Adjunto
+            AdjuntoFiles = Request.Adjunto,
+            Identificacion = Request.Identificacion
 
         };
         ResponseType<string> resultBiometria = await _repoBiometriaAsync.AuthenticationFacialLastAsync(requestFacial);

@@ -41,4 +41,11 @@
     <Folder Include="Configurations\Seguridad\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="FaceSDK.NET">
+      <HintPath>..\WebEvaluacionCoreApi\FaceSDK.NET.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
 </Project>
