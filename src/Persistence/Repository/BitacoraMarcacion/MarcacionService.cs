@@ -204,7 +204,7 @@ public class MarcacionService : IMarcacion
             Nombre = Request.Nombre,
             Identificacion = Request.Identificacion
         };
-        ResponseType<string> resultBiometria = await _repoBiometriaAsync.AuthenticationFacialAsync(requestFacial);
+        ResponseType<string> resultBiometria = await _repoBiometriaAsync.AuthenticationFacialAsync(requestFacial,IdentificacionSesion);
 
         if (resultBiometria.StatusCode != "100") return new ResponseType<CreateMarcacionResponseType>() { Message = resultBiometria.Message, StatusCode = resultBiometria.StatusCode, Succeeded = resultBiometria.Succeeded };
 
@@ -479,7 +479,7 @@ public class MarcacionService : IMarcacion
                     FacialPersonUid = colaborador.FacialPersonId.ToString(),
                 };
 
-                var respAuth = await _repoBiometriaAsync.AuthenticationFacialAsync(objAuth);
+                var respAuth = await _repoBiometriaAsync.AuthenticationFacialAsync(objAuth, Request.IdentificacionJefe);
 
                 if (!respAuth.Succeeded)
                     return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = respAuth.Message, StatusCode = "101", Succeeded = false };

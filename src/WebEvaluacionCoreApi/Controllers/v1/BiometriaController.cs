@@ -5,6 +5,7 @@ using EvaluacionCore.Application.Features.Biometria.Commands.GetFaceVerification
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace WebEvaluacionCoreApi.Controllers.v1
 {
@@ -55,7 +56,9 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status200OK)]
         public async Task<IActionResult> AutenticacionFacialPersona(AuthenticationFacialRequest biometriaRequest, CancellationToken cancellationToken)
         {
-            var objResult = await Mediator.Send(new AuthenticationFacialCommand(biometriaRequest), cancellationToken);
+            var Identificacion = new JwtSecurityToken(HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
+
+            var objResult = await Mediator.Send(new AuthenticationFacialCommand(biometriaRequest,Identificacion), cancellationToken);
             return Ok(objResult);
         }
 
