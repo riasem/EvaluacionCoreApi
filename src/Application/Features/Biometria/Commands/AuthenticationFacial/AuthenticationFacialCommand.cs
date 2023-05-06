@@ -5,7 +5,7 @@ using MediatR;
 
 namespace EvaluacionCore.Application.Features.Biometria.Commands.AuthenticationFacial
 {
-    public record AuthenticationFacialCommand(AuthenticationFacialRequest BiometriaRequest,string IdentificacionSesion) : IRequest<ResponseType<string>>;
+    public record AuthenticationFacialCommand(AuthenticationFacialRequest BiometriaRequest) : IRequest<ResponseType<string>>;
 
     public class AuthenticationFacialCommandHandler : IRequestHandler<AuthenticationFacialCommand, ResponseType<string>>
     {
@@ -20,7 +20,7 @@ namespace EvaluacionCore.Application.Features.Biometria.Commands.AuthenticationF
         {
             try
             {
-                var objResult = await _repoBiometriaAsync.AuthenticationFacialAsync(request.BiometriaRequest, request.IdentificacionSesion);
+                var objResult = await _repoBiometriaAsync.AuthenticationFacialAsync(request.BiometriaRequest);
 
                 return objResult;
             }
