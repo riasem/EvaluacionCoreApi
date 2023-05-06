@@ -21,22 +21,89 @@ namespace Workflow.Persistence.Repository.Biometria
         private readonly IConfiguration _config;
         private readonly ILogger<BiometriaService> _log;
         private readonly IRepositoryAsync<Cliente> _repoCliente;
+        private readonly IRepositoryAsync<CargoEje> _repoCargoEje;
         private readonly string apiKeyLuxand = string.Empty;
         private readonly string apiBaseLuxand = string.Empty;
         private string nombreEnpoint = string.Empty;
         private string uriEndPoint = string.Empty;
 
-        public BiometriaService(IConfiguration config, ILogger<BiometriaService> log, IRepositoryAsync<Cliente> repoCliente)
+        public BiometriaService(IConfiguration config, ILogger<BiometriaService> log, IRepositoryAsync<Cliente> repoCliente, IRepositoryAsync<CargoEje> repoCargoEje)
         {
             _log = log;
             _config = config;
             _repoCliente = repoCliente;
             apiBaseLuxand = _config.GetSection("Luxand:ApiBase").Get<string>();
             apiKeyLuxand = _config.GetSection("Luxand:ApiKey").Get<string>();
+            _repoCargoEje = repoCargoEje;
         }
 
-        public async Task<ResponseType<string>> AuthenticationFacialAsync(AuthenticationFacialRequest request)
+        public async Task<ResponseType<string>> AuthenticationFacialAsync(AuthenticationFacialRequest request, string IdentificacionSesion)
         {
+
+            var identSesion = await _repoCargoEje.FirstOrDefaultAsync(new GetEjeByIdentificacionSpec(IdentificacionSesion));
+
+            if (identSesion is not null && identSesion.ApiLuxand)
+            {
+                #region Autenticación con SDK Comentado
+
+
+                try
+                {
+
+                    #region Parametros archivo y nombre persona
+                    byte[] bytes = Convert.FromBase64String(request.Base64);
+                    var rutaBase = _config.GetSection("Adjuntos:RutaBase").Get<string>();
+                    var directorio = rutaBase + "temp/";
+                    if (!Directory.Exists(directorio))
+                    {
+                        Directory.CreateDirectory(directorio);
+                    }
+                    var rutafinal = directorio + "imagen." + request.Extension;
+                    await File.WriteAllBytesAsync(rutafinal, bytes);
+                    #endregion
+
+                    #region Luxand
+                    FSDK.ActivateLibrary("ITP46F7LrqUL03MbPpqoxAQ3QhzK6ABcKMPz/FmBnvEPDMyZy6mYtrEgyNe3vk3h55QtpOr+ANaQYG6GMy3PNJmfmjTuwI9r3+ioyOBlb/mPgCdEkM1MXwogISqCSuKwGUvr9gPpPHZmTZyjjFMSowuiBrigIOvjtU50vh/LwaI=");
+                    FSDK.InitializeLibrary();
+                    var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(request.Identificacion));
+                    if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
+
+                    FSDK.CImage imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
+                    FSDK.CImage image = new FSDK.CImage(rutafinal); // Imagen enviada
+
+                    File.Delete(rutafinal);
+
+                    byte[] template = new byte[FSDK.TemplateSize];
+                    byte[] templateImgCola = new byte[FSDK.TemplateSize];
+                    FSDK.TFacePosition facePosition = new FSDK.TFacePosition();
+                    FSDK.TFacePosition facePositionCola = new FSDK.TFacePosition();
+                    facePosition = image.DetectFace();
+                    facePositionCola = imageCola.DetectFace();
+                    template = image.GetFaceTemplateInRegion(ref facePosition);
+                    templateImgCola = imageCola.GetFaceTemplateInRegion(ref facePositionCola);
+
+                    float Similarity = 0.0f;
+
+                    FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
+                    #endregion
+
+                    if (Similarity >= 0.96)
+                    {
+                        return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
+                    }
+                    else
+                    {
+                        return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    _log.LogError(ex, string.Empty);
+                    return new ResponseType<string>() { Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
+                }
+                #endregion
+            }
 
             try
             {
@@ -83,70 +150,7 @@ namespace Workflow.Persistence.Repository.Biometria
 
 
 
-            #region Autenticación con SDK Comentado
-
-
-            //try
-            //{
-            //    nombreEnpoint = _config.GetSection("Luxand:FaceVerification").Get<string>();
-            //    uriEndPoint = string.Concat(apiBaseLuxand, nombreEnpoint);
-
-            //    using var client = new HttpClient();
-            //    client.DefaultRequestHeaders.Add("token", apiKeyLuxand ?? string.Empty);
-
-            //    #region Parametros archivo y nombre persona
-            //    byte[] bytes = Convert.FromBase64String(request.Base64);
-            //    var rutaBase = _config.GetSection("Adjuntos:RutaBase").Get<string>();
-            //    var directorio = rutaBase + "temp/";
-            //    if (!Directory.Exists(directorio))
-            //    {
-            //        Directory.CreateDirectory(directorio);
-            //    }
-            //    var rutafinal = directorio + "imagen."+request.Extension;
-            //    await File.WriteAllBytesAsync(rutafinal, bytes);
-            //    #endregion
-
-            //    #region Luxand
-            //    FSDK.ActivateLibrary("aK4rAKMCHRmlWrZoR36CfwHj+nGoV3O75HmPUDj0QLlutgwJ7IkJfOXVpSDlyaBhu+4nowm120626ilmjXkoPjDmU6sOtWSvdT2zKnjjVduRhmaFv487DMH/YwIJaAbVMQxwE4ukpLBpd8alT+HbkRrbCAVNJYNrs7qi3srdsCw=");
-            //    FSDK.InitializeLibrary();
-            //    var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(request.Identificacion));
-            //    if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
-
-            //    FSDK.CImage imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
-            //    FSDK.CImage image = new FSDK.CImage(rutafinal); // Imagen enviada
-
-            //    File.Delete(rutafinal);
-
-            //    byte[] template = new byte[FSDK.TemplateSize];
-            //    byte[] templateImgCola = new byte[FSDK.TemplateSize];
-            //    FSDK.TFacePosition facePosition = new FSDK.TFacePosition();
-            //    FSDK.TFacePosition facePositionCola = new FSDK.TFacePosition();
-            //    facePosition = image.DetectFace();
-            //    facePositionCola = imageCola.DetectFace();
-            //    template = image.GetFaceTemplateInRegion(ref facePosition);
-            //    templateImgCola = imageCola.GetFaceTemplateInRegion(ref facePositionCola);
-
-            //    float Similarity = 0.0f;
-
-            //    FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
-            //    #endregion
-
-            //    if (Similarity >= 0.96)
-            //    {
-            //        return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
-            //    }
-            //    else
-            //    {
-            //        return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
-            //    }
-
-            //}
-            //catch (Exception ex)
-            //{
-            //    _log.LogError(ex, string.Empty);
-            //    return new ResponseType<string>() { Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
-            //}
-            #endregion
+            
         }
 
         public async Task<ResponseType<string>> AuthenticationFacialLastAsync(AuthenticationFacialLastRequest request)
@@ -176,7 +180,7 @@ namespace Workflow.Persistence.Repository.Biometria
 
 
                 #region Luxand
-                FSDK.ActivateLibrary("aK4rAKMCHRmlWrZoR36CfwHj+nGoV3O75HmPUDj0QLlutgwJ7IkJfOXVpSDlyaBhu+4nowm120626ilmjXkoPjDmU6sOtWSvdT2zKnjjVduRhmaFv487DMH/YwIJaAbVMQxwE4ukpLBpd8alT+HbkRrbCAVNJYNrs7qi3srdsCw=");
+                FSDK.ActivateLibrary("ITP46F7LrqUL03MbPpqoxAQ3QhzK6ABcKMPz/FmBnvEPDMyZy6mYtrEgyNe3vk3h55QtpOr+ANaQYG6GMy3PNJmfmjTuwI9r3+ioyOBlb/mPgCdEkM1MXwogISqCSuKwGUvr9gPpPHZmTZyjjFMSowuiBrigIOvjtU50vh/LwaI=");
                 FSDK.InitializeLibrary();
 
                 FSDK.CImage imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
