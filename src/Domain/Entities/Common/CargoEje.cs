@@ -40,10 +40,5 @@ namespace EvaluacionCore.Domain.Entities.Common
 
         [Column("deviceName", Order = 10, TypeName = "varchar")]
         public string DeviceName { get; set; }
-
-        [Column("apiLuxand", Order = 11, TypeName = "bit")]
-        public bool ApiLuxand { get; set; }
-
-
     }
 }
