@@ -46,10 +46,4 @@
     <None Remove="RazorEngineCore" />
     <None Remove="Plantillas\" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Update="FaceSDK.NET.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
 </Project>
