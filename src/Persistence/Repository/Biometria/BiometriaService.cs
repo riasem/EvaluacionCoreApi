@@ -63,7 +63,7 @@ namespace Workflow.Persistence.Repository.Biometria
                     #endregion
 
                     #region Luxand
-                    FSDK.ActivateLibrary("ITP46F7LrqUL03MbPpqoxAQ3QhzK6ABcKMPz/FmBnvEPDMyZy6mYtrEgyNe3vk3h55QtpOr+ANaQYG6GMy3PNJmfmjTuwI9r3+ioyOBlb/mPgCdEkM1MXwogISqCSuKwGUvr9gPpPHZmTZyjjFMSowuiBrigIOvjtU50vh/LwaI=");
+                    FSDK.ActivateLibrary("aTnuLhSRuOXFwOZq9IBWpBIQMF0RMoBI/gNFdS3aG3eNatqoJssib09CHdS/0OS4QCzTzH1dXYQvdyL6qmKnaiAEBMCSoK01AL0dNc33eczA2fi3v3hiHRShP3v9EtG+RG07m1oY++kAFB5qJYOs7WS1iVRkQbdK2LUCNJBUsO4=");
                     FSDK.InitializeLibrary();
                     var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(request.Identificacion));
                     if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
