@@ -87,7 +87,7 @@ namespace Workflow.Persistence.Repository.Biometria
                     FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
                     #endregion
 
-                    if (Similarity >= 0.96)
+                    if (Similarity >= 0.85)
                     {
                         return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
                     }

@@ -242,5 +242,24 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         }
 
 
+
+        //[HttpGet("GetListadoColaboradorByDispositivo")]
+        //[EnableCors("AllowOrigin")]
+        //[ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
+        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+        //public async Task<IActionResult> GetListadoColaboradorByDispositivo(string Identificacion ,CancellationToken cancellationToken)
+        //{
+        //    //var Identificacion = new JwtSecurityToken(HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
+
+        //    //var query = new CreateMarcacionAppLastCommand(request, Identificacion);
+        //    //var objResult = await Mediator.Send(query, cancellationToken);
+        //    //return Ok(objResult);
+        //}
+
+
+
+
+
+
     }
 }
