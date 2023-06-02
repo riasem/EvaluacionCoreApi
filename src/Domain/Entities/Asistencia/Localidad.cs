@@ -1,4 +1,5 @@
 ﻿using EvaluacionCore.Domain.Entities.Calendario;
+using EvaluacionCore.Domain.Entities.Organizacion;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -15,6 +16,7 @@ public class Localidad
     [Column("idEmpresa", Order = 1, TypeName = "uniqueidentifier")]
     public Guid IdEmpresa { get; set; }
     [Column("idCanton", TypeName = "uniqueidentifier")]
+    public virtual Empresa Empresa { get; set; }
     public Guid IdCanton { get; set; }
     public virtual Canton Canton { get; set; }
 

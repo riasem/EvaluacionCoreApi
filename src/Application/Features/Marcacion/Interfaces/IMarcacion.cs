@@ -1,6 +1,7 @@
 ﻿using EnrolApp.Application.Features.Marcacion.Commands.CreateMarcacion;
 using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionApp;
+using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionOffline;
 using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionWeb;
 using EvaluacionCore.Application.Features.Marcacion.Dto;
 
@@ -21,4 +22,9 @@ public interface IMarcacion
     Task<ResponseType<List<NovedadMarcacionType>>> ConsultaNovedadMarcacion(string Identificacion, string FiltroNovedades, DateTime FDesde, DateTime FHasta, CancellationToken cancellationToken);
     
     Task<ResponseType<List<NovedadMarcacionWebType>>> ConsultaNovedadMarcacionWeb(string Identificacion, string FiltroNovedades, DateTime FDesde, DateTime FHasta, CancellationToken cancellationToken);
+
+    Task<ResponseType<List<ColaboradorByLocalidadResponseType>>> ListadoColaboradorByLocalidad(string IdentificacionSesion, CancellationToken cancellationToken);
+
+    Task<ResponseType<string>> CreateMarcacionOffline (List<CreateMarcacionOfflineRequest> Request,string IdentificacionSesion, CancellationToken cancellationToken);
+
 }

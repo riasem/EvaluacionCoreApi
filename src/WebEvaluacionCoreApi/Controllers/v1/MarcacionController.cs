@@ -7,10 +7,13 @@ using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetBitacora
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetComboBitacoraMarcacion;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Dto;
 using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionApp;
+using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionOffline;
 using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionWeb;
 using EvaluacionCore.Application.Features.Marcacion.Commands.GetBitacoraMarcacion;
 using EvaluacionCore.Application.Features.Marcacion.Dto;
+using EvaluacionCore.Application.Features.Marcacion.Queries.GetListadoColaborador;
 using EvaluacionCore.Application.Features.Marcacion.Queries.GetRecurso;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
@@ -242,19 +245,44 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         }
 
 
+        /// <summary>
+        /// Listado de Colaboradores por Dispositivo Tablets
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpGet("GetListadoColaboradorByDispositivo")]
+        [EnableCors("AllowOrigin")]
+        [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetListadoColaboradorByDispositivo( CancellationToken cancellationToken)
+        {
+            var Identificacion = new JwtSecurityToken(HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
 
-        //[HttpGet("GetListadoColaboradorByDispositivo")]
-        //[EnableCors("AllowOrigin")]
-        //[ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
-        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
-        //public async Task<IActionResult> GetListadoColaboradorByDispositivo(string Identificacion ,CancellationToken cancellationToken)
-        //{
-        //    //var Identificacion = new JwtSecurityToken(HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
+            var query = new GetListadoColaboradorQueries(Identificacion);
+            var objResult = await Mediator.Send(query, cancellationToken);
+            return Ok(objResult);
+        }
 
-        //    //var query = new CreateMarcacionAppLastCommand(request, Identificacion);
-        //    //var objResult = await Mediator.Send(query, cancellationToken);
-        //    //return Ok(objResult);
-        //}
+
+
+        /// <summary>
+        /// Creación de marcaciones offline
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpPost("GenerarMarcacionOffline")]
+        [EnableCors("AllowOrigin")]
+        [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GenerarMarcacionOffline([FromBody] List<CreateMarcacionOfflineRequest> request, CancellationToken cancellationToken)
+        {
+            var Identificacion = new JwtSecurityToken(HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
+
+            var query = new CreateMarcacionOfflineCommand(request,Identificacion);
+            var objResult = await Mediator.Send(query, cancellationToken);
+            return Ok(objResult);
+        }
 
 
 

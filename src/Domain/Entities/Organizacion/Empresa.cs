@@ -1,4 +1,5 @@
 ﻿
+using EvaluacionCore.Domain.Entities.Asistencia;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -42,4 +43,6 @@ public class Empresa
 
     
     public virtual ICollection<Area> Areas { get; set; }
+
+    public virtual ICollection<Localidad> Localidades { get; set; }
 }

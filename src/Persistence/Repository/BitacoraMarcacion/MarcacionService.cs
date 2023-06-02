@@ -1,5 +1,6 @@
 ﻿
 using Ardalis.Specification;
+using AutoMapper;
 using Dapper;
 using EnrolApp.Application.Features.Marcacion.Commands.CreateMarcacion;
 using EnrolApp.Application.Features.Marcacion.Specifications;
@@ -14,6 +15,7 @@ using EvaluacionCore.Application.Features.Common.Specifications;
 using EvaluacionCore.Application.Features.EvalCore.Interfaces;
 using EvaluacionCore.Application.Features.Locacions.Specifications;
 using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionApp;
+using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionOffline;
 using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionWeb;
 using EvaluacionCore.Application.Features.Marcacion.Dto;
 using EvaluacionCore.Application.Features.Marcacion.Interfaces;
@@ -48,6 +50,7 @@ public class MarcacionService : IMarcacion
     private readonly IRepositoryAsync<LocalidadColaborador> _repoLocalColab;
     private readonly IConfiguration _config;
     private readonly IBiometria _repoBiometriaAsync;
+    private readonly IMapper _mapper;
 
     private readonly IRepositoryAsync<CargoEje> _repoEje;
     private readonly IEvaluacion _EvaluacionAsync;
@@ -62,7 +65,7 @@ public class MarcacionService : IMarcacion
         IRepositoryAsync<TurnoColaborador> repoTurnoCola, IConfiguration config, IRepositoryAsync<CargoEje> repoEje,
         IRepositoryAsync<MarcacionColaborador> repoMarcacionCola, IRepositoryGRiasemAsync<AccMonitorLog> repoMonitorLogAsync,
         IRepositoryAsync<Cliente> repoCliente, IRepositoryAsync<LocalidadColaborador> repoLocalColab,
-        IRepositoryGRiasemAsync<AccMonitoLogRiasem> repoMonitoLogRiasemAsync, IRepositoryGRiasemAsync<AlertasNovedadMarcacion> repoNovedadMarcacion, IBiometria repoBiometriaAsync, IRepositoryGRiasemAsync<Machines> repoMachinesAsync)
+        IRepositoryGRiasemAsync<AccMonitoLogRiasem> repoMonitoLogRiasemAsync, IRepositoryGRiasemAsync<AlertasNovedadMarcacion> repoNovedadMarcacion, IBiometria repoBiometriaAsync, IRepositoryGRiasemAsync<Machines> repoMachinesAsync,IMapper mapper)
     {
         _EvaluacionAsync = repository;
 
@@ -86,6 +89,7 @@ public class MarcacionService : IMarcacion
         _repositoryTurnoColAsync = repositoryTurnoCol;
         _repoEje = repoEje;
         _repoMachinesAsync = repoMachinesAsync;
+        _mapper = mapper;
     }
     public async Task<ResponseType<MarcacionResponseType>> CreateMarcacion(CreateMarcacionRequest Request, CancellationToken cancellationToken)
     {
@@ -812,6 +816,79 @@ public class MarcacionService : IMarcacion
             //insertar logs
         }
     }
+
+
+    public async Task<ResponseType<List<ColaboradorByLocalidadResponseType>>> ListadoColaboradorByLocalidad(string IdentificacionSesion, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var colaboradores = await _repoLocalColab.ListAsync(new GetListadoPersonalByLocalidadSpec(IdentificacionSesion), cancellationToken);
+
+            if (!colaboradores.Any()) return new ResponseType<List<ColaboradorByLocalidadResponseType>>() { Message = "No existen Colaboradores en la localidad", StatusCode = "001", Succeeded = true };
+
+            var result = _mapper.Map<List<ColaboradorByLocalidadResponseType>>(colaboradores);
+
+            return new ResponseType<List<ColaboradorByLocalidadResponseType>>() { Data = result, Message = CodeMessageResponse.GetMessageByCode("000"),Succeeded = true, StatusCode = "000"};
+        }
+        catch (Exception ex)
+        {
+
+            _log.LogError(ex, string.Empty);
+
+            return new ResponseType<List<ColaboradorByLocalidadResponseType>>() { Message = CodeMessageResponse.GetMessageByCode("002"), StatusCode = "002", Succeeded = false};
+        }
+
+    }
+
+
+    public async Task<ResponseType<string>> CreateMarcacionOffline(List<CreateMarcacionOfflineRequest> Request,string IdentificacionSesion, CancellationToken cancellationToken)
+    {
+        try
+        {
+            MarcacionResponseType objResultFinal = new();
+
+            var deviceId = 999;
+            var deviceName = "EnrolApp";
+
+            var objUserSesion = await _repoEje.FirstOrDefaultAsync(new GetEjeByIdentificacionSpec(IdentificacionSesion));
+            if (objUserSesion != null)
+            {
+                var objMachines = await _repoMachinesAsync.GetByIdAsync(objUserSesion.DeviceId);
+                deviceId = objMachines.ID;
+                deviceName = objMachines.MachineAlias;
+            }
+
+            List<AccMonitorLog> accMonitorLog = new();
+
+            Request.ForEach(x => accMonitorLog.Add(new AccMonitorLog()
+            {
+                State = 0,
+                Time = x.Time,
+                Pin = x.CodigoBiometrico,
+                Device_Id = deviceId,
+                Verified = 0,
+                Device_Name = deviceName,
+                Status = 1,
+                Create_Time = DateTime.Now
+            }));
+
+            var objResultado = await _repoMonitorLogAsync.AddRangeAsync(accMonitorLog,cancellationToken);
+
+            if (!objResultado.Any())
+            {
+                return new ResponseType<string>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
+            }
+
+            return new ResponseType<string>() { Message = "Marcaciónes Offline registradas correctamente", StatusCode = "100", Succeeded = true };
+        }
+        catch (Exception ex)
+        {
+            _log.LogError(ex, string.Empty);
+            return new ResponseType<string>() { Message = CodeMessageResponse.GetMessageByCode("102"), StatusCode = "102", Succeeded = false };
+
+        }
+    }
+
 
     private string EvaluaTipoSolicitud(Guid? idFeature)
     {

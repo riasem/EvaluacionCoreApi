@@ -10,6 +10,7 @@ namespace WebEvaluacionCoreApi.Controllers;
 [Route("api/v{version:apiVersion}/[controller]")]
 [Produces("application/json")]
 [Authorize]
+
 public abstract class ApiControllerBase : ControllerBase
 {
     private IMediator _mediator = null!;
