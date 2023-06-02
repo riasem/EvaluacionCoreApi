@@ -21,5 +21,6 @@ RUN dotnet publish "WebEvaluacionCoreApi.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
+COPY ["src/WebEvaluacionCoreApi/libfacesdk.so","./"]
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "WebEvaluacionCoreApi.dll"]

@@ -43,7 +43,7 @@ public class MappingProfile : Profile
         CreateMap<ColaboradorByLocalidadResponseType, LocalidadColaborador>().ReverseMap()
             .ForMember(des => des.Identificacion,opt => opt.MapFrom(src => src.Colaborador.Identificacion))
             .ForMember(des => des.Empleado, opt => opt.MapFrom(src => (src.Colaborador.Nombres + " " +src.Colaborador.Apellidos)))
-            .ForMember(des => des.RutaImagen, opt => opt.MapFrom(src => "https://imagenes.enrolapp.ec/" + src.Colaborador.ImagenPerfil.RutaAcceso))
+            .ForMember(des => des.RutaImagen, opt => opt.MapFrom(src => string.IsNullOrEmpty(src.Colaborador.ImagenPerfil.RutaAcceso) ? "" : "https://imagenes.enrolapp.ec/" + src.Colaborador.ImagenPerfil.RutaAcceso  ))
             .ForMember(des => des.NombreUdn, opt => opt.MapFrom(src => src.Localidad.Empresa.RazonSocial))
             .ForMember(des => des.CodigoUdn, opt => opt.MapFrom(src => src.Localidad.Empresa.Codigo))
             .ForMember(des => des.CodigoBiometrico, opt => opt.MapFrom(src => src.Colaborador.CodigoConvivencia));
