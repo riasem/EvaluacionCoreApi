@@ -869,15 +869,33 @@ public class MarcacionService : IMarcacion
                 Verified = 0,
                 Device_Name = deviceName,
                 Status = 1,
+                Description = "OS",
                 Create_Time = DateTime.Now
             }));
 
             var objResultado = await _repoMonitorLogAsync.AddRangeAsync(accMonitorLog,cancellationToken);
 
+
+
             if (!objResultado.Any())
             {
                 return new ResponseType<string>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
             }
+            #region Inicio de Reproceso de marcaciones offline
+
+            foreach (var marc in objResultado)
+            {
+                var identificacion = Request.Find(x => x.CodigoBiometrico == marc.Pin).Identificacion;
+
+                string query = "EXEC [dbo].[EAPP_SP_REPROCESA_MARCACIONES_OFFLINE] NULL, NULL, NULL, '" + marc.Time.Date.ToString("yyyy/MM/dd HH:mm:ss") + "' , '" + marc.Time.ToString("yyyy/MM/dd HH:mm:ss") + "',  '"+ identificacion + "';";
+                using IDbConnection con = new SqlConnection(ConnectionString_Marc);
+                if (con.State == ConnectionState.Closed) con.Open();
+                con.Query(query);
+                if (con.State == ConnectionState.Open) con.Close();
+       
+            }
+            #endregion
+
 
             return new ResponseType<string>() { Message = "Marcaciónes Offline registradas correctamente", StatusCode = "100", Succeeded = true };
         }
