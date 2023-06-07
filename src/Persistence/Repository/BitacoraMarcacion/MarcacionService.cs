@@ -843,7 +843,7 @@ public class MarcacionService : IMarcacion
     }
 
 
-    public async Task<ResponseType<string>> CreateMarcacionOffline(List<CreateMarcacionOfflineRequest> Request,string IdentificacionSesion, CancellationToken cancellationToken)
+    public async Task<ResponseType<string>> CreateMarcacionOffline(CreateMarcacionOfflineRequest Request,string IdentificacionSesion, CancellationToken cancellationToken)
     {
         try
         {
@@ -860,84 +860,70 @@ public class MarcacionService : IMarcacion
                 deviceName = objMachines.MachineAlias;
             }
 
-            List<AccMonitorLog> accMonitorLog = new();
-
-            Request.ForEach(async delegate (CreateMarcacionOfflineRequest request)
+            AccMonitorLog accMonitorLog = new()
             {
-                accMonitorLog.Add(new AccMonitorLog()
-                {
-                    State = 0,
-                    Time = request.Time,
-                    Pin = request.CodigoBiometrico,
-                    Device_Id = deviceId,
-                    Verified = 0,
-                    Device_Name = deviceName,
-                    Status = 1,
-                    Description = "OS",
-                    Create_Time = DateTime.Now
-                });
-
-                #region Conversion de Archivo
-                byte[] fileByte = await File.ReadAllBytesAsync(request.Imagen.FileName);
-
-
-                #endregion
-
-
-            });
+                State = 0,
+                Time = Request.Time,
+                Pin = Request.CodigoBiometrico,
+                Device_Id = deviceId,
+                Verified = 0,
+                Device_Name = deviceName,
+                Status = 1,
+                Description = "OS",
+                Create_Time = DateTime.Now
+            };
 
 
 
+            var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
 
-            //Request.ForEach(x => accMonitorLog.Add(new AccMonitorLog()
-            //{
-            //    State = 0,
-            //    Time = x.Time,
-            //    Pin = x.CodigoBiometrico,
-            //    Device_Id = deviceId,
-            //    Verified = 0,
-            //    Device_Name = deviceName,
-            //    Status = 1,
-            //    Description = "OS",
-            //    Create_Time = DateTime.Now
-            //}));
+            if (objResultado is null)
+            {
+                return new ResponseType<string>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
+            }
+            #region Conversion de Archivo
 
+            var rutaBase = _config.GetSection("Adjuntos:RutaBase").Get<string>();
+            var directorio = rutaBase + "marcacionOffline/";
+            if (!Directory.Exists(directorio))
+            {
+                Directory.CreateDirectory(directorio);
+            }
+            
+            
+            string nombreFile = objResultado.Time.Year.ToString() + "-" + objResultado.Time.Month.ToString() + "-" + objResultado.Time.Day.ToString() + "-" + objResultado.Time.Hour.ToString() + "-" + objResultado.Time.Minute.ToString() + "-" + objResultado.Time.Second.ToString();
 
+            var rutaFinal = directorio +  nombreFile+"-"+ objResultado.Pin.ToString()+"-"+ objResultado.Id.ToString()+ Path.GetExtension(Request.Imagen.FileName);
 
+            using (var stream = System.IO.File.Create(rutaFinal))
+            {
+                await Request.Imagen.CopyToAsync(stream);
+            }
 
-            //MonitorLogFileOffline objFile = new()
-            //{
-            //    FilePerfil = ,
-            //    IdMonito = 15
-            //};
+            #endregion
 
+            //Guardamos en tabla offline
 
-            //var result = await _repoMonitorLogFileAsync.AddAsync(objFile);
+            MonitorLogFileOffline objFile = new()
+            {
+                Id = Guid.NewGuid(),
+                MonitorId = objResultado.Id.ToString(),
+                RutaImagen = rutaFinal,
+                EstadoValidacion = false,
+                EstadoReconocimiento = "PENDIENTE"
+            };
 
+            var result = await _repoMonitorLogFileAsync.AddAsync(objFile);
 
-            //var objResultado = await _repoMonitorLogAsync.AddRangeAsync(accMonitorLog,cancellationToken);
+            #region Inicio de Reproceso de marcaciones offline
 
-
-
-            //if (!objResultado.Any())
-            //{
-            //    return new ResponseType<string>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
-            //}
-            //#region Inicio de Reproceso de marcaciones offline
-
-            //foreach (var marc in objResultado)
-            //{
-            //    var identificacion = Request.Find(x => x.CodigoBiometrico == marc.Pin).Identificacion;
-
-            //    string query = "EXEC [dbo].[EAPP_SP_REPROCESA_MARCACIONES_OFFLINE] NULL, NULL, NULL, '" + marc.Time.Date.ToString("yyyy/MM/dd HH:mm:ss") + "' , '" + marc.Time.ToString("yyyy/MM/dd HH:mm:ss") + "',  '"+ identificacion + "';";
-            //    using IDbConnection con = new SqlConnection(ConnectionString_Marc);
-            //    if (con.State == ConnectionState.Closed) con.Open();
-            //    con.Query(query);
-            //    if (con.State == ConnectionState.Open) con.Close();
-
-            //}
-            //#endregion
-
+            string query = "EXEC [dbo].[EAPP_SP_REPROCESA_MARCACIONES_OFFLINE] NULL, NULL, NULL, '" + objResultado.Time.Date.ToString("yyyy/MM/dd HH:mm:ss") + "' , '" + objResultado.Time.ToString("yyyy/MM/dd HH:mm:ss") + "',  '" + Request.Identificacion + "';";
+            using IDbConnection con = new SqlConnection(ConnectionString_Marc);
+            if (con.State == ConnectionState.Closed) con.Open();
+            con.Query(query);
+            if (con.State == ConnectionState.Open) con.Close();
+            
+            #endregion
 
             return new ResponseType<string>() { Message = "Marcaciónes Offline registradas correctamente", StatusCode = "100", Succeeded = true };
         }

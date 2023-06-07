@@ -15,9 +15,15 @@ public class MonitorLogFileOffline
     [Column("id", TypeName = "uniqueidentifier")]
     public Guid Id { get; set; }
 
-    [Column("idMonito", TypeName = "int")]
-    public int IdMonito { get; set; }
+    [Column("monitorId", TypeName = "varchar")]
+    public string MonitorId { get; set; }
 
-    [Column("filePerfil", TypeName = "image")]
-    public byte[] FilePerfil { get; set; }
+    [Column("rutaImagen", TypeName = "varchar")]
+    public string RutaImagen { get; set; }
+
+    [Column("estadoValidacion", TypeName ="bit")]
+    public bool EstadoValidacion { get; set; }
+
+    [Column("estadoReconocimiento", TypeName = "varchar")]
+    public string EstadoReconocimiento { get; set; }
 }

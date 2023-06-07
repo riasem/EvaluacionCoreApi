@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionOffline;
 
-public record CreateMarcacionOfflineCommand(List<CreateMarcacionOfflineRequest> RequestOfflineMarca,string IdentificacionSesion) : IRequest<ResponseType<string>>;
+public record CreateMarcacionOfflineCommand(CreateMarcacionOfflineRequest RequestOfflineMarca,string IdentificacionSesion) : IRequest<ResponseType<string>>;
 public class CreateMarcacionOfflineCommandHandler : IRequestHandler<CreateMarcacionOfflineCommand, ResponseType<string>>
 {
     private readonly IMarcacion _repository;

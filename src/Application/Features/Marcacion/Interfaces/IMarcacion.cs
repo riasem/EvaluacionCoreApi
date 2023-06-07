@@ -25,6 +25,6 @@ public interface IMarcacion
 
     Task<ResponseType<List<ColaboradorByLocalidadResponseType>>> ListadoColaboradorByLocalidad(string IdentificacionSesion, CancellationToken cancellationToken);
 
-    Task<ResponseType<string>> CreateMarcacionOffline (List<CreateMarcacionOfflineRequest> Request,string IdentificacionSesion, CancellationToken cancellationToken);
+    Task<ResponseType<string>> CreateMarcacionOffline (CreateMarcacionOfflineRequest Request,string IdentificacionSesion, CancellationToken cancellationToken);
 
 }
