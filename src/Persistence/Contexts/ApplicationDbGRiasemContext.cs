@@ -16,6 +16,8 @@ namespace EvaluacionCore.Persistence.Contexts
         public DbSet<CheckInOut> CheckInOut { get; set; }
         public DbSet<UserInfo> UserInfo { get; set; }
 
+        public DbSet<MonitorLogFileOffline> MonitorLogFileOffline { get; set; }
+
         public DbSet<AccMonitorLog> AccMonitorLog { get; set; }
         public DbSet<AccMonitoLogRiasem> AccMonitoLogRiasem { get; set; }
         public DbSet<ControlAsistenciaCab> ControlAsistenciaCab { get; set; }
@@ -28,6 +30,8 @@ namespace EvaluacionCore.Persistence.Contexts
         public DbSet<ControlAsistenciaNovedad_V> ControlAsistenciaNovedadV { get; set; }
         public DbSet<ControlAsistenciaSolicitudes_V> ControlAsistenciaSolicitudesV { get; set; }
         public DbSet<Machines> Machines { get; set; }
+
+
         
 
 

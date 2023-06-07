@@ -40,6 +40,7 @@ public class MarcacionService : IMarcacion
     private readonly IRepositoryGRiasemAsync<Machines> _repoMachinesAsync;
     private readonly IRepositoryGRiasemAsync<CheckInOut> _repoCheckInOutAsync;
     private readonly IRepositoryGRiasemAsync<AccMonitorLog> _repoMonitorLogAsync;
+    private readonly IRepositoryGRiasemAsync<MonitorLogFileOffline> _repoMonitorLogFileAsync;
     private readonly IRepositoryGRiasemAsync<AccMonitoLogRiasem> _repoMonitoLogRiasemAsync;
     private readonly IRepositoryGRiasemAsync<AlertasNovedadMarcacion> _repoNovedadMarcacion;
     private readonly IRepositoryAsync<TurnoColaborador> _repositoryTurnoColAsync;
@@ -65,7 +66,7 @@ public class MarcacionService : IMarcacion
         IRepositoryAsync<TurnoColaborador> repoTurnoCola, IConfiguration config, IRepositoryAsync<CargoEje> repoEje,
         IRepositoryAsync<MarcacionColaborador> repoMarcacionCola, IRepositoryGRiasemAsync<AccMonitorLog> repoMonitorLogAsync,
         IRepositoryAsync<Cliente> repoCliente, IRepositoryAsync<LocalidadColaborador> repoLocalColab,
-        IRepositoryGRiasemAsync<AccMonitoLogRiasem> repoMonitoLogRiasemAsync, IRepositoryGRiasemAsync<AlertasNovedadMarcacion> repoNovedadMarcacion, IBiometria repoBiometriaAsync, IRepositoryGRiasemAsync<Machines> repoMachinesAsync,IMapper mapper)
+        IRepositoryGRiasemAsync<AccMonitoLogRiasem> repoMonitoLogRiasemAsync, IRepositoryGRiasemAsync<AlertasNovedadMarcacion> repoNovedadMarcacion, IBiometria repoBiometriaAsync, IRepositoryGRiasemAsync<Machines> repoMachinesAsync,IMapper mapper, IRepositoryGRiasemAsync<MonitorLogFileOffline> repoMonitorLogFileAsync)
     {
         _EvaluacionAsync = repository;
 
@@ -90,6 +91,7 @@ public class MarcacionService : IMarcacion
         _repoEje = repoEje;
         _repoMachinesAsync = repoMachinesAsync;
         _mapper = mapper;
+        _repoMonitorLogFileAsync = repoMonitorLogFileAsync;
     }
     public async Task<ResponseType<MarcacionResponseType>> CreateMarcacion(CreateMarcacionRequest Request, CancellationToken cancellationToken)
     {
@@ -860,41 +862,81 @@ public class MarcacionService : IMarcacion
 
             List<AccMonitorLog> accMonitorLog = new();
 
-            Request.ForEach(x => accMonitorLog.Add(new AccMonitorLog()
+            Request.ForEach(async delegate (CreateMarcacionOfflineRequest request)
             {
-                State = 0,
-                Time = x.Time,
-                Pin = x.CodigoBiometrico,
-                Device_Id = deviceId,
-                Verified = 0,
-                Device_Name = deviceName,
-                Status = 1,
-                Description = "OS",
-                Create_Time = DateTime.Now
-            }));
+                accMonitorLog.Add(new AccMonitorLog()
+                {
+                    State = 0,
+                    Time = request.Time,
+                    Pin = request.CodigoBiometrico,
+                    Device_Id = deviceId,
+                    Verified = 0,
+                    Device_Name = deviceName,
+                    Status = 1,
+                    Description = "OS",
+                    Create_Time = DateTime.Now
+                });
 
-            var objResultado = await _repoMonitorLogAsync.AddRangeAsync(accMonitorLog,cancellationToken);
+                #region Conversion de Archivo
+                byte[] fileByte = await File.ReadAllBytesAsync(request.Imagen.FileName);
+
+
+                #endregion
+
+
+            });
 
 
 
-            if (!objResultado.Any())
-            {
-                return new ResponseType<string>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
-            }
-            #region Inicio de Reproceso de marcaciones offline
 
-            foreach (var marc in objResultado)
-            {
-                var identificacion = Request.Find(x => x.CodigoBiometrico == marc.Pin).Identificacion;
+            //Request.ForEach(x => accMonitorLog.Add(new AccMonitorLog()
+            //{
+            //    State = 0,
+            //    Time = x.Time,
+            //    Pin = x.CodigoBiometrico,
+            //    Device_Id = deviceId,
+            //    Verified = 0,
+            //    Device_Name = deviceName,
+            //    Status = 1,
+            //    Description = "OS",
+            //    Create_Time = DateTime.Now
+            //}));
 
-                string query = "EXEC [dbo].[EAPP_SP_REPROCESA_MARCACIONES_OFFLINE] NULL, NULL, NULL, '" + marc.Time.Date.ToString("yyyy/MM/dd HH:mm:ss") + "' , '" + marc.Time.ToString("yyyy/MM/dd HH:mm:ss") + "',  '"+ identificacion + "';";
-                using IDbConnection con = new SqlConnection(ConnectionString_Marc);
-                if (con.State == ConnectionState.Closed) con.Open();
-                con.Query(query);
-                if (con.State == ConnectionState.Open) con.Close();
-       
-            }
-            #endregion
+
+
+
+            //MonitorLogFileOffline objFile = new()
+            //{
+            //    FilePerfil = ,
+            //    IdMonito = 15
+            //};
+
+
+            //var result = await _repoMonitorLogFileAsync.AddAsync(objFile);
+
+
+            //var objResultado = await _repoMonitorLogAsync.AddRangeAsync(accMonitorLog,cancellationToken);
+
+
+
+            //if (!objResultado.Any())
+            //{
+            //    return new ResponseType<string>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
+            //}
+            //#region Inicio de Reproceso de marcaciones offline
+
+            //foreach (var marc in objResultado)
+            //{
+            //    var identificacion = Request.Find(x => x.CodigoBiometrico == marc.Pin).Identificacion;
+
+            //    string query = "EXEC [dbo].[EAPP_SP_REPROCESA_MARCACIONES_OFFLINE] NULL, NULL, NULL, '" + marc.Time.Date.ToString("yyyy/MM/dd HH:mm:ss") + "' , '" + marc.Time.ToString("yyyy/MM/dd HH:mm:ss") + "',  '"+ identificacion + "';";
+            //    using IDbConnection con = new SqlConnection(ConnectionString_Marc);
+            //    if (con.State == ConnectionState.Closed) con.Open();
+            //    con.Query(query);
+            //    if (con.State == ConnectionState.Open) con.Close();
+
+            //}
+            //#endregion
 
 
             return new ResponseType<string>() { Message = "Marcaciónes Offline registradas correctamente", StatusCode = "100", Succeeded = true };

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,5 +14,7 @@ public class CreateMarcacionOfflineRequest
     public DateTime Time { get; set; }
 
     public string CodigoBiometrico { get; set; }
+
+    public IFormFile Imagen { get; set; }
 
 }
