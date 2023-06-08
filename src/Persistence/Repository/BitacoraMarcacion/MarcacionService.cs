@@ -827,10 +827,11 @@ public class MarcacionService : IMarcacion
             var colaboradores = await _repoLocalColab.ListAsync(new GetListadoPersonalByLocalidadSpec(IdentificacionSesion), cancellationToken);
 
             if (!colaboradores.Any()) return new ResponseType<List<ColaboradorByLocalidadResponseType>>() { Message = "No existen Colaboradores en la localidad", StatusCode = "001", Succeeded = true };
+            colaboradores = colaboradores.DistinctBy(x => x.Colaborador.Identificacion).ToList();
 
             var result = _mapper.Map<List<ColaboradorByLocalidadResponseType>>(colaboradores);
 
-            return new ResponseType<List<ColaboradorByLocalidadResponseType>>() { Data = result, Message = CodeMessageResponse.GetMessageByCode("000"),Succeeded = true, StatusCode = "000"};
+            return new ResponseType<List<ColaboradorByLocalidadResponseType>>() { Data = result.OrderBy(x => x.Identificacion).ToList(), Message = CodeMessageResponse.GetMessageByCode("000"),Succeeded = true, StatusCode = "000"};
         }
         catch (Exception ex)
         {
