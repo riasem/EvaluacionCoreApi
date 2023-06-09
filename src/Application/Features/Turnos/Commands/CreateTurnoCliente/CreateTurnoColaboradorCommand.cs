@@ -84,93 +84,118 @@ public class CreateTurnoColaboradorCommandHandler : IRequestHandler<CreateTurnoC
                     //Consulta de Días Feriados
                     var objCliente = await _repoCliente.GetByIdAsync(item.IdCliente);
                     var diasferiados = await _repoCalendario.GetDiasFeriadosByIdentificacion(objCliente.Identificacion, fechaDesde.AddDays(i));
-                    if (diasferiados.Data != null)
+                    if (difFechas.Days == 0)
                     {
-                        var uidTurnoFeriado = _config.GetSection("TurnosUid:Feriado").Get<string>();
-
                         TurnoColaborador objClient = new()
                         {
                             Id = Guid.NewGuid(),
                             Estado = "A",
                             UsuarioCreacion = "SYSTEM",
-                            IdTurno = Guid.Parse(uidTurnoFeriado),
+                            IdTurno = request.TurnoRequest.IdTurno,
                             IdColaborador = item.IdCliente,
                             FechaAsignacion = fechaDesde.AddDays(i)
                         };
 
                         turnos.Add(objClient);
 
-                    }else
-                    {
-                        //Asignacion del turno escogido y subturno en caso de escogerlo
-                        var diaSemana = (int)fechaDesde.AddDays(i).DayOfWeek;
-
-                        if (diaSemana != 6 && diaSemana != 0)
+                        if (item.Subturnos.Count > 0 && subturnoAsignado == false)
                         {
+                            foreach (var item2 in item.Subturnos)
+                            {
+                                TurnoColaborador objClient2 = new()
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Estado = "A",
+                                    UsuarioCreacion = "SYSTEM",
+                                    IdTurno = item2.IdSubturno,
+                                    IdColaborador = item.IdCliente,
+                                    FechaAsignacion = fechaDesde.AddDays(i)
+                                };
+
+                                subturnos.Add(objClient2);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (diasferiados.Data != null)
+                        {
+                            var uidTurnoFeriado = _config.GetSection("TurnosUid:Feriado").Get<string>();
+
                             TurnoColaborador objClient = new()
                             {
                                 Id = Guid.NewGuid(),
                                 Estado = "A",
                                 UsuarioCreacion = "SYSTEM",
-                                IdTurno = request.TurnoRequest.IdTurno,
+                                IdTurno = Guid.Parse(uidTurnoFeriado),
                                 IdColaborador = item.IdCliente,
                                 FechaAsignacion = fechaDesde.AddDays(i)
                             };
 
                             turnos.Add(objClient);
 
-                            if (item.Subturnos.Count > 0 && subturnoAsignado == false)
-                            {
-                                foreach (var item2 in item.Subturnos)
-                                {
-                                    TurnoColaborador objClient2 = new()
-                                    {
-                                        Id = Guid.NewGuid(),
-                                        Estado = "A",
-                                        UsuarioCreacion = "SYSTEM",
-                                        IdTurno = item2.IdSubturno,
-                                        IdColaborador = item.IdCliente,
-                                        FechaAsignacion = fechaDesde.AddDays(i)
-                                    };
-
-                                    subturnos.Add(objClient2);
-                                }
-                            }
                         }
                         else
                         {
-                            #region Asignacion de turnos fines de semana
-                            var uidLibre = _config.GetSection("TurnosUid:Libre").Get<string>();
+                            //Asignacion del turno escogido y subturno en caso de escogerlo
+                            var diaSemana = (int)fechaDesde.AddDays(i).DayOfWeek;
 
-                            TurnoColaborador objClient = new()
+                            if (diaSemana != 6 && diaSemana != 0)
                             {
-                                Id = Guid.NewGuid(),
-                                Estado = "A",
-                                UsuarioCreacion = "SYSTEM",
-                                IdTurno = Guid.Parse(uidLibre),
-                                IdColaborador = item.IdCliente,
-                                FechaAsignacion = fechaDesde.AddDays(i)
-                            };
+                                TurnoColaborador objClient = new()
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Estado = "A",
+                                    UsuarioCreacion = "SYSTEM",
+                                    IdTurno = request.TurnoRequest.IdTurno,
+                                    IdColaborador = item.IdCliente,
+                                    FechaAsignacion = fechaDesde.AddDays(i)
+                                };
 
-                            turnos.Add(objClient);
+                                turnos.Add(objClient);
 
-                            #endregion
+                                if (item.Subturnos.Count > 0 && subturnoAsignado == false)
+                                {
+                                    foreach (var item2 in item.Subturnos)
+                                    {
+                                        TurnoColaborador objClient2 = new()
+                                        {
+                                            Id = Guid.NewGuid(),
+                                            Estado = "A",
+                                            UsuarioCreacion = "SYSTEM",
+                                            IdTurno = item2.IdSubturno,
+                                            IdColaborador = item.IdCliente,
+                                            FechaAsignacion = fechaDesde.AddDays(i)
+                                        };
 
+                                        subturnos.Add(objClient2);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                #region Asignacion de turnos fines de semana
+                                var uidLibre = _config.GetSection("TurnosUid:Libre").Get<string>();
+
+                                TurnoColaborador objClient = new()
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Estado = "A",
+                                    UsuarioCreacion = "SYSTEM",
+                                    IdTurno = Guid.Parse(uidLibre),
+                                    IdColaborador = item.IdCliente,
+                                    FechaAsignacion = fechaDesde.AddDays(i)
+                                };
+
+                                turnos.Add(objClient);
+
+                                #endregion
+
+                            }
                         }
                     }
-                    //if (subturno != null)
-                    //{
-                    //    TurnoColaborador objSubturno = new()
-                    //    {
-                    //        Id = Guid.NewGuid(),
-                    //        Estado = "A",
-                    //        UsuarioCreacion = "SYSTEM",
-                    //        IdTurno = subturno.Id,
-                    //        IdColaborador = item.IdCliente,
-                    //        FechaAsignacion = fechaDesde.AddDays(i)
-                    //    };
-                    //    turnos.Add(objSubturno);
-                    //}
+                    
+
                 }
             }
 

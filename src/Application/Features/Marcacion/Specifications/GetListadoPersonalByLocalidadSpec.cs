@@ -12,7 +12,7 @@ public class GetListadoPersonalByLocalidadSpec : Specification<LocalidadColabora
 {
     public GetListadoPersonalByLocalidadSpec(string Identificacion)
     {
-        Query.Where(p => p.Localidad.LocalidadColaboradores.Where(x => x.Colaborador.Identificacion == Identificacion).Any() && p.Estado == "A")
+        Query.Where(p => p.Localidad.LocalidadColaboradores.Where(x => x.Colaborador.Identificacion == Identificacion).Any() && p.Estado == "A" && p.Localidad.Estado == "A")
             .Include(p => p.Colaborador)
             .ThenInclude(p => p.ImagenPerfil)
             .Include(p => p.Localidad.Empresa)

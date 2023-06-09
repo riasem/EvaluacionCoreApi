@@ -860,6 +860,9 @@ public class MarcacionService : IMarcacion
                 deviceId = objMachines.ID;
                 deviceName = objMachines.MachineAlias;
             }
+            //Validacion con SDK
+
+            //Evaluacion de respuesta de Autenticacion
 
             AccMonitorLog accMonitorLog = new()
             {
@@ -874,14 +877,13 @@ public class MarcacionService : IMarcacion
                 Create_Time = DateTime.Now
             };
 
-
-
             var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
 
             if (objResultado is null)
             {
                 return new ResponseType<string>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
             }
+
             #region Conversion de Archivo
 
             var rutaBase = _config.GetSection("Adjuntos:RutaBase").Get<string>();
@@ -912,6 +914,7 @@ public class MarcacionService : IMarcacion
                 RutaImagen = rutaFinal,
                 EstadoValidacion = false,
                 EstadoReconocimiento = "PENDIENTE"
+                //fecha de registro
             };
 
             var result = await _repoMonitorLogFileAsync.AddAsync(objFile);
@@ -926,7 +929,7 @@ public class MarcacionService : IMarcacion
             
             #endregion
 
-            return new ResponseType<string>() { Message = "Marcaciónes Offline registradas correctamente", StatusCode = "100", Succeeded = true };
+            return new ResponseType<string>() { Message = "Marcación Offline registrada correctamente", StatusCode = "100", Succeeded = true };
         }
         catch (Exception ex)
         {
