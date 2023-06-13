@@ -17,12 +17,6 @@ public class GetListadoPersonalByLocalidadSpec : Specification<LocalidadColabora
             .ThenInclude(p => p.ImagenPerfil)
             .Include(p => p.Localidad.Empresa)
             .OrderBy(p => p.Colaborador.Identificacion);
-            
-            //.ThenInclude(p => p.Areas.Where(p => p.EmpresaId == p.Empresa.Id ))
-            //.ThenInclude(p => p.Departamentos)
-            //.ThenInclude(p => p.Cargos);
-
-        
 
     }
 }

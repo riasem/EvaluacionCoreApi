@@ -24,6 +24,7 @@ using EvaluacionCore.Application.Features.Turnos.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using EvaluacionCore.Domain.Entities.Common;
 using EvaluacionCore.Domain.Entities.Marcaciones;
+using Luxand;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -860,29 +861,6 @@ public class MarcacionService : IMarcacion
                 deviceId = objMachines.ID;
                 deviceName = objMachines.MachineAlias;
             }
-            //Validacion con SDK
-
-            //Evaluacion de respuesta de Autenticacion
-
-            AccMonitorLog accMonitorLog = new()
-            {
-                State = 0,
-                Time = Request.Time,
-                Pin = Request.CodigoBiometrico,
-                Device_Id = deviceId,
-                Verified = 0,
-                Device_Name = deviceName,
-                Status = 1,
-                Description = "OS",
-                Create_Time = DateTime.Now
-            };
-
-            var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
-
-            if (objResultado is null)
-            {
-                return new ResponseType<string>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
-            }
 
             #region Conversion de Archivo
 
@@ -894,9 +872,9 @@ public class MarcacionService : IMarcacion
             }
             
             
-            string nombreFile = objResultado.Time.Year.ToString() + "-" + objResultado.Time.Month.ToString() + "-" + objResultado.Time.Day.ToString() + "-" + objResultado.Time.Hour.ToString() + "-" + objResultado.Time.Minute.ToString() + "-" + objResultado.Time.Second.ToString();
+            string nombreFile = DateTime.Now.Year.ToString() + "-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString() + "-" + DateTime.Now.Hour.ToString() + "-" + DateTime.Now.Minute.ToString() + "-" + DateTime.Now.Second.ToString();
 
-            var rutaFinal = directorio +  nombreFile+"-"+ objResultado.Pin.ToString()+"-"+ objResultado.Id.ToString()+ Path.GetExtension(Request.Imagen.FileName);
+            var rutaFinal = directorio +  nombreFile+"-"+ Request.CodigoBiometrico.ToString() + Path.GetExtension(Request.Imagen.FileName);
 
             using (var stream = System.IO.File.Create(rutaFinal))
             {
@@ -905,29 +883,96 @@ public class MarcacionService : IMarcacion
 
             #endregion
 
-            //Guardamos en tabla offline
+            bool estadoValid = false;
+
+            #region Validacion con el SDK
+
+            FSDK.ActivateLibrary("aTnuLhSRuOXFwOZq9IBWpBIQMF0RMoBI/gNFdS3aG3eNatqoJssib09CHdS/0OS4QCzTzH1dXYQvdyL6qmKnaiAEBMCSoK01AL0dNc33eczA2fi3v3hiHRShP3v9EtG+RG07m1oY++kAFB5qJYOs7WS1iVRkQbdK2LUCNJBUsO4=");
+            FSDK.InitializeLibrary();
+            var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Request.Identificacion));
+            if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
+
+            FSDK.CImage imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
+            FSDK.CImage image = new FSDK.CImage(rutaFinal); // Imagen enviada
+
+            //File.Delete(rutaFinal);
+
+            byte[] template = new byte[FSDK.TemplateSize];
+            byte[] templateImgCola = new byte[FSDK.TemplateSize];
+            FSDK.TFacePosition facePosition = new FSDK.TFacePosition();
+            FSDK.TFacePosition facePositionCola = new FSDK.TFacePosition();
+            facePosition = image.DetectFace();
+            facePositionCola = imageCola.DetectFace();
+            template = image.GetFaceTemplateInRegion(ref facePosition);
+            templateImgCola = imageCola.GetFaceTemplateInRegion(ref facePositionCola);
+
+            estadoValid = true;
+
+            float Similarity = 0.0f;
+
+            FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
+
+            string respMonitorId;
+            
+            string estadoRecono = "PENDIENTE";
+
+            if (Similarity >= 0.85)
+            {
+                estadoRecono = "CORRECTO";
+                AccMonitorLog accMonitorLog = new()
+                {
+                    State = 0,
+                    Time = Request.Time,
+                    Pin = Request.CodigoBiometrico,
+                    Device_Id = deviceId,
+                    Verified = 0,
+                    Device_Name = deviceName,
+                    Status = 1,
+                    Description = "OS",
+                    Create_Time = DateTime.Now
+                };
+
+                var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
+                
+                if (objResultado is null)
+                {
+                    return new ResponseType<string>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
+                }
+                respMonitorId = objResultado.Id.ToString();
+
+                #region Inicio de Reproceso de marcaciones offline
+
+                string query = "EXEC [dbo].[EAPP_SP_REPROCESA_MARCACIONES_OFFLINE] NULL, NULL, NULL, '" + Request.Time.Date.ToString("yyyy/MM/dd HH:mm:ss") + "' , '" + Request.Time.ToString("yyyy/MM/dd HH:mm:ss") + "',  '" + Request.Identificacion + "';";
+                using IDbConnection con = new SqlConnection(ConnectionString_Marc);
+                if (con.State == ConnectionState.Closed) con.Open();
+                con.Query(query);
+                if (con.State == ConnectionState.Open) con.Close();
+
+                #endregion
+
+
+            }
+            else
+            {
+                estadoRecono = "Novedad " + (Similarity * 100) + "% de Similitud." ;
+                respMonitorId = null;
+            }
+
+            #endregion
 
             MonitorLogFileOffline objFile = new()
             {
                 Id = Guid.NewGuid(),
-                MonitorId = objResultado.Id.ToString(),
+                MonitorId = respMonitorId,
                 RutaImagen = rutaFinal,
-                EstadoValidacion = false,
-                EstadoReconocimiento = "PENDIENTE"
-                //fecha de registro
+                EstadoValidacion = estadoValid,
+                EstadoReconocimiento = estadoRecono,
+                FechaRegistro = DateTime.Now
             };
 
             var result = await _repoMonitorLogFileAsync.AddAsync(objFile);
 
-            #region Inicio de Reproceso de marcaciones offline
 
-            string query = "EXEC [dbo].[EAPP_SP_REPROCESA_MARCACIONES_OFFLINE] NULL, NULL, NULL, '" + objResultado.Time.Date.ToString("yyyy/MM/dd HH:mm:ss") + "' , '" + objResultado.Time.ToString("yyyy/MM/dd HH:mm:ss") + "',  '" + Request.Identificacion + "';";
-            using IDbConnection con = new SqlConnection(ConnectionString_Marc);
-            if (con.State == ConnectionState.Closed) con.Open();
-            con.Query(query);
-            if (con.State == ConnectionState.Open) con.Close();
-            
-            #endregion
 
             return new ResponseType<string>() { Message = "Marcación Offline registrada correctamente", StatusCode = "100", Succeeded = true };
         }

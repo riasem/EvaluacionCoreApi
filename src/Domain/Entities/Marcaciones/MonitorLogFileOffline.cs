@@ -26,4 +26,9 @@ public class MonitorLogFileOffline
 
     [Column("estadoReconocimiento", TypeName = "varchar")]
     public string EstadoReconocimiento { get; set; }
+
+    [Column("fechaRegistro",TypeName = "datetime2")]
+    public DateTime FechaRegistro { get; set; }
+
+
 }

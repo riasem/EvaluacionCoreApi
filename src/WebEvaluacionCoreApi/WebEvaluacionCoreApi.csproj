@@ -12,9 +12,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Archivos\**" />
     <Compile Remove="FilesDocsTmp\**" />
+    <Content Remove="Archivos\**" />
     <Content Remove="FilesDocsTmp\**" />
+    <EmbeddedResource Remove="Archivos\**" />
     <EmbeddedResource Remove="FilesDocsTmp\**" />
+    <None Remove="Archivos\**" />
     <None Remove="FilesDocsTmp\**" />
   </ItemGroup>
 
