@@ -266,7 +266,7 @@ namespace WebEvaluacionCoreApi.Controllers.v1
 
 
         /// <summary>
-        /// Creación de marcaciones offline
+        /// Creación de marcaciones offline con autenticación 
         /// </summary>
         /// <param name="request"></param>
         /// <param name="cancellationToken"></param>
