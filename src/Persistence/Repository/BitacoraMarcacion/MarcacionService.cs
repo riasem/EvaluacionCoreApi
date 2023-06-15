@@ -967,7 +967,10 @@ public class MarcacionService : IMarcacion
                 RutaImagen = rutaFinal,
                 EstadoValidacion = estadoValid,
                 EstadoReconocimiento = estadoRecono,
-                FechaRegistro = DateTime.Now
+                FechaRegistro = DateTime.Now,
+                Identificacion = Request.Identificacion,
+                Time = Request.Time
+                
             };
 
             var result = await _repoMonitorLogFileAsync.AddAsync(objFile);
@@ -982,6 +985,49 @@ public class MarcacionService : IMarcacion
             return new ResponseType<string>() { Message = CodeMessageResponse.GetMessageByCode("102"), StatusCode = "102", Succeeded = false };
 
         }
+    }
+
+    public async Task<ResponseType<List<NovedadesMarcacionOfflineResponse>>> NovedadesMaracionOffline(string Identificacion, DateTime? FechaDesde, DateTime? FechaHasta, string IdentificacionSesion, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var lstMarcaNovedad = await _repoMonitorLogFileAsync.ListAsync(new NovedadesMarcacionOfflineSpec(Identificacion, FechaDesde, FechaHasta), cancellationToken);
+
+            if (!lstMarcaNovedad.Any())
+            {
+                return new ResponseType<List<NovedadesMarcacionOfflineResponse>> { Message = "No existen Marcaciones Offline con novedad", StatusCode = "001", Succeeded = true };
+            }
+            List<NovedadesMarcacionOfflineResponse> objResult = new();
+
+            foreach (var value in lstMarcaNovedad)
+            {
+                var objColab = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(value.Identificacion));
+
+                objResult.Add(new NovedadesMarcacionOfflineResponse
+                {
+                    Empleado = objColab.Nombres + " " + objColab.Apellidos,
+                    Identificacion = value.Identificacion,
+                    Time = value.Time,
+                    ImagenColaborador = objColab.ImagenPerfil.RutaAcceso,
+                    estadoReconocimiento = value.EstadoReconocimiento,
+                    estadoValidacion = value.EstadoValidacion,
+                    ImagenMarcacion = value.RutaImagen
+
+                });
+            }
+
+            return new ResponseType<List<NovedadesMarcacionOfflineResponse>>() { Data = objResult, Message = CodeMessageResponse.GetMessageByCode("000"), StatusCode = "000", Succeeded = true };
+        }
+        catch (Exception ex)
+        {
+            _log.LogError(ex, string.Empty);
+            return new ResponseType<List<NovedadesMarcacionOfflineResponse>>() { Message = CodeMessageResponse.GetMessageByCode("002"), StatusCode = "002", Succeeded = false };
+
+        }
+        
+
+
+
     }
 
 

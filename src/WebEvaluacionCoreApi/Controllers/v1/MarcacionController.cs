@@ -12,6 +12,7 @@ using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionWeb;
 using EvaluacionCore.Application.Features.Marcacion.Commands.GetBitacoraMarcacion;
 using EvaluacionCore.Application.Features.Marcacion.Dto;
 using EvaluacionCore.Application.Features.Marcacion.Queries.GetListadoColaborador;
+using EvaluacionCore.Application.Features.Marcacion.Queries.GetNovedadesMarcacionOffline;
 using EvaluacionCore.Application.Features.Marcacion.Queries.GetRecurso;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -284,6 +285,23 @@ namespace WebEvaluacionCoreApi.Controllers.v1
             var objResult = await Mediator.Send(query, cancellationToken);
             return Ok(objResult);
         }
+
+
+
+        [HttpGet("GetNovedadesMarcacionOffline")]
+        [EnableCors("AllowOrigin")]
+        [ProducesResponseType(typeof(ResponseType<List<NovedadesMarcacionOfflineResponse>>), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetNovedadesMarcacionOffline(string? identificacion, DateTime? fechaDesde, DateTime? fechaHasta, CancellationToken cancellationToken)
+        {
+            var IdentificacionSesion = new JwtSecurityToken(HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
+
+            var query = new GetNovedadesMarcacionOfflineQueries(identificacion,fechaDesde,fechaHasta, IdentificacionSesion);
+            var objResult = await Mediator.Send(query, cancellationToken);
+            return Ok(objResult);
+        }
+
+
 
 
 

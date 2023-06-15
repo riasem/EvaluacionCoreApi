@@ -27,4 +27,6 @@ public interface IMarcacion
 
     Task<ResponseType<string>> CreateMarcacionOffline (CreateMarcacionOfflineRequest Request,string IdentificacionSesion, CancellationToken cancellationToken);
 
+    Task<ResponseType<List<NovedadesMarcacionOfflineResponse>>> NovedadesMaracionOffline(string Identificacion, DateTime? FechaDesde, DateTime? FechasHasta, string IdentificacionSesion, CancellationToken cancellationToken);
+
 }
