@@ -276,7 +276,7 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         [EnableCors("AllowOrigin")]
         [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GenerarMarcacionOffline([FromForm] CreateMarcacionOfflineRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> GenerarMarcacionOffline([FromBody] CreateMarcacionOfflineRequest request, CancellationToken cancellationToken)
         {
             
             var Identificacion = new JwtSecurityToken(HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;

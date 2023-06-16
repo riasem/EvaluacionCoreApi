@@ -862,10 +862,14 @@ public class MarcacionService : IMarcacion
                 deviceName = objMachines.MachineAlias;
             }
 
+
+
             #region Conversion de Archivo
 
+            byte[] bytes = Convert.FromBase64String(Request.Imagen);
             var rutaBase = _config.GetSection("Adjuntos:RutaBase").Get<string>();
             var directorio = rutaBase + "marcacionOffline/";
+
             if (!Directory.Exists(directorio))
             {
                 Directory.CreateDirectory(directorio);
@@ -874,12 +878,13 @@ public class MarcacionService : IMarcacion
             
             string nombreFile = DateTime.Now.Year.ToString() + "-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString() + "-" + DateTime.Now.Hour.ToString() + "-" + DateTime.Now.Minute.ToString() + "-" + DateTime.Now.Second.ToString();
 
-            var rutaFinal = directorio +  nombreFile+"-"+ Request.CodigoBiometrico.ToString() + Path.GetExtension(Request.Imagen.FileName);
+            var rutaFinal = directorio +  nombreFile+"-"+ Request.CodigoBiometrico.ToString() + Request.Extension;
 
-            using (var stream = System.IO.File.Create(rutaFinal))
-            {
-                await Request.Imagen.CopyToAsync(stream);
-            }
+            await File.WriteAllBytesAsync(rutaFinal, bytes);
+            //using (var stream = System.IO.File.Create(rutaFinal))
+            //{
+            //    await Request.Imagen.CopyToAsync(stream);
+            //}
 
             #endregion
 
@@ -954,7 +959,7 @@ public class MarcacionService : IMarcacion
             }
             else
             {
-                estadoRecono = "Novedad " + (Similarity * 100) + "% de Similitud." ;
+                estadoRecono = "Novedad " + Math.Round((Similarity * 100),0) + "% de Similitud." ;
                 respMonitorId = null;
             }
 

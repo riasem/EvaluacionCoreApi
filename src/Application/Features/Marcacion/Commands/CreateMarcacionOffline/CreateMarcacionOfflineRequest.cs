@@ -20,6 +20,12 @@ public class CreateMarcacionOfflineRequest
     public string CodigoBiometrico { get; set; }
 
     [JsonPropertyName("imagen")]
-    public IFormFile Imagen { get; set; }
+    public string Imagen { get; set; }
+
+    [JsonPropertyName("extension")]
+    public string Extension { get; set; }
+
+    //[JsonPropertyName("imagen")]
+    //public IFormFile Imagen { get; set; }
 
 }
