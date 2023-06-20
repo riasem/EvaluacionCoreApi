@@ -31,9 +31,12 @@ namespace EvaluacionCore.Persistence.Contexts
         public DbSet<ControlAsistenciaSolicitudes_V> ControlAsistenciaSolicitudesV { get; set; }
         public DbSet<Machines> Machines { get; set; }
 
+        public DbSet<AccLogMarcacionOffline> AccLogMarcacionOffline { get; set; }
 
 
-        
+
+
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) =>

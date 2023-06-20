@@ -1021,7 +1021,7 @@ public class MarcacionService : IMarcacion
                 });
             }
 
-            return new ResponseType<List<NovedadesMarcacionOfflineResponse>>() { Data = objResult, Message = CodeMessageResponse.GetMessageByCode("000"), StatusCode = "000", Succeeded = true };
+            return new ResponseType<List<NovedadesMarcacionOfflineResponse>>() { Data = objResult.OrderByDescending(x => x.Time).ToList(), Message = CodeMessageResponse.GetMessageByCode("000"), StatusCode = "000", Succeeded = true };
         }
         catch (Exception ex)
         {

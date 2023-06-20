@@ -3,6 +3,7 @@ using EvaluacionCore.Application.Features.Localidads.Commands.AsignarLocalidadCl
 using EvaluacionCore.Application.Features.Localidads.Commands.CreateLocalidad;
 using EvaluacionCore.Application.Features.Localidads.Commands.UpdateLocalidad;
 using EvaluacionCore.Application.Features.Localidads.Dto;
+using EvaluacionCore.Application.Features.Marcacion.Commands.CreateCabeceraLog;
 using EvaluacionCore.Application.Features.Marcacion.Dto;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurno;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoColaborador;
@@ -11,6 +12,7 @@ using EvaluacionCore.Application.Features.Turnos.Commands.UpdateTurnoColaborador
 using EvaluacionCore.Application.Features.Turnos.Dto;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using EvaluacionCore.Domain.Entities.Common;
+using EvaluacionCore.Domain.Entities.Marcaciones;
 using Microsoft.Extensions.Configuration;
 using System.Reflection;
 
@@ -40,6 +42,7 @@ public class MappingProfile : Profile
         CreateMap<ColaboradorByLocalidadResponseType, Cliente>().ReverseMap();
         CreateMap<ColaboradorByLocalidadResponseType, Localidad>().ReverseMap();
         CreateMap<ColaboradorByLocalidadResponseType, Adjunto>().ReverseMap();
+        CreateMap<AccLogMarcacionOffline, CreateCabeceraLogRequest>().ReverseMap();
         CreateMap<ColaboradorByLocalidadResponseType, LocalidadColaborador>().ReverseMap()
             .ForMember(des => des.Identificacion,opt => opt.MapFrom(src => src.Colaborador.Identificacion))
             .ForMember(des => des.Empleado, opt => opt.MapFrom(src => (src.Colaborador.Nombres + " " +src.Colaborador.Apellidos)))

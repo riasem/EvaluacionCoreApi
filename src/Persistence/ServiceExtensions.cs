@@ -17,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Workflow.Persistence.Repository.Biometria;
 using Workflow.Persistence.Repository.Biometrico;
+using Workflow.Persistence.Repository.BitacoraMarcacion;
 using Workflow.Persistence.Repository.Calendario;
 using Workflow.Persistence.Repository.TurnosAsignadosExcel;
 
@@ -45,6 +46,7 @@ public static class ServiceExtensions
         services.AddTransient<IRecordatorio, RecordatorioService>();
         services.AddTransient<IBiometria, BiometriaService>();
         services.AddTransient<IBiometrico, BiometricoService>();
+        services.AddTransient<IMarcacionOffline, MarcacionOfflineService>();
 
         #endregion
         return services;
