@@ -34,7 +34,10 @@ public class MonitorLogFileOffline
     public string Identificacion { get; set; }
 
     [Column("time",TypeName = "datetime2")]
-    public DateTime Time { get; set; } 
+    public DateTime Time { get; set; }
+
+    [Column("usuarioCreacion",TypeName = "varchar")]
+    public string UsuarioCreacion { get; set; }
 
 
 }

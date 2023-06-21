@@ -973,9 +973,9 @@ public class MarcacionService : IMarcacion
                 EstadoValidacion = estadoValid,
                 EstadoReconocimiento = estadoRecono,
                 FechaRegistro = DateTime.Now,
+                UsuarioCreacion = IdentificacionSesion,
                 Identificacion = Request.Identificacion,
                 Time = Request.Time
-                
             };
 
             var result = await _repoMonitorLogFileAsync.AddAsync(objFile);
