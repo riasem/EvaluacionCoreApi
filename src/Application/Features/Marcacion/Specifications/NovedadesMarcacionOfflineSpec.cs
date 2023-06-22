@@ -3,22 +3,24 @@ using EvaluacionCore.Domain.Entities.Marcaciones;
 
 namespace EvaluacionCore.Application.Features.Marcacion.Specifications;
 
-public class NovedadesMarcacionOfflineSpec : Specification<MonitorLogFileOffline>
+public class NovedadesMarcacionOfflineSpec : Specification<MarcacionOffline>
 {
-    public NovedadesMarcacionOfflineSpec(string identificacion, DateTime? fechaDesde, DateTime? fechaHasta)
+    public NovedadesMarcacionOfflineSpec(string Colaborador, DateTime? fechaDesde, DateTime? fechaHasta,int? deviceId, string codUdn)
     {
-        if (fechaDesde == null && fechaHasta == null)
+        if (fechaDesde != null && fechaHasta != null)
         {
-            Query.Where(x => x.Identificacion == (string.IsNullOrEmpty(identificacion) ? x.Identificacion : identificacion) 
-            && x.EstadoReconocimiento != "CORRECTO");
+            Query.Where(p => string.IsNullOrEmpty(Colaborador) ? p.Identificacion == p.Identificacion : (p.Empleado.Contains(Colaborador) || p.Identificacion == Colaborador))
+          .Where(p => p.DeviceId == (deviceId == null ? p.DeviceId : deviceId))
+          .Where(p => p.CodUdn == (string.IsNullOrEmpty(codUdn) ? p.CodUdn : codUdn))
+          .Where(p => p.Time.Value.Date >= fechaDesde.Value.Date && p.Time.Value.Date <= fechaHasta.Value.Date);
         }
-        else if (fechaDesde != null && fechaHasta != null)
+        else
         {
-            Query.Where(x => x.Identificacion == (string.IsNullOrEmpty(identificacion) ? x.Identificacion : identificacion) &&
-            (x.Time.Date >= (fechaDesde == null ? x.Time.Date : fechaDesde.Value.Date)
-            && x.Time.Date <= (fechaHasta == null ? x.Time.Date : fechaHasta.Value.Date)) 
-            && x.EstadoReconocimiento != "CORRECTO");
+            Query.Where(p => string.IsNullOrEmpty(Colaborador) ? p.Identificacion == p.Identificacion : (p.Empleado.Contains(Colaborador) || p.Identificacion == Colaborador))
+                .Where(p => p.DeviceId == (deviceId == null ? p.DeviceId : deviceId))
+                .Where(p => p.CodUdn == (string.IsNullOrEmpty(codUdn) ? p.CodUdn : codUdn));
         }
+
     }
 
 }

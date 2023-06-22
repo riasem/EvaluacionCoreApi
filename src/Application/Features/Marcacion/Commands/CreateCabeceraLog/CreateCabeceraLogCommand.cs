@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace EvaluacionCore.Application.Features.Marcacion.Commands.CreateCabeceraLog;
 
-public record CreateCabeceraLogCommand(List<CreateCabeceraLogRequest> requestCabecera,string IdentificacionSesion) : IRequest<ResponseType<string>>;
+public record CreateCabeceraLogCommand(CreateCabeceraLogRequest requestCabecera,string IdentificacionSesion) : IRequest<ResponseType<string>>;
 public class CreateCabeceraLogCommandHandler : IRequestHandler<CreateCabeceraLogCommand, ResponseType<string>>
 {
     public IMarcacionOffline _repository;

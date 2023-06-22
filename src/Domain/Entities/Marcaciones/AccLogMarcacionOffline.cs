@@ -19,10 +19,10 @@ public class AccLogMarcacionOffline
 	public DateTime FechaSincronizacion { get; set; }
 
     [Column("fechaInicio",TypeName = "datetime2")]
-	public DateTime FechaInicio { get; set; }
+	public DateTime? FechaInicio { get; set; }
 
     [Column("fechaFin",TypeName = "datetime2")]
-	public DateTime FechaFin { get; set; }
+	public DateTime? FechaFin { get; set; }
 
     [Column("identificacionInicio",TypeName = "varchar")]
 	public string IdentificacionInicio { get; set; }
@@ -47,5 +47,8 @@ public class AccLogMarcacionOffline
 
     [Column("usuarioModificacion", TypeName = "varchar")]
 	public string UsuarioModificacion { get; set; }
+
+    [Column("estado", TypeName = "varchar")]
+	public string Estado { get; set; }
 
 }

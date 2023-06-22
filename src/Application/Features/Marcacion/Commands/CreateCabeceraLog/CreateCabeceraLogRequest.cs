@@ -10,15 +10,17 @@ public class CreateCabeceraLogRequest
 {
     public int TotalMarcacion { get; set; }
 
-    public DateTime FechaInicio { get; set; }
+    public DateTime? FechaInicio { get; set; }
 
     public string IdentificacionInicio { get; set; }
 
-    public DateTime FechaFin { get; set; }
+    public DateTime? FechaFin { get; set; }
 
     public string IdentificacionFin { get; set; }
 
     public DateTime FechaSincronizacion { get; set; }
+
+    public string Estado { get; set; }
 
 
 }

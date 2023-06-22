@@ -293,11 +293,11 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         [EnableCors("AllowOrigin")]
         [ProducesResponseType(typeof(ResponseType<List<NovedadesMarcacionOfflineResponse>>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetNovedadesMarcacionOffline(string? identificacion, DateTime? fechaDesde, DateTime? fechaHasta, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetNovedadesMarcacionOffline(string? CodUdn,string? identificacion, DateTime? fechaDesde, DateTime? fechaHasta,int? DeviceId, CancellationToken cancellationToken)
         {
             var IdentificacionSesion = new JwtSecurityToken(HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
 
-            var query = new GetNovedadesMarcacionOfflineQueries(identificacion,fechaDesde,fechaHasta, IdentificacionSesion);
+            var query = new GetNovedadesMarcacionOfflineQueries(CodUdn,identificacion,fechaDesde,fechaHasta,DeviceId, IdentificacionSesion);
             var objResult = await Mediator.Send(query, cancellationToken);
             return Ok(objResult);
         }
@@ -307,7 +307,7 @@ namespace WebEvaluacionCoreApi.Controllers.v1
         [EnableCors("AllowOrigin")]
         [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> LogCabeceraOffline([FromBody] List<CreateCabeceraLogRequest> request, CancellationToken cancellationToken)
+        public async Task<IActionResult> LogCabeceraOffline([FromBody] CreateCabeceraLogRequest request, CancellationToken cancellationToken)
         {
             var IdentificacionSesion = new JwtSecurityToken(HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
 

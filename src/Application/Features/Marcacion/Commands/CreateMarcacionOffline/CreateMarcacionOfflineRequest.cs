@@ -25,6 +25,12 @@ public class CreateMarcacionOfflineRequest
     [JsonPropertyName("extension")]
     public string Extension { get; set; }
 
+    [JsonPropertyName("idCabecera")]
+    public Guid IdCabecera { get; set; }
+
+    [JsonPropertyName("cantidadSincronizada")]
+    public int CantidadSincronizada { get; set; }
+
     //[JsonPropertyName("imagen")]
     //public IFormFile Imagen { get; set; }
 

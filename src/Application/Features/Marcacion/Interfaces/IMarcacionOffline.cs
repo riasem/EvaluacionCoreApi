@@ -10,5 +10,5 @@ namespace EvaluacionCore.Application.Features.Marcacion.Interfaces;
 
 public interface IMarcacionOffline
 {
-    Task<ResponseType<string>> CreateCabeceraLogOffline(List<CreateCabeceraLogRequest> Request, string IdentificacionSesion, CancellationToken cancellationToken);
+    Task<ResponseType<string>> CreateCabeceraLogOffline(CreateCabeceraLogRequest Request, string IdentificacionSesion, CancellationToken cancellationToken);
 }

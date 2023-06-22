@@ -9,6 +9,15 @@ namespace EvaluacionCore.Application.Features.Marcacion.Dto;
 
 public class NovedadesMarcacionOfflineResponse
 {
+    [JsonPropertyName("codUdn")]
+    public string CodUdn { get; set; }
+
+    [JsonPropertyName("desUdn")]
+    public string DesUdn { get; set; }
+
+    [JsonPropertyName("dispositivo")]
+    public string Dispositivo { get; set; }
+
     [JsonPropertyName("identificacion")]
     public string Identificacion { get; set; }
 

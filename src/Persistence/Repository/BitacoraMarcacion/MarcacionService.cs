@@ -43,6 +43,8 @@ public class MarcacionService : IMarcacion
     private readonly IRepositoryGRiasemAsync<AccMonitorLog> _repoMonitorLogAsync;
     private readonly IRepositoryGRiasemAsync<MonitorLogFileOffline> _repoMonitorLogFileAsync;
     private readonly IRepositoryGRiasemAsync<AccMonitoLogRiasem> _repoMonitoLogRiasemAsync;
+    private readonly IRepositoryGRiasemAsync<AccLogMarcacionOffline> _repoAccLogMarcacionAsync;
+
     private readonly IRepositoryGRiasemAsync<AlertasNovedadMarcacion> _repoNovedadMarcacion;
     private readonly IRepositoryAsync<TurnoColaborador> _repositoryTurnoColAsync;
     private readonly IRepositoryAsync<Localidad> _repoLocalidad;
@@ -50,6 +52,8 @@ public class MarcacionService : IMarcacion
     private readonly IRepositoryAsync<TurnoColaborador> _repoTurnoCola;
     private readonly IRepositoryAsync<MarcacionColaborador> _repoMarcacionCola;
     private readonly IRepositoryAsync<LocalidadColaborador> _repoLocalColab;
+    private readonly IRepositoryGRiasemAsync<MarcacionOffline> _repoMarcacionOffline;
+    
     private readonly IConfiguration _config;
     private readonly IBiometria _repoBiometriaAsync;
     private readonly IMapper _mapper;
@@ -67,7 +71,8 @@ public class MarcacionService : IMarcacion
         IRepositoryAsync<TurnoColaborador> repoTurnoCola, IConfiguration config, IRepositoryAsync<CargoEje> repoEje,
         IRepositoryAsync<MarcacionColaborador> repoMarcacionCola, IRepositoryGRiasemAsync<AccMonitorLog> repoMonitorLogAsync,
         IRepositoryAsync<Cliente> repoCliente, IRepositoryAsync<LocalidadColaborador> repoLocalColab,
-        IRepositoryGRiasemAsync<AccMonitoLogRiasem> repoMonitoLogRiasemAsync, IRepositoryGRiasemAsync<AlertasNovedadMarcacion> repoNovedadMarcacion, IBiometria repoBiometriaAsync, IRepositoryGRiasemAsync<Machines> repoMachinesAsync,IMapper mapper, IRepositoryGRiasemAsync<MonitorLogFileOffline> repoMonitorLogFileAsync)
+        IRepositoryGRiasemAsync<AccMonitoLogRiasem> repoMonitoLogRiasemAsync, IRepositoryGRiasemAsync<AlertasNovedadMarcacion> repoNovedadMarcacion, IBiometria repoBiometriaAsync, IRepositoryGRiasemAsync<Machines> repoMachinesAsync,IMapper mapper, IRepositoryGRiasemAsync<MonitorLogFileOffline> repoMonitorLogFileAsync,
+        IRepositoryGRiasemAsync<MarcacionOffline> repoMarcacionOffline, IRepositoryGRiasemAsync<AccLogMarcacionOffline> repoAccLogMarcacionAsync)
     {
         _EvaluacionAsync = repository;
 
@@ -77,6 +82,8 @@ public class MarcacionService : IMarcacion
         _config = config;
         _repoLocalidad = repoLocalidad;
         _log = log;
+        _repoAccLogMarcacionAsync = repoAccLogMarcacionAsync;
+        _repoMarcacionOffline = repoMarcacionOffline;
         _repoMarcacionCola = repoMarcacionCola;
         ConnectionString_Marc = _config.GetConnectionString("Bd_Marcaciones_GRIAMSE");
         Esquema = _config.GetSection("StoredProcedure:Esquema").Get<string>();
@@ -862,7 +869,21 @@ public class MarcacionService : IMarcacion
                 deviceName = objMachines.MachineAlias;
             }
 
+            #region Actualizar Sincronizadas
 
+            var objUpdateCabecera = await _repoAccLogMarcacionAsync.GetByIdAsync(Request.IdCabecera);
+            if (objUpdateCabecera is null)
+            {
+                return new ResponseType<string> { Message = "No se ha actualizado la cabecera", StatusCode = "101", Succeeded = true };
+            }
+            objUpdateCabecera.TotalSincronizadas = Request.CantidadSincronizada;
+            objUpdateCabecera.UsuarioModificacion = IdentificacionSesion;
+            objUpdateCabecera.FechaModificacion = DateTime.Now;
+
+            await _repoAccLogMarcacionAsync.UpdateAsync(objUpdateCabecera);
+
+
+            #endregion
 
             #region Conversion de Archivo
 
@@ -891,31 +912,36 @@ public class MarcacionService : IMarcacion
             bool estadoValid = false;
 
             #region Validacion con el SDK
-
-            FSDK.ActivateLibrary("aTnuLhSRuOXFwOZq9IBWpBIQMF0RMoBI/gNFdS3aG3eNatqoJssib09CHdS/0OS4QCzTzH1dXYQvdyL6qmKnaiAEBMCSoK01AL0dNc33eczA2fi3v3hiHRShP3v9EtG+RG07m1oY++kAFB5qJYOs7WS1iVRkQbdK2LUCNJBUsO4=");
-            FSDK.InitializeLibrary();
-            var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Request.Identificacion));
-            if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
-
-            FSDK.CImage imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
-            FSDK.CImage image = new FSDK.CImage(rutaFinal); // Imagen enviada
-
-            //File.Delete(rutaFinal);
-
-            byte[] template = new byte[FSDK.TemplateSize];
-            byte[] templateImgCola = new byte[FSDK.TemplateSize];
-            FSDK.TFacePosition facePosition = new FSDK.TFacePosition();
-            FSDK.TFacePosition facePositionCola = new FSDK.TFacePosition();
-            facePosition = image.DetectFace();
-            facePositionCola = imageCola.DetectFace();
-            template = image.GetFaceTemplateInRegion(ref facePosition);
-            templateImgCola = imageCola.GetFaceTemplateInRegion(ref facePositionCola);
-
-            estadoValid = true;
-
             float Similarity = 0.0f;
+            try
+            {
+                FSDK.ActivateLibrary("aTnuLhSRuOXFwOZq9IBWpBIQMF0RMoBI/gNFdS3aG3eNatqoJssib09CHdS/0OS4QCzTzH1dXYQvdyL6qmKnaiAEBMCSoK01AL0dNc33eczA2fi3v3hiHRShP3v9EtG+RG07m1oY++kAFB5qJYOs7WS1iVRkQbdK2LUCNJBUsO4=");
+                FSDK.InitializeLibrary();
+                var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Request.Identificacion));
+                if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
 
-            FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
+                FSDK.CImage imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
+                FSDK.CImage image = new FSDK.CImage(rutaFinal); // Imagen enviada
+
+                //File.Delete(rutaFinal);
+
+                byte[] template = new byte[FSDK.TemplateSize];
+                byte[] templateImgCola = new byte[FSDK.TemplateSize];
+                FSDK.TFacePosition facePosition = new FSDK.TFacePosition();
+                FSDK.TFacePosition facePositionCola = new FSDK.TFacePosition();
+                facePosition = image.DetectFace();
+                facePositionCola = imageCola.DetectFace();
+                template = image.GetFaceTemplateInRegion(ref facePosition);
+                templateImgCola = imageCola.GetFaceTemplateInRegion(ref facePositionCola);
+
+                FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
+                estadoValid = true;
+            }
+            catch (Exception)
+            {
+                estadoValid = false;
+                
+            }
 
             string respMonitorId;
             
@@ -978,6 +1004,10 @@ public class MarcacionService : IMarcacion
                 Time = Request.Time
             };
 
+
+
+
+
             var result = await _repoMonitorLogFileAsync.AddAsync(objFile);
 
 
@@ -992,36 +1022,18 @@ public class MarcacionService : IMarcacion
         }
     }
 
-    public async Task<ResponseType<List<NovedadesMarcacionOfflineResponse>>> NovedadesMaracionOffline(string Identificacion, DateTime? FechaDesde, DateTime? FechaHasta, string IdentificacionSesion, CancellationToken cancellationToken)
+    public async Task<ResponseType<List<NovedadesMarcacionOfflineResponse>>> NovedadesMaracionOffline(string CodUdn,string Identificacion, DateTime? FechaDesde, DateTime? FechaHasta,int? DevideId ,string IdentificacionSesion, CancellationToken cancellationToken)
     {
         try
         {
-            var lstMarcaNovedad = await _repoMonitorLogFileAsync.ListAsync(new NovedadesMarcacionOfflineSpec(Identificacion, FechaDesde, FechaHasta), cancellationToken);
 
-            if (!lstMarcaNovedad.Any())
-            {
-                return new ResponseType<List<NovedadesMarcacionOfflineResponse>> { Message = "No existen Marcaciones Offline con novedad", StatusCode = "001", Succeeded = true };
-            }
-            List<NovedadesMarcacionOfflineResponse> objResult = new();
+            var listMarcacionOff = await _repoMarcacionOffline.ListAsync(new NovedadesMarcacionOfflineSpec(Identificacion, FechaDesde, FechaHasta, DevideId, CodUdn));
 
-            foreach (var value in lstMarcaNovedad)
-            {
-                var objColab = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(value.Identificacion));
 
-                objResult.Add(new NovedadesMarcacionOfflineResponse
-                {
-                    Empleado = objColab.Nombres + " " + objColab.Apellidos,
-                    Identificacion = value.Identificacion,
-                    Time = value.Time,
-                    ImagenColaborador = objColab.ImagenPerfil.RutaAcceso,
-                    estadoReconocimiento = value.EstadoReconocimiento,
-                    estadoValidacion = value.EstadoValidacion,
-                    ImagenMarcacion = value.RutaImagen
+            var result = _mapper.Map<List<NovedadesMarcacionOfflineResponse>>(listMarcacionOff);
 
-                });
-            }
 
-            return new ResponseType<List<NovedadesMarcacionOfflineResponse>>() { Data = objResult.OrderByDescending(x => x.Time).ToList(), Message = CodeMessageResponse.GetMessageByCode("000"), StatusCode = "000", Succeeded = true };
+            return new ResponseType<List<NovedadesMarcacionOfflineResponse>>() { Data = result.OrderByDescending(x => x.Time).ToList(), Message = CodeMessageResponse.GetMessageByCode("000"), StatusCode = "000", Succeeded = true };
         }
         catch (Exception ex)
         {

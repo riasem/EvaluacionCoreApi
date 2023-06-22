@@ -31,20 +31,23 @@ public class MarcacionOfflineService : IMarcacionOffline
         _mapper = mapper;
     }
 
-    public async Task<ResponseType<string>> CreateCabeceraLogOffline(List<CreateCabeceraLogRequest> Request, string IdentificacionSesion, CancellationToken cancellationToken)
+    public async Task<ResponseType<string>> CreateCabeceraLogOffline(CreateCabeceraLogRequest Request, string IdentificacionSesion, CancellationToken cancellationToken)
     {
-        var lstCabeceraOffline = _mapper.Map<List<AccLogMarcacionOffline>>(Request);
+        var lstCabeceraOffline = _mapper.Map<AccLogMarcacionOffline>(Request);
 
-        lstCabeceraOffline.ForEach(item => { item.UsuarioCreacion = IdentificacionSesion; item.FechaCreacion = DateTime.Now; });
+        lstCabeceraOffline.UsuarioCreacion = IdentificacionSesion;
+        lstCabeceraOffline.FechaCreacion = DateTime.Now;
 
-        var result = await _repoLogMarcOffline.AddRangeAsync(lstCabeceraOffline,cancellationToken);
 
-        if (!result.Any())
+
+        var result = await _repoLogMarcOffline.AddAsync(lstCabeceraOffline,cancellationToken);
+
+        if (result is null)
         {
             return new ResponseType<string> { Message = CodeMessageResponse.GetMessageByCode("100", "Cabecera"), StatusCode = "101", Succeeded = true };
         }
 
-        return new ResponseType<string> { Message = CodeMessageResponse.GetMessageByCode("100", "Cabecera"), StatusCode = "100", Succeeded = true };
+        return new ResponseType<string> { Data = result.Id.ToString(), Message = CodeMessageResponse.GetMessageByCode("100", "Cabecera"), StatusCode = "100", Succeeded = true };
         
     }
 }

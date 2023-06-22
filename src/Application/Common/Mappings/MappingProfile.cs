@@ -43,6 +43,9 @@ public class MappingProfile : Profile
         CreateMap<ColaboradorByLocalidadResponseType, Localidad>().ReverseMap();
         CreateMap<ColaboradorByLocalidadResponseType, Adjunto>().ReverseMap();
         CreateMap<AccLogMarcacionOffline, CreateCabeceraLogRequest>().ReverseMap();
+
+        CreateMap<MarcacionOffline, NovedadesMarcacionOfflineResponse>().ReverseMap();
+
         CreateMap<ColaboradorByLocalidadResponseType, LocalidadColaborador>().ReverseMap()
             .ForMember(des => des.Identificacion,opt => opt.MapFrom(src => src.Colaborador.Identificacion))
             .ForMember(des => des.Empleado, opt => opt.MapFrom(src => (src.Colaborador.Nombres + " " +src.Colaborador.Apellidos)))
