@@ -302,7 +302,12 @@ namespace WebEvaluacionCoreApi.Controllers.v1
             return Ok(objResult);
         }
 
-
+        /// <summary>
+        /// Crear Cabecera de Log para marcaciones Offline
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpPost("CreateCabeceraLog")]
         [EnableCors("AllowOrigin")]
         [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]

@@ -15,6 +15,9 @@ public class NovedadesMarcacionOfflineResponse
     [JsonPropertyName("desUdn")]
     public string DesUdn { get; set; }
 
+    [JsonPropertyName("deviceId")]
+    public int? DeviceId { get; set; }
+
     [JsonPropertyName("dispositivo")]
     public string Dispositivo { get; set; }
 
