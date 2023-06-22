@@ -879,6 +879,16 @@ public class MarcacionService : IMarcacion
             objUpdateCabecera.TotalSincronizadas = Request.CantidadSincronizada;
             objUpdateCabecera.UsuarioModificacion = IdentificacionSesion;
             objUpdateCabecera.FechaModificacion = DateTime.Now;
+            if (Request.CantidadSincronizada == 1)
+            {
+                objUpdateCabecera.Estado = "IS";//Inicio de Sincronización
+            }else if (objUpdateCabecera.TotalSincronizadas > 0 )
+            {
+                objUpdateCabecera.Estado = "EM";//Enviando Marcación
+            }else if (objUpdateCabecera.TotalMarcacion == Request.CantidadSincronizada)
+            {
+                objUpdateCabecera.Estado = "ET";//Envio Terminado
+            }
 
             await _repoAccLogMarcacionAsync.UpdateAsync(objUpdateCabecera);
 
