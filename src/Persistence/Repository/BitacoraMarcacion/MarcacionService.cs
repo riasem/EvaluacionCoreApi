@@ -882,10 +882,12 @@ public class MarcacionService : IMarcacion
             if (Request.CantidadSincronizada == 1)
             {
                 objUpdateCabecera.Estado = "IS";//Inicio de Sincronización
-            }else if (objUpdateCabecera.TotalSincronizadas > 0 )
+            }
+            else if (objUpdateCabecera.TotalSincronizadas > 0)
             {
                 objUpdateCabecera.Estado = "EM";//Enviando Marcación
-            }else if (objUpdateCabecera.TotalMarcacion == Request.CantidadSincronizada)
+            }
+            else if (objUpdateCabecera.TotalMarcacion == Request.CantidadSincronizada)
             {
                 objUpdateCabecera.Estado = "ET";//Envio Terminado
             }
@@ -925,7 +927,7 @@ public class MarcacionService : IMarcacion
             float Similarity = 0.0f;
             try
             {
-                FSDK.ActivateLibrary("aTnuLhSRuOXFwOZq9IBWpBIQMF0RMoBI/gNFdS3aG3eNatqoJssib09CHdS/0OS4QCzTzH1dXYQvdyL6qmKnaiAEBMCSoK01AL0dNc33eczA2fi3v3hiHRShP3v9EtG+RG07m1oY++kAFB5qJYOs7WS1iVRkQbdK2LUCNJBUsO4=");
+                FSDK.ActivateLibrary("d40mAWrxDQyp5GkdVLHRqaaQvQ2ahhA/qXCASGeKO7O59UwUe7T/rzGs2LF5Efb5SFxItfJkkHbeBUksIC2wjrvR5ViXvpoa5fKvQkbPrauvpVSjQaQJZvjgU4daglMfk6gNJNgeYeW9t4wcV4hCQHEDqPu5Kyt0B3tAvOhLBAA=");
                 FSDK.InitializeLibrary();
                 var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Request.Identificacion));
                 if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
