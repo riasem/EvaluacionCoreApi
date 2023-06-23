@@ -883,7 +883,7 @@ public class MarcacionService : IMarcacion
             {
                 objUpdateCabecera.Estado = "IS";//Inicio de Sincronización
             }
-            else if (objUpdateCabecera.TotalSincronizadas > 0)
+            else if (objUpdateCabecera.TotalSincronizadas > 0 && Request.CantidadSincronizada < objUpdateCabecera.TotalSincronizadas)
             {
                 objUpdateCabecera.Estado = "EM";//Enviando Marcación
             }
