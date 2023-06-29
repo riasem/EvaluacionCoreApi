@@ -43,6 +43,8 @@ public class MappingProfile : Profile
         CreateMap<ColaboradorByLocalidadResponseType, Localidad>().ReverseMap();
         CreateMap<ColaboradorByLocalidadResponseType, Adjunto>().ReverseMap();
         CreateMap<AccLogMarcacionOffline, CreateCabeceraLogRequest>().ReverseMap();
+        CreateMap<DispositivosMarcacionResponse, DispositivoMarcacion>().ReverseMap();
+        
 
         CreateMap<MarcacionOffline, NovedadesMarcacionOfflineResponse>().ReverseMap();
 

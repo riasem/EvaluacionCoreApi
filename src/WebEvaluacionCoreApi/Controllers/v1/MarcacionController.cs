@@ -12,6 +12,7 @@ using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionOffl
 using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionWeb;
 using EvaluacionCore.Application.Features.Marcacion.Commands.GetBitacoraMarcacion;
 using EvaluacionCore.Application.Features.Marcacion.Dto;
+using EvaluacionCore.Application.Features.Marcacion.Queries.GetDispositivoMarcacion;
 using EvaluacionCore.Application.Features.Marcacion.Queries.GetListadoColaborador;
 using EvaluacionCore.Application.Features.Marcacion.Queries.GetNovedadesMarcacionOffline;
 using EvaluacionCore.Application.Features.Marcacion.Queries.GetRecurso;
@@ -320,6 +321,28 @@ namespace WebEvaluacionCoreApi.Controllers.v1
             var objResult = await Mediator.Send(query, cancellationToken);
             return Ok(objResult);
         }
+
+        /// <summary>
+        /// Listado de dispositivos de marcaciones tablets
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("DispositivosMarcacion")]
+        [EnableCors("AllowOrigin")]
+        [ProducesResponseType(typeof(ResponseType<List<DispositivosMarcacionResponse>>), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [AllowAnonymous]
+        public async Task<IActionResult> DispositivosMarcacion()
+        {
+            var query = new GetDispositivoMarcacionQueries();
+            var objResult = await Mediator.Send(query);
+            return Ok(objResult);
+        }
+
+
+
+
+
+
 
 
 

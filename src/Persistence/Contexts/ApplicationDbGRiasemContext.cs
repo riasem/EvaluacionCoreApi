@@ -35,6 +35,9 @@ namespace EvaluacionCore.Persistence.Contexts
 
         public DbSet<AccLogMarcacionOffline> AccLogMarcacionOffline { get; set; }
 
+        public DbSet<DispositivoMarcacion> DispositivoMarcacion { get; set; }
+        
+
 
 
 

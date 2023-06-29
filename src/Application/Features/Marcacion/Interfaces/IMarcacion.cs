@@ -29,4 +29,6 @@ public interface IMarcacion
 
     Task<ResponseType<List<NovedadesMarcacionOfflineResponse>>> NovedadesMaracionOffline(string CodUdn, string Identificacion, DateTime? FechaDesde, DateTime? FechasHasta,int? DeviceId ,string IdentificacionSesion, CancellationToken cancellationToken);
 
+    Task<ResponseType<List<DispositivosMarcacionResponse>>> GetDispositivoMarcacion();
+
 }

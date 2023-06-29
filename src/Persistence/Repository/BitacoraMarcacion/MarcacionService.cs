@@ -44,6 +44,7 @@ public class MarcacionService : IMarcacion
     private readonly IRepositoryGRiasemAsync<MonitorLogFileOffline> _repoMonitorLogFileAsync;
     private readonly IRepositoryGRiasemAsync<AccMonitoLogRiasem> _repoMonitoLogRiasemAsync;
     private readonly IRepositoryGRiasemAsync<AccLogMarcacionOffline> _repoAccLogMarcacionAsync;
+    private readonly IRepositoryGRiasemAsync<DispositivoMarcacion> _repoDispMarcaAsync;
 
     private readonly IRepositoryGRiasemAsync<AlertasNovedadMarcacion> _repoNovedadMarcacion;
     private readonly IRepositoryAsync<TurnoColaborador> _repositoryTurnoColAsync;
@@ -72,7 +73,7 @@ public class MarcacionService : IMarcacion
         IRepositoryAsync<MarcacionColaborador> repoMarcacionCola, IRepositoryGRiasemAsync<AccMonitorLog> repoMonitorLogAsync,
         IRepositoryAsync<Cliente> repoCliente, IRepositoryAsync<LocalidadColaborador> repoLocalColab,
         IRepositoryGRiasemAsync<AccMonitoLogRiasem> repoMonitoLogRiasemAsync, IRepositoryGRiasemAsync<AlertasNovedadMarcacion> repoNovedadMarcacion, IBiometria repoBiometriaAsync, IRepositoryGRiasemAsync<Machines> repoMachinesAsync,IMapper mapper, IRepositoryGRiasemAsync<MonitorLogFileOffline> repoMonitorLogFileAsync,
-        IRepositoryGRiasemAsync<MarcacionOffline> repoMarcacionOffline, IRepositoryGRiasemAsync<AccLogMarcacionOffline> repoAccLogMarcacionAsync)
+        IRepositoryGRiasemAsync<MarcacionOffline> repoMarcacionOffline, IRepositoryGRiasemAsync<AccLogMarcacionOffline> repoAccLogMarcacionAsync, IRepositoryGRiasemAsync<DispositivoMarcacion> repoDispMarcaAsync)
     {
         _EvaluacionAsync = repository;
 
@@ -100,6 +101,7 @@ public class MarcacionService : IMarcacion
         _repoMachinesAsync = repoMachinesAsync;
         _mapper = mapper;
         _repoMonitorLogFileAsync = repoMonitorLogFileAsync;
+        _repoDispMarcaAsync = repoDispMarcaAsync;
     }
     public async Task<ResponseType<MarcacionResponseType>> CreateMarcacion(CreateMarcacionRequest Request, CancellationToken cancellationToken)
     {
@@ -1059,6 +1061,27 @@ public class MarcacionService : IMarcacion
 
     }
 
+
+    public async Task<ResponseType<List<DispositivosMarcacionResponse>>> GetDispositivoMarcacion()
+    {
+        try
+        {
+            var lstDispositivos = await _repoDispMarcaAsync.ListAsync();
+            if (!lstDispositivos.Any()) return new ResponseType<List<DispositivosMarcacionResponse>> { Message = "No tenemos dispositivos disponibles", StatusCode = "001", Succeeded = true };
+            
+            var lstResult = _mapper.Map<List<DispositivosMarcacionResponse>>(lstDispositivos);
+
+            return new ResponseType<List<DispositivosMarcacionResponse>>() { Data = lstResult, Message = CodeMessageResponse.GetMessageByCode("000"), StatusCode = "000", Succeeded = true };
+        }
+        catch (Exception ex)
+        {
+            _log.LogError(ex, string.Empty);
+
+            return new ResponseType<List<DispositivosMarcacionResponse>> { Message = CodeMessageResponse.GetMessageByCode("002"), StatusCode = "002", Succeeded = false };
+        }
+        
+        
+    }
 
     private string EvaluaTipoSolicitud(Guid? idFeature)
     {
