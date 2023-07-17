@@ -63,7 +63,7 @@ namespace Workflow.Persistence.Repository.Biometria
                     #endregion
 
                     #region Luxand
-                    FSDK.ActivateLibrary("d40mAWrxDQyp5GkdVLHRqaaQvQ2ahhA/qXCASGeKO7O59UwUe7T/rzGs2LF5Efb5SFxItfJkkHbeBUksIC2wjrvR5ViXvpoa5fKvQkbPrauvpVSjQaQJZvjgU4daglMfk6gNJNgeYeW9t4wcV4hCQHEDqPu5Kyt0B3tAvOhLBAA=");
+                    FSDK.ActivateLibrary("OzcLugSo7r/QQc5uUan/hLmtsyw7avFhRPiyRJFXPNg+qnV0VwOkJeefJTLGmmzM+Jclto9Mto6KY64OW419evp+KXZoti3d2dKhzvexBjdANFb93HpJVSYcHPrs/j+bn8iIEHSS8G7r5LV64TyzdUZdVkukOKuF1EeMj4C0/Js=");
                     FSDK.InitializeLibrary();
                     var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(request.Identificacion));
                     if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
@@ -180,7 +180,7 @@ namespace Workflow.Persistence.Repository.Biometria
 
 
                 #region Luxand
-                FSDK.ActivateLibrary("d40mAWrxDQyp5GkdVLHRqaaQvQ2ahhA/qXCASGeKO7O59UwUe7T/rzGs2LF5Efb5SFxItfJkkHbeBUksIC2wjrvR5ViXvpoa5fKvQkbPrauvpVSjQaQJZvjgU4daglMfk6gNJNgeYeW9t4wcV4hCQHEDqPu5Kyt0B3tAvOhLBAA=");
+                FSDK.ActivateLibrary("OzcLugSo7r/QQc5uUan/hLmtsyw7avFhRPiyRJFXPNg+qnV0VwOkJeefJTLGmmzM+Jclto9Mto6KY64OW419evp+KXZoti3d2dKhzvexBjdANFb93HpJVSYcHPrs/j+bn8iIEHSS8G7r5LV64TyzdUZdVkukOKuF1EeMj4C0/Js=");
                 FSDK.InitializeLibrary();
 
                 FSDK.CImage imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
