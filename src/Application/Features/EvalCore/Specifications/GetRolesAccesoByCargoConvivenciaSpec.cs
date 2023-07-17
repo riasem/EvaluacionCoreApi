@@ -14,19 +14,20 @@ public class GetRolesAccesoByCargoConvivenciaSpec : Specification<RolCargoSG>
     {
         if (tipoCliente == "EJE")
         {
-            Query.Where(rca => rca.CargoSG.Id == Guid.Parse(codCargoConvivencia) &&
-                               rca.CargoSG.Departamento.Id == Guid.Parse(codScc) &&
+            Query.Where(rca => rca.CargoDepartamentoSG.Id == Guid.Parse(codCargoConvivencia) &&
+                               rca.CargoDepartamentoSG.Departamento.Id == Guid.Parse(codScc) &&
                                rca.RolSG.CanalSGId == uidCanal &&
                                rca.Estado == "A")
                 .Include(rca => rca.RolSG);
         }
         else
         {
-            Query.Where(rca => rca.CargoSG.CodigoHomologacion == codCargoConvivencia &&
-                               rca.CargoSG.Departamento.CodigoHomologacion == codScc &&
+            Query.Where(rca => rca.CargoDepartamentoSG.CargoSG.CodigoHomologacion == codCargoConvivencia &&
+                               rca.CargoDepartamentoSG.Departamento.CodigoHomologacion == codScc &&
                                rca.RolSG.CanalSGId == uidCanal &&
                                rca.Estado == "A")
                 .Include(rca => rca.RolSG);
+                
         }
 
 

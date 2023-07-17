@@ -1,8 +1,7 @@
-﻿using EvaluacionCore.Domain.Entities.Organizacion;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,36 +12,40 @@ namespace EvaluacionCore.Domain.Entities.Seguridad;
 public class CargoSG
 {
     [Key]
-    [Column("id", Order = 0, TypeName = "uniqueidentifier")]
+    [Column("id", TypeName = "uniqueidentifier")]
     public Guid Id { get; set; }
 
-    [Column("departamentoId", Order = 1, TypeName = "uniqueidentifier")]
-    public Guid DepartamentoId { get; set; }
-    public virtual Departamento Departamento { get; set; }
-
-    [Column("nombre", Order = 2, TypeName = "varchar")]
+    [Column("nombre", TypeName = "varchar")]
     public string Nombre { get; set; }
 
-    [Column("descripcion", Order = 3, TypeName = "varchar")]
+    [Column("descripcion", TypeName = "varchar")]
     public string Descripcion { get; set; }
 
-    [Column("codigoHomologacion", Order = 4, TypeName = "varchar")]
+    [Column("codigoHomologacion", TypeName = "varchar")]
     public string CodigoHomologacion { get; set; }
 
-    [Column("estado", Order = 5, TypeName = "varchar")]
+    [Column("nombreHomologacion", TypeName = "varchar")]
+    public string NombreHomologacion { get; set; }
+
+    [Column("estado", TypeName = "varchar")]
     public string Estado { get; set; }
 
-    [Column("usuarioCreacion", Order = 6, TypeName = "varchar")]
+    [Column("usuarioCreacion", TypeName = "varchar")]
     public string UsuarioCreacion { get; set; }
 
-    [Column("fechaCreacion", Order = 7, TypeName = "datetime2")]
+    [Column("fechaCreacion", TypeName = "datetime2")]
     public DateTime FechaCreacion { get; set; }
 
-    [Column("usuarioModificacion", Order = 8, TypeName = "varchar")]
+    [Column("usuarioModificacion", TypeName = "varchar")]
     public string UsuarioModificacion { get; set; }
 
-    [Column("fechaModificacion", Order = 9, TypeName = "datetime2")]
+    [Column("fechaModificacion", TypeName = "datetime2")]
     public DateTime? FechaModificacion { get; set; }
 
-    //public virtual ICollection<CargoEje> CargoEje { get; set; }
+    [Column("codigo", TypeName = "varchar")]
+    public string Codigo { get; set; }
+
+    public virtual ICollection<CargoDepartamentoSG> CargoDepartamentoSG { get; set; }
+
+
 }

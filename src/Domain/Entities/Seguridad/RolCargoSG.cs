@@ -20,8 +20,8 @@ public class RolCargoSG
     public virtual RolSG RolSG { get; set; }
 
     [Column("cargoId", Order = 2, TypeName = "uniqueidentifier")]
-    public Guid CargoSGId { get; set; }
-    public virtual CargoSG CargoSG { get; set; }
+    public Guid CargoDepartamentoSGId { get; set; }
+    public virtual CargoDepartamentoSG CargoDepartamentoSG { get; set; }
 
     [Column("estado", Order = 3, TypeName = "varchar")]
     public string Estado { get; set; }
