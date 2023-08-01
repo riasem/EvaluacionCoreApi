@@ -10,10 +10,14 @@ using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.Biometria.Commands.AuthenticationFacial;
 using EvaluacionCore.Application.Features.Biometria.Interfaces;
+using EvaluacionCore.Application.Features.Biometria.Specifications;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Dto;
 using EvaluacionCore.Application.Features.Common.Specifications;
 using EvaluacionCore.Application.Features.EvalCore.Interfaces;
 using EvaluacionCore.Application.Features.Locacions.Specifications;
+using EvaluacionCore.Application.Features.Marcacion.Commands.CargaMarcacionesExcel;
+using EvaluacionCore.Application.Features.Marcacion.Commands.CargaMarcacionesTxt;
+using EvaluacionCore.Application.Features.Marcacion.Commands.CreateCabeceraLog;
 using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionApp;
 using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionOffline;
 using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionWeb;
@@ -24,6 +28,7 @@ using EvaluacionCore.Application.Features.Turnos.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using EvaluacionCore.Domain.Entities.Common;
 using EvaluacionCore.Domain.Entities.Marcaciones;
+using EvaluacionCore.Domain.Entities.Seguridad;
 using Luxand;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
@@ -54,13 +59,17 @@ public class MarcacionService : IMarcacion
     private readonly IRepositoryAsync<MarcacionColaborador> _repoMarcacionCola;
     private readonly IRepositoryAsync<LocalidadColaborador> _repoLocalColab;
     private readonly IRepositoryGRiasemAsync<MarcacionOffline> _repoMarcacionOffline;
+    private readonly IRepositoryAsync<LicenciaTerceroSG> _repoLicencia;
     
+
     private readonly IConfiguration _config;
     private readonly IBiometria _repoBiometriaAsync;
     private readonly IMapper _mapper;
 
     private readonly IRepositoryAsync<CargoEje> _repoEje;
     private readonly IEvaluacion _EvaluacionAsync;
+
+    private readonly IMarcacionOffline _MarcacionesOffline;
 
     private readonly string Esquema = null;
     private string ConnectionString_Marc { get; }
@@ -73,10 +82,11 @@ public class MarcacionService : IMarcacion
         IRepositoryAsync<MarcacionColaborador> repoMarcacionCola, IRepositoryGRiasemAsync<AccMonitorLog> repoMonitorLogAsync,
         IRepositoryAsync<Cliente> repoCliente, IRepositoryAsync<LocalidadColaborador> repoLocalColab,
         IRepositoryGRiasemAsync<AccMonitoLogRiasem> repoMonitoLogRiasemAsync, IRepositoryGRiasemAsync<AlertasNovedadMarcacion> repoNovedadMarcacion, IBiometria repoBiometriaAsync, IRepositoryGRiasemAsync<Machines> repoMachinesAsync,IMapper mapper, IRepositoryGRiasemAsync<MonitorLogFileOffline> repoMonitorLogFileAsync,
-        IRepositoryGRiasemAsync<MarcacionOffline> repoMarcacionOffline, IRepositoryGRiasemAsync<AccLogMarcacionOffline> repoAccLogMarcacionAsync, IRepositoryGRiasemAsync<DispositivoMarcacion> repoDispMarcaAsync)
+        IRepositoryGRiasemAsync<MarcacionOffline> repoMarcacionOffline, IRepositoryGRiasemAsync<AccLogMarcacionOffline> repoAccLogMarcacionAsync, IRepositoryGRiasemAsync<DispositivoMarcacion> repoDispMarcaAsync,
+        IMarcacionOffline MarcacionesOffline, IRepositoryAsync<LicenciaTerceroSG> repoLicencia)
     {
         _EvaluacionAsync = repository;
-
+        _MarcacionesOffline = MarcacionesOffline;
         _repoNovedadMarcacion = repoNovedadMarcacion;
         _repoUserInfoAsync = repoUserInfoAsync;
         _repoCheckInOutAsync = repoCheckInOutAsync;
@@ -102,6 +112,7 @@ public class MarcacionService : IMarcacion
         _mapper = mapper;
         _repoMonitorLogFileAsync = repoMonitorLogFileAsync;
         _repoDispMarcaAsync = repoDispMarcaAsync;
+        _repoLicencia = repoLicencia;
     }
     public async Task<ResponseType<MarcacionResponseType>> CreateMarcacion(CreateMarcacionRequest Request, CancellationToken cancellationToken)
     {
@@ -854,7 +865,7 @@ public class MarcacionService : IMarcacion
     }
 
 
-    public async Task<ResponseType<string>> CreateMarcacionOffline(CreateMarcacionOfflineRequest Request,string IdentificacionSesion, CancellationToken cancellationToken)
+    public async Task<ResponseType<string>> CreateMarcacionOffline(CreateMarcacionOfflineRequest Request,string IdentificacionSesion,string TipoCarga, CancellationToken cancellationToken)
     {
         try
         {
@@ -881,7 +892,7 @@ public class MarcacionService : IMarcacion
             objUpdateCabecera.TotalSincronizadas = Request.CantidadSincronizada;
             objUpdateCabecera.UsuarioModificacion = IdentificacionSesion;
             objUpdateCabecera.FechaModificacion = DateTime.Now;
-            if (Request.CantidadSincronizada == 1)
+            if (Request.CantidadSincronizada == 1 && objUpdateCabecera.TotalMarcacion  > Request.CantidadSincronizada )
             {
                 objUpdateCabecera.Estado = "IS";//Inicio de Sincronización
             }
@@ -897,111 +908,121 @@ public class MarcacionService : IMarcacion
             await _repoAccLogMarcacionAsync.UpdateAsync(objUpdateCabecera);
 
 
-            #endregion
-
-            #region Conversion de Archivo
-
-            byte[] bytes = Convert.FromBase64String(Request.Imagen);
-            var rutaBase = _config.GetSection("Adjuntos:RutaBase").Get<string>();
-            var directorio = rutaBase + "marcacionOffline/";
-
-            if (!Directory.Exists(directorio))
-            {
-                Directory.CreateDirectory(directorio);
-            }
-            
-            
-            string nombreFile = DateTime.Now.Year.ToString() + "-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString() + "-" + DateTime.Now.Hour.ToString() + "-" + DateTime.Now.Minute.ToString() + "-" + DateTime.Now.Second.ToString();
-
-            var rutaFinal = directorio +  nombreFile+"-"+ Request.CodigoBiometrico.ToString() + Request.Extension;
-
-            await File.WriteAllBytesAsync(rutaFinal, bytes);
-            //using (var stream = System.IO.File.Create(rutaFinal))
-            //{
-            //    await Request.Imagen.CopyToAsync(stream);
-            //}
-
-            #endregion
-
             bool estadoValid = false;
-
-            #region Validacion con el SDK
-            float Similarity = 0.0f;
-            try
-            {
-                FSDK.ActivateLibrary("OzcLugSo7r/QQc5uUan/hLmtsyw7avFhRPiyRJFXPNg+qnV0VwOkJeefJTLGmmzM+Jclto9Mto6KY64OW419evp+KXZoti3d2dKhzvexBjdANFb93HpJVSYcHPrs/j+bn8iIEHSS8G7r5LV64TyzdUZdVkukOKuF1EeMj4C0/Js=");
-                FSDK.InitializeLibrary();
-                var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Request.Identificacion));
-                if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
-
-                FSDK.CImage imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
-                FSDK.CImage image = new FSDK.CImage(rutaFinal); // Imagen enviada
-
-                //File.Delete(rutaFinal);
-
-                byte[] template = new byte[FSDK.TemplateSize];
-                byte[] templateImgCola = new byte[FSDK.TemplateSize];
-                FSDK.TFacePosition facePosition = new FSDK.TFacePosition();
-                FSDK.TFacePosition facePositionCola = new FSDK.TFacePosition();
-                facePosition = image.DetectFace();
-                facePositionCola = imageCola.DetectFace();
-                template = image.GetFaceTemplateInRegion(ref facePosition);
-                templateImgCola = imageCola.GetFaceTemplateInRegion(ref facePositionCola);
-
-                FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
-                estadoValid = true;
-            }
-            catch (Exception)
-            {
-                estadoValid = false;
-                
-            }
-
             string respMonitorId;
-            
+            var rutaFinal = "";
             string estadoRecono = "PENDIENTE";
-
-            if (Similarity >= 0.85)
+            #endregion
+            if (TipoCarga is null || TipoCarga == "txt")
             {
-                estadoRecono = "CORRECTO";
-                AccMonitorLog accMonitorLog = new()
-                {
-                    State = 0,
-                    Time = Request.Time,
-                    Pin = Request.CodigoBiometrico,
-                    Device_Id = deviceId,
-                    Verified = 0,
-                    Device_Name = deviceName,
-                    Status = 1,
-                    Description = "OS",
-                    Create_Time = DateTime.Now
-                };
+                #region Conversion de Archivo
 
-                var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
-                
-                if (objResultado is null)
+                byte[] bytes = Convert.FromBase64String(Request.Imagen);
+                var rutaBase = _config.GetSection("Adjuntos:RutaBase").Get<string>();
+                var directorio = rutaBase + "marcacionOffline/";
+
+                if (!Directory.Exists(directorio))
                 {
-                    return new ResponseType<string>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
+                    Directory.CreateDirectory(directorio);
                 }
-                respMonitorId = objResultado.Id.ToString();
 
-                #region Inicio de Reproceso de marcaciones offline
 
-                string query = "EXEC [dbo].[EAPP_SP_REPROCESA_MARCACIONES_OFFLINE] NULL, NULL, NULL, '" + Request.Time.Date.ToString("yyyy/MM/dd HH:mm:ss") + "' , '" + Request.Time.ToString("yyyy/MM/dd HH:mm:ss") + "',  '" + Request.Identificacion + "';";
-                using IDbConnection con = new SqlConnection(ConnectionString_Marc);
-                if (con.State == ConnectionState.Closed) con.Open();
-                con.Query(query);
-                if (con.State == ConnectionState.Open) con.Close();
+                string nombreFile = DateTime.Now.Year.ToString() + "-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString() + "-" + DateTime.Now.Hour.ToString() + "-" + DateTime.Now.Minute.ToString() + "-" + DateTime.Now.Second.ToString();
+
+                rutaFinal = directorio + nombreFile + "-" + Request.CodigoBiometrico.ToString() + Request.Extension;
+
+                await File.WriteAllBytesAsync(rutaFinal, bytes);
+                //using (var stream = System.IO.File.Create(rutaFinal))
+                //{
+                //    await Request.Imagen.CopyToAsync(stream);
+                //}
 
                 #endregion
 
+                #region Validacion con el SDK
+                float Similarity = 0.0f;
+                try
+                {
+                    //FSDK.ActivateLibrary("OzcLugSo7r/QQc5uUan/hLmtsyw7avFhRPiyRJFXPNg+qnV0VwOkJeefJTLGmmzM+Jclto9Mto6KY64OW419evp+KXZoti3d2dKhzvexBjdANFb93HpJVSYcHPrs/j+bn8iIEHSS8G7r5LV64TyzdUZdVkukOKuF1EeMj4C0/Js=");
+                    var Licencia = await _repoLicencia.FirstOrDefaultAsync(new LicenciaByServicioSpec("SDK RECONOCIMIENTO FACIAL PAGO MENSUAL"));
 
+                    if (Licencia is null) return new ResponseType<string> { StatusCode = "101", Succeeded = true, Message = "No se ha podido obtener datos de Licencia" };
+
+                    FSDK.ActivateLibrary(Licencia.CodigoLicencia);
+                    FSDK.InitializeLibrary();
+                    var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Request.Identificacion));
+                    if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
+
+                    FSDK.CImage imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
+                    FSDK.CImage image = new FSDK.CImage(rutaFinal); // Imagen enviada
+
+                    //File.Delete(rutaFinal);
+
+                    byte[] template = new byte[FSDK.TemplateSize];
+                    byte[] templateImgCola = new byte[FSDK.TemplateSize];
+                    FSDK.TFacePosition facePosition = new FSDK.TFacePosition();
+                    FSDK.TFacePosition facePositionCola = new FSDK.TFacePosition();
+                    facePosition = image.DetectFace();
+                    facePositionCola = imageCola.DetectFace();
+                    template = image.GetFaceTemplateInRegion(ref facePosition);
+                    templateImgCola = imageCola.GetFaceTemplateInRegion(ref facePositionCola);
+
+                    FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
+                    estadoValid = true;
+                }
+                catch (Exception)
+                {
+                    estadoValid = false;
+
+                }
+
+
+
+
+
+                if (Similarity >= 0.85)
+                {
+                    estadoRecono = "CORRECTO";
+
+
+
+                }
+                else
+                {
+                    estadoRecono = "Novedad " + Math.Round((Similarity * 100), 0) + "% de Similitud.";
+                    respMonitorId = null;
+                }
+
+                #endregion
             }
-            else
+            AccMonitorLog accMonitorLog = new()
             {
-                estadoRecono = "Novedad " + Math.Round((Similarity * 100),0) + "% de Similitud." ;
-                respMonitorId = null;
+                State = 0,
+                Time = Request.Time,
+                Pin = Request.CodigoBiometrico,
+                Device_Id = deviceId,
+                Verified = 0,
+                Device_Name = deviceName,
+                Status = 1,
+                Description = "OS",
+                Create_Time = DateTime.Now
+            };
+
+            var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
+
+            if (objResultado is null)
+            {
+                return new ResponseType<string>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
             }
+            respMonitorId = objResultado.Id.ToString();
+
+            #region Inicio de Reproceso de marcaciones offline
+
+            string query = "EXEC [dbo].[EAPP_SP_REPROCESA_MARCACIONES_OFFLINE] NULL, NULL, NULL, '" + Request.Time.Date.ToString("yyyy/MM/dd HH:mm:ss") + "' , '" + Request.Time.ToString("yyyy/MM/dd HH:mm:ss") + "',  '" + Request.Identificacion + "';";
+            using IDbConnection con = new SqlConnection(ConnectionString_Marc);
+            if (con.State == ConnectionState.Closed) con.Open();
+            con.Query(query);
+            if (con.State == ConnectionState.Open) con.Close();
 
             #endregion
 
@@ -1009,7 +1030,7 @@ public class MarcacionService : IMarcacion
             {
                 Id = Guid.NewGuid(),
                 MonitorId = respMonitorId,
-                RutaImagen = rutaFinal,
+                RutaImagen = rutaFinal == "" ? null : rutaFinal,
                 EstadoValidacion = estadoValid,
                 EstadoReconocimiento = estadoRecono,
                 FechaRegistro = DateTime.Now,
@@ -1083,6 +1104,146 @@ public class MarcacionService : IMarcacion
         
     }
 
+    public async Task<ResponseType<string>> CargarMarcacionesExcel(List<CargaMarcacionesExcelRequest> request, string IdentificacionSesion, CancellationToken cancellationToken)
+    {
+        var firstMarcacion = request.OrderBy(x => x.Order).FirstOrDefault();
+        var lastMarcacion = request.OrderByDescending(x => x.Order).FirstOrDefault();
+        var totalMarcacion = request.Count();
+        var tipoCarga = "Excel";
+
+        CreateCabeceraLogRequest requestCabecera = new()
+        {
+            TotalMarcacion = totalMarcacion,
+            Estado = "IS",
+            FechaFin = lastMarcacion.Time,
+            FechaInicio = firstMarcacion.Time,
+            FechaSincronizacion = DateTime.Now,
+            IdentificacionFin = lastMarcacion.Identificacion,
+            IdentificacionInicio = firstMarcacion.Identificacion,
+            TipoCarga = tipoCarga
+        };
+
+
+        var idcabecera = await _MarcacionesOffline.CreateCabeceraLogOffline(requestCabecera,IdentificacionSesion, cancellationToken);
+
+        if (idcabecera is null) return new ResponseType<string> { Message = "No se ha guardado cabecera correctamente", StatusCode = "101", Succeeded = true };
+        var countMarcacion = 0;
+
+        List<CargaMarcacionesExcelRequest> marcacionesSinProcesar = new();
+
+        foreach (var marcacion in request.OrderBy(x => x.Order))
+        {
+            var cliente = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(marcacion.Identificacion));
+
+            if (cliente is null)  marcacionesSinProcesar.Add(marcacion);
+
+            countMarcacion++;   
+
+            CreateMarcacionOfflineRequest requestMarcacion = new()
+            {
+                CodigoBiometrico = cliente.CodigoConvivencia,
+                Imagen = null,
+                IdCabecera = Guid.Parse(idcabecera.Data),
+                Extension = null,
+                Time = marcacion.Time,
+                Identificacion = marcacion.Identificacion,
+                CantidadSincronizada = countMarcacion
+                
+            };
+            var resultMarcacion = await CreateMarcacionOffline(requestMarcacion,marcacion.IdentificacionDispositivo, tipoCarga, cancellationToken);
+            if (!resultMarcacion.Succeeded)
+            {
+                return new ResponseType<string> { Message = "No se ha procesado las marcaciones correctamente", Succeeded = true, StatusCode = "101" };   
+            }
+
+        }
+
+        if (marcacionesSinProcesar.Any())
+        {
+            return new ResponseType<string> {Data= marcacionesSinProcesar.ToString() , Message = "Marcaciones Procesadas correctamente", StatusCode = "100", Succeeded = true };
+        }
+        else
+        {
+            return new ResponseType<string> { Message = "Marcaciones Procesadas correctamente", StatusCode = "100", Succeeded = true };
+        }
+
+        
+    }
+
+    public async Task<ResponseType<string>> CargarMarcacionesTxt(List<CargaMarcacionesTxtRequest> request, string IdentificacionSesion, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var firstMarcacion = request.OrderBy(x => x.Id).FirstOrDefault();
+            var lastMarcacion = request.OrderByDescending(x => x.Id).FirstOrDefault();
+            var totalMarcacion = request.Count();
+            var tipoCarga = "Txt";
+
+            CreateCabeceraLogRequest requestCabecera = new()
+            {
+                TotalMarcacion = totalMarcacion,
+                Estado = "IS",
+                FechaFin = lastMarcacion.FechaMarcacion,
+                FechaInicio = firstMarcacion.FechaMarcacion,
+                FechaSincronizacion = DateTime.Now,
+                IdentificacionFin = lastMarcacion.Identificacion,
+                IdentificacionInicio = firstMarcacion.Identificacion,
+                TipoCarga = tipoCarga
+            };
+
+
+            var idcabecera = await _MarcacionesOffline.CreateCabeceraLogOffline(requestCabecera, IdentificacionSesion, cancellationToken);
+
+            if (idcabecera is null) return new ResponseType<string> { Message = "No se ha guardado cabecera correctamente", StatusCode = "101", Succeeded = true };
+            var countMarcacion = 0;
+
+            List<CargaMarcacionesTxtRequest> marcacionesSinProcesar = new();
+
+            foreach (var marcacion in request.OrderBy(x => x.Id))
+            {
+                var cliente = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(marcacion.Identificacion));
+
+                if (cliente is null) marcacionesSinProcesar.Add(marcacion);
+
+                countMarcacion++;
+
+                CreateMarcacionOfflineRequest requestMarcacion = new()
+                {
+                    CodigoBiometrico = cliente.CodigoConvivencia,
+                    Imagen = null,
+                    IdCabecera = Guid.Parse(idcabecera.Data),
+                    Extension = null,
+                    Time = marcacion.FechaMarcacion,
+                    Identificacion = marcacion.Identificacion,
+                    CantidadSincronizada = countMarcacion
+
+                };
+                var resultMarcacion = await CreateMarcacionOffline(requestMarcacion, marcacion.IdentificacionDispositivo, tipoCarga, cancellationToken);
+                if (!resultMarcacion.Succeeded)
+                {
+                    return new ResponseType<string> { Message = "No se ha procesado las marcaciones correctamente", Succeeded = true, StatusCode = "101" };
+                }
+
+            }
+
+            if (marcacionesSinProcesar.Any())
+            {
+                return new ResponseType<string> { Data = marcacionesSinProcesar.ToString(), Message = "Marcaciones Procesadas correctamente", StatusCode = "100", Succeeded = true };
+            }
+            else
+            {
+                return new ResponseType<string> { Message = "Marcaciones Procesadas correctamente", StatusCode = "100", Succeeded = true };
+            }
+
+        }
+        catch (Exception ex)
+        {
+            _log.LogError(ex, string.Empty);
+            return new ResponseType<string> { Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
+            
+        }
+
+    }
     private string EvaluaTipoSolicitud(Guid? idFeature)
     {
         Guid permiso = Guid.Parse("DE4D17BD-9F03-4CCB-A3C0-3F37629CEA6A");

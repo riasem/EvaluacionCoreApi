@@ -53,6 +53,10 @@ public class ApplicationDbContext : DbContext
     public DbSet<TurnoColaborador> TurnoColaborador { get; set; }
     public DbSet<CargoEje> CargoEje { get; set; }
 
+    public DbSet<LicenciaTerceroSG> LicenciaTerceroSG { get; set; }
+    public DbSet<LogLicenciaTerceroSG> LogLicenciaTerceroSG { get; set; }
+    public DbSet<ServicioTerceroSG> ServicioTerceroSG { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 

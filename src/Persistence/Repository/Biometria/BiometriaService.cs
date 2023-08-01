@@ -13,6 +13,8 @@ using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Luxand;
+using EvaluacionCore.Domain.Entities.Seguridad;
+using EvaluacionCore.Application.Features.Biometria.Specifications;
 
 namespace Workflow.Persistence.Repository.Biometria
 {
@@ -22,12 +24,14 @@ namespace Workflow.Persistence.Repository.Biometria
         private readonly ILogger<BiometriaService> _log;
         private readonly IRepositoryAsync<Cliente> _repoCliente;
         private readonly IRepositoryAsync<CargoEje> _repoCargoEje;
+        private readonly IRepositoryAsync<LicenciaTerceroSG> _repoLicencia;
         private readonly string apiKeyLuxand = string.Empty;
         private readonly string apiBaseLuxand = string.Empty;
         private string nombreEnpoint = string.Empty;
         private string uriEndPoint = string.Empty;
 
-        public BiometriaService(IConfiguration config, ILogger<BiometriaService> log, IRepositoryAsync<Cliente> repoCliente, IRepositoryAsync<CargoEje> repoCargoEje)
+        public BiometriaService(IConfiguration config, ILogger<BiometriaService> log, IRepositoryAsync<Cliente> repoCliente, IRepositoryAsync<CargoEje> repoCargoEje,
+            IRepositoryAsync<LicenciaTerceroSG> repoLicencia)
         {
             _log = log;
             _config = config;
@@ -35,6 +39,7 @@ namespace Workflow.Persistence.Repository.Biometria
             apiBaseLuxand = _config.GetSection("Luxand:ApiBase").Get<string>();
             apiKeyLuxand = _config.GetSection("Luxand:ApiKey").Get<string>();
             _repoCargoEje = repoCargoEje;
+            _repoLicencia= repoLicencia;
         }
 
         public async Task<ResponseType<string>> AuthenticationFacialAsync(AuthenticationFacialRequest request, string IdentificacionSesion)
@@ -63,7 +68,12 @@ namespace Workflow.Persistence.Repository.Biometria
                     #endregion
 
                     #region Luxand
-                    FSDK.ActivateLibrary("OzcLugSo7r/QQc5uUan/hLmtsyw7avFhRPiyRJFXPNg+qnV0VwOkJeefJTLGmmzM+Jclto9Mto6KY64OW419evp+KXZoti3d2dKhzvexBjdANFb93HpJVSYcHPrs/j+bn8iIEHSS8G7r5LV64TyzdUZdVkukOKuF1EeMj4C0/Js=");
+
+                    var Licencia = await _repoLicencia.FirstOrDefaultAsync(new LicenciaByServicioSpec("SDK RECONOCIMIENTO FACIAL PAGO MENSUAL"));
+
+                    if (Licencia is null) return new ResponseType<string> { StatusCode = "101", Succeeded = true, Message = "No se ha podido obtener datos de Licencia" };
+
+                    FSDK.ActivateLibrary(Licencia.CodigoLicencia);
                     FSDK.InitializeLibrary();
                     var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(request.Identificacion));
                     if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
@@ -180,7 +190,11 @@ namespace Workflow.Persistence.Repository.Biometria
 
 
                 #region Luxand
-                FSDK.ActivateLibrary("OzcLugSo7r/QQc5uUan/hLmtsyw7avFhRPiyRJFXPNg+qnV0VwOkJeefJTLGmmzM+Jclto9Mto6KY64OW419evp+KXZoti3d2dKhzvexBjdANFb93HpJVSYcHPrs/j+bn8iIEHSS8G7r5LV64TyzdUZdVkukOKuF1EeMj4C0/Js=");
+                var Licencia = await _repoLicencia.FirstOrDefaultAsync(new LicenciaByServicioSpec("SDK RECONOCIMIENTO FACIAL PAGO MENSUAL"));
+
+                if (Licencia is null) return new ResponseType<string> { StatusCode = "101", Succeeded = true, Message = "No se ha podido obtener datos de Licencia" };
+
+                FSDK.ActivateLibrary(Licencia.CodigoLicencia);
                 FSDK.InitializeLibrary();
 
                 FSDK.CImage imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());

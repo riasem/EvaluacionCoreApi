@@ -24,7 +24,7 @@ public class CreateMarcacionOfflineCommandHandler : IRequestHandler<CreateMarcac
     {
         try
         {
-            var objResult = await _repository.CreateMarcacionOffline(request.RequestOfflineMarca,request.IdentificacionSesion, cancellationToken);
+            var objResult = await _repository.CreateMarcacionOffline(request.RequestOfflineMarca,request.IdentificacionSesion,null, cancellationToken);
 
             return objResult;
         }

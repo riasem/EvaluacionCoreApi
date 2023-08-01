@@ -4,6 +4,7 @@ using EvaluacionCore.Application.Features.Biometrico.Interfaces;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Interfaces;
 using EvaluacionCore.Application.Features.Calendario.Interfaces;
 using EvaluacionCore.Application.Features.EvalCore.Interfaces;
+using EvaluacionCore.Application.Features.Licencia.Interfaces;
 using EvaluacionCore.Application.Features.Marcacion.Interfaces;
 using EvaluacionCore.Application.Features.Turnos.Interfaces;
 using EvaluacionCore.Persistence.Contexts;
@@ -19,6 +20,7 @@ using Workflow.Persistence.Repository.Biometria;
 using Workflow.Persistence.Repository.Biometrico;
 using Workflow.Persistence.Repository.BitacoraMarcacion;
 using Workflow.Persistence.Repository.Calendario;
+using Workflow.Persistence.Repository.Licencia;
 using Workflow.Persistence.Repository.TurnosAsignadosExcel;
 
 namespace EvaluacionCore.Persistence;
@@ -45,6 +47,7 @@ public static class ServiceExtensions
         services.AddTransient<ICalendario, CalendarioServices>();
         services.AddTransient<IRecordatorio, RecordatorioService>();
         services.AddTransient<IBiometria, BiometriaService>();
+        services.AddTransient<ILicencia, LicenciaService>();
         services.AddTransient<IBiometrico, BiometricoService>();
         services.AddTransient<IMarcacionOffline, MarcacionOfflineService>();
 

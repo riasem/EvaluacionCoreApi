@@ -51,4 +51,7 @@ public class AccLogMarcacionOffline
     [Column("estado", TypeName = "varchar")]
 	public string Estado { get; set; }
 
+	[Column("tipoCarga", TypeName = "varchar")]
+	public string TipoCarga { get; set; }
+
 }

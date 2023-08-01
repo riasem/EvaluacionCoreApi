@@ -20,6 +20,8 @@ public class CreateCabeceraLogRequest
 
     public DateTime FechaSincronizacion { get; set; }
 
+    public string TipoCarga { get; set; }
+
     public string Estado { get; set; }
 
 

@@ -6,6 +6,8 @@ using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetBitacora
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetBitacoraMarcacionCapacidadesEspeciales;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Commands.GetComboBitacoraMarcacion;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Dto;
+using EvaluacionCore.Application.Features.Marcacion.Commands.CargaMarcacionesExcel;
+using EvaluacionCore.Application.Features.Marcacion.Commands.CargaMarcacionesTxt;
 using EvaluacionCore.Application.Features.Marcacion.Commands.CreateCabeceraLog;
 using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionApp;
 using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionOffline;
@@ -338,11 +340,42 @@ namespace WebEvaluacionCoreApi.Controllers.v1
             return Ok(objResult);
         }
 
+        /// <summary>
+        /// Carga de Marcaciones Manuales por archivo Excel
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpPost("CargaMarcacionesExcel")]
+        [EnableCors("AllowOrigin")]
+        [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CargaMarcacionesExcel([FromBody] List<CargaMarcacionesExcelRequest> request, CancellationToken cancellationToken)
+        {
+            var IdentificacionSesion = new JwtSecurityToken(HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
+            var query = new CargaMarcacionesExcelCommand(request, IdentificacionSesion);
+            var objResult = await Mediator.Send(query);
+            return Ok(objResult);
+        }
 
 
-
-
-
+        /// <summary>
+        /// Carga de Marcaciones Offline por archivo Txt
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpPost("CargaMarcacionesTxt")]
+        [EnableCors("AllowOrigin")]
+        [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CargaMarcacionesTxt([FromBody] List<CargaMarcacionesTxtRequest> request, CancellationToken cancellationToken)
+        {
+            var IdentificacionSesion = new JwtSecurityToken(HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
+            var query = new CargaMarcacionesTxtCommand(request, IdentificacionSesion);
+            var objResult = await Mediator.Send(query);
+            return Ok(objResult);
+        }
 
 
 

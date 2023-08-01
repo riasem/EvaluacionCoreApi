@@ -34,6 +34,6 @@ public class Departamento
 
 
     //public virtual ICollection<Prospecto> Prospectos { get; set; }
-    public virtual ICollection<CargoDepartamentoSG> Cargos { get; set; }
+    //public virtual ICollection<CargoDepartamentoSG> Cargos { get; set; }
     //public virtual ICollection<Cliente> Clientes { get; set; }
 }

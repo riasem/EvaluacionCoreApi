@@ -45,7 +45,7 @@ public class CargoSG
     [Column("codigo", TypeName = "varchar")]
     public string Codigo { get; set; }
 
-    public virtual ICollection<CargoDepartamentoSG> CargoDepartamentoSG { get; set; }
+    public virtual ICollection<RolCargoSG> RolCargoSG { get; set; }
 
 
 }

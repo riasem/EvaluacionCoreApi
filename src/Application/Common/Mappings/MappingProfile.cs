@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using EvaluacionCore.Application.Features.Licencia.Dto;
 using EvaluacionCore.Application.Features.Localidads.Commands.AsignarLocalidadCliente;
 using EvaluacionCore.Application.Features.Localidads.Commands.CreateLocalidad;
 using EvaluacionCore.Application.Features.Localidads.Commands.UpdateLocalidad;
@@ -13,6 +14,7 @@ using EvaluacionCore.Application.Features.Turnos.Dto;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using EvaluacionCore.Domain.Entities.Common;
 using EvaluacionCore.Domain.Entities.Marcaciones;
+using EvaluacionCore.Domain.Entities.Seguridad;
 using Microsoft.Extensions.Configuration;
 using System.Reflection;
 
@@ -37,6 +39,12 @@ public class MappingProfile : Profile
         CreateMap<SubclaseTurno, SubclaseTurnoType>().ReverseMap();
         CreateMap<TipoTurno, TipoTurnoType>().ReverseMap();
         CreateMap<TurnoType, Turno>().ReverseMap();
+        //CreateMap<LogLicenciaTerceroSG, LicenciaTerceroSG>().ReverseMap()
+        //    .ForMember();
+        CreateMap<LicenciaResponseType, LicenciaTerceroSG>().ReverseMap();
+        
+
+
         CreateMap<TurnoType, TurnoResponseType>().ReverseMap();
         CreateMap<LocalidadColaborador, AsignarLocalidadClienteRequest>().ReverseMap();
         CreateMap<ColaboradorByLocalidadResponseType, Cliente>().ReverseMap();
