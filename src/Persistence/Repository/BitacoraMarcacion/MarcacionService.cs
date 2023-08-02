@@ -913,7 +913,7 @@ public class MarcacionService : IMarcacion
             var rutaFinal = "";
             string estadoRecono = "PENDIENTE";
             #endregion
-            if (TipoCarga is null || TipoCarga == "txt")
+            if (TipoCarga is null || TipoCarga == "Txt")
             {
                 #region Conversion de Archivo
 
