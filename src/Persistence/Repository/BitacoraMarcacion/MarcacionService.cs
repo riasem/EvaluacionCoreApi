@@ -943,6 +943,7 @@ public class MarcacionService : IMarcacion
                 float Similarity = 0.0f;
                 try
                 {
+
                     //FSDK.ActivateLibrary("OzcLugSo7r/QQc5uUan/hLmtsyw7avFhRPiyRJFXPNg+qnV0VwOkJeefJTLGmmzM+Jclto9Mto6KY64OW419evp+KXZoti3d2dKhzvexBjdANFb93HpJVSYcHPrs/j+bn8iIEHSS8G7r5LV64TyzdUZdVkukOKuF1EeMj4C0/Js=");
                     var Licencia = await _repoLicencia.FirstOrDefaultAsync(new LicenciaByServicioSpec("SDK RECONOCIMIENTO FACIAL PAGO MENSUAL"));
 
@@ -953,9 +954,9 @@ public class MarcacionService : IMarcacion
                     var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Request.Identificacion));
                     if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
 
-                    FSDK.CImage imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
+                    
                     FSDK.CImage image = new FSDK.CImage(rutaFinal); // Imagen enviada
-
+                    FSDK.CImage imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
                     //File.Delete(rutaFinal);
 
                     byte[] template = new byte[FSDK.TemplateSize];
@@ -1174,6 +1175,8 @@ public class MarcacionService : IMarcacion
     {
         try
         {
+            //var dataProcesar = request.Where(x => x.Sincronizado == false && x.TipoMarcacion == "Offline").ToList();
+
             var firstMarcacion = request.OrderBy(x => x.Id).FirstOrDefault();
             var lastMarcacion = request.OrderByDescending(x => x.Id).FirstOrDefault();
             var totalMarcacion = request.Count();
@@ -1210,9 +1213,9 @@ public class MarcacionService : IMarcacion
                 CreateMarcacionOfflineRequest requestMarcacion = new()
                 {
                     CodigoBiometrico = cliente.CodigoConvivencia,
-                    Imagen = null,
+                    Imagen = marcacion.ImgBase,
                     IdCabecera = Guid.Parse(idcabecera.Data),
-                    Extension = null,
+                    Extension = ".png",
                     Time = marcacion.FechaMarcacion,
                     Identificacion = marcacion.Identificacion,
                     CantidadSincronizada = countMarcacion

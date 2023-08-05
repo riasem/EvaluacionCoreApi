@@ -8,7 +8,7 @@ namespace EvaluacionCore.Application.Features.Marcacion.Commands.CargaMarcacione
 
 public class CargaMarcacionesTxtRequest
 {
-    public string Id { get; set; }
+    public int Id { get; set; }
 
     public DateTime FechaMarcacion { get; set; }
 
