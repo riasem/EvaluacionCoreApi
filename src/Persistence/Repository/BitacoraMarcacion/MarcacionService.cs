@@ -909,9 +909,10 @@ public class MarcacionService : IMarcacion
 
 
             bool estadoValid = false;
-            string respMonitorId;
+            string respMonitorId = "";
             var rutaFinal = "";
             string estadoRecono = "PENDIENTE";
+            float Similarity = 0.0f;
             #endregion
             if (TipoCarga is null || TipoCarga == "Txt")
             {
@@ -940,7 +941,7 @@ public class MarcacionService : IMarcacion
                 #endregion
 
                 #region Validacion con el SDK
-                float Similarity = 0.0f;
+
                 try
                 {
 
@@ -996,6 +997,7 @@ public class MarcacionService : IMarcacion
 
                 #endregion
             }
+
             AccMonitorLog accMonitorLog = new()
             {
                 State = 0,
@@ -1009,28 +1011,39 @@ public class MarcacionService : IMarcacion
                 Create_Time = DateTime.Now
             };
 
-            var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
+            //Si viene por txt y no es correcto la comparativa no debe ingresar
+            //Si viene por null el tipo de carga si registra
+            //Si viene por txt y es correcto la comparativa si registra
+            //Si viene por Excel si registra
 
-            if (objResultado is null)
+            if (TipoCarga is null || (TipoCarga == "Txt" && estadoRecono == "CORRECTO") || (TipoCarga == "Excel"))
             {
-                return new ResponseType<string>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
+                var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
+
+                if (objResultado is null)
+                {
+                    return new ResponseType<string>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
+                }
+                respMonitorId = objResultado.Id.ToString();
+
+                #region Inicio de Reproceso de marcaciones offline
+
+                string query = "EXEC [dbo].[EAPP_SP_REPROCESA_MARCACIONES_OFFLINE] NULL, NULL, NULL, '" + Request.Time.Date.ToString("yyyy/MM/dd HH:mm:ss") + "' , '" + Request.Time.ToString("yyyy/MM/dd HH:mm:ss") + "',  '" + Request.Identificacion + "';";
+                using IDbConnection con = new SqlConnection(ConnectionString_Marc);
+                if (con.State == ConnectionState.Closed) con.Open();
+                con.Query(query);
+                if (con.State == ConnectionState.Open) con.Close();
+
+                #endregion
             }
-            respMonitorId = objResultado.Id.ToString();
 
-            #region Inicio de Reproceso de marcaciones offline
 
-            string query = "EXEC [dbo].[EAPP_SP_REPROCESA_MARCACIONES_OFFLINE] NULL, NULL, NULL, '" + Request.Time.Date.ToString("yyyy/MM/dd HH:mm:ss") + "' , '" + Request.Time.ToString("yyyy/MM/dd HH:mm:ss") + "',  '" + Request.Identificacion + "';";
-            using IDbConnection con = new SqlConnection(ConnectionString_Marc);
-            if (con.State == ConnectionState.Closed) con.Open();
-            con.Query(query);
-            if (con.State == ConnectionState.Open) con.Close();
 
-            #endregion
 
             MonitorLogFileOffline objFile = new()
             {
                 Id = Guid.NewGuid(),
-                MonitorId = respMonitorId,
+                MonitorId = respMonitorId == "" ? null:respMonitorId,
                 RutaImagen = rutaFinal == "" ? null : rutaFinal,
                 EstadoValidacion = estadoValid,
                 EstadoReconocimiento = estadoRecono,
