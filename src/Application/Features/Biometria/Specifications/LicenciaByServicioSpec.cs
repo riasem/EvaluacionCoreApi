@@ -12,9 +12,9 @@ namespace EvaluacionCore.Application.Features.Biometria.Specifications;
 public class LicenciaByServicioSpec : Specification<LicenciaTerceroSG>
 {
 
-    public LicenciaByServicioSpec(string tipoLicencia)
+    public LicenciaByServicioSpec(Guid tipoLicencia)
     {
-        Query.Where(x => x.TipoLicencia == tipoLicencia && x.Estado == "ACTIVO");
+        Query.Where(x => x.IdLicenciaTercero == tipoLicencia && x.Estado == "ACTIVO");
     }
 
 }

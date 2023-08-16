@@ -30,6 +30,9 @@ namespace Workflow.Persistence.Repository.Biometria
         private string nombreEnpoint = string.Empty;
         private string uriEndPoint = string.Empty;
 
+        // Guid de la Licencia de Luxand - SDK RECONOCIMIENTO FACIAL PAGO MENSUAL
+        private string GuidLicenciaLuxand = "A199017E-3EA1-4FB0-929D-BCB10B6E2F90";
+
         public BiometriaService(IConfiguration config, ILogger<BiometriaService> log, IRepositoryAsync<Cliente> repoCliente, IRepositoryAsync<CargoEje> repoCargoEje,
             IRepositoryAsync<LicenciaTerceroSG> repoLicencia)
         {
@@ -69,8 +72,7 @@ namespace Workflow.Persistence.Repository.Biometria
 
                     #region Luxand
 
-                    var Licencia = await _repoLicencia.FirstOrDefaultAsync(new LicenciaByServicioSpec("SDK RECONOCIMIENTO FACIAL PAGO MENSUAL"));
-
+                    var Licencia = await _repoLicencia.FirstOrDefaultAsync(new LicenciaByServicioSpec(Guid.Parse(GuidLicenciaLuxand)));
                     if (Licencia is null) return new ResponseType<string> { StatusCode = "101", Succeeded = true, Message = "No se ha podido obtener datos de Licencia" };
 
                     FSDK.ActivateLibrary(Licencia.CodigoLicencia);
@@ -190,8 +192,7 @@ namespace Workflow.Persistence.Repository.Biometria
 
 
                 #region Luxand
-                var Licencia = await _repoLicencia.FirstOrDefaultAsync(new LicenciaByServicioSpec("SDK RECONOCIMIENTO FACIAL PAGO MENSUAL"));
-
+                var Licencia = await _repoLicencia.FirstOrDefaultAsync(new LicenciaByServicioSpec(Guid.Parse(GuidLicenciaLuxand)));
                 if (Licencia is null) return new ResponseType<string> { StatusCode = "101", Succeeded = true, Message = "No se ha podido obtener datos de Licencia" };
 
                 FSDK.ActivateLibrary(Licencia.CodigoLicencia);

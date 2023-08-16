@@ -76,6 +76,9 @@ public class MarcacionService : IMarcacion
     private string NombreStoreProcedure = null;
     private string fotoPerfilDefecto = string.Empty;
 
+    // Guid de la Licencia de Luxand - SDK RECONOCIMIENTO FACIAL PAGO MENSUAL
+    private string GuidLicenciaLuxand = "A199017E-3EA1-4FB0-929D-BCB10B6E2F90";
+
     public MarcacionService(IRepositoryGRiasemAsync<UserInfo> repoUserInfoAsync, IRepositoryGRiasemAsync<CheckInOut> repoCheckInOutAsync, IRepositoryAsync<TurnoColaborador> repositoryTurnoCol,
         IRepositoryAsync<Localidad> repoLocalidad, ILogger<MarcacionColaborador> log, IEvaluacion repository,
         IRepositoryAsync<TurnoColaborador> repoTurnoCola, IConfiguration config, IRepositoryAsync<CargoEje> repoEje,
@@ -907,13 +910,14 @@ public class MarcacionService : IMarcacion
 
             await _repoAccLogMarcacionAsync.UpdateAsync(objUpdateCabecera);
 
+            #endregion
 
             bool estadoValid = false;
             string respMonitorId = "";
             var rutaFinal = "";
             string estadoRecono = "PENDIENTE";
             float Similarity = 0.0f;
-            #endregion
+
             if (TipoCarga is null || TipoCarga == "Txt")
             {
                 #region Conversion de Archivo
@@ -927,16 +931,10 @@ public class MarcacionService : IMarcacion
                     Directory.CreateDirectory(directorio);
                 }
 
-
                 string nombreFile = DateTime.Now.Year.ToString() + "-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString() + "-" + DateTime.Now.Hour.ToString() + "-" + DateTime.Now.Minute.ToString() + "-" + DateTime.Now.Second.ToString();
-
                 rutaFinal = directorio + nombreFile + "-" + Request.CodigoBiometrico.ToString() + Request.Extension;
 
                 await File.WriteAllBytesAsync(rutaFinal, bytes);
-                //using (var stream = System.IO.File.Create(rutaFinal))
-                //{
-                //    await Request.Imagen.CopyToAsync(stream);
-                //}
 
                 #endregion
 
@@ -946,9 +944,8 @@ public class MarcacionService : IMarcacion
                 {
 
                     //FSDK.ActivateLibrary("OzcLugSo7r/QQc5uUan/hLmtsyw7avFhRPiyRJFXPNg+qnV0VwOkJeefJTLGmmzM+Jclto9Mto6KY64OW419evp+KXZoti3d2dKhzvexBjdANFb93HpJVSYcHPrs/j+bn8iIEHSS8G7r5LV64TyzdUZdVkukOKuF1EeMj4C0/Js=");
-                    var Licencia = await _repoLicencia.FirstOrDefaultAsync(new LicenciaByServicioSpec("SDK RECONOCIMIENTO FACIAL PAGO MENSUAL"));
-
-                    if (Licencia is null) return new ResponseType<string> { StatusCode = "101", Succeeded = true, Message = "No se ha podido obtener datos de Licencia" };
+                    var Licencia = await _repoLicencia.FirstOrDefaultAsync(new LicenciaByServicioSpec(Guid.Parse(GuidLicenciaLuxand)));
+                    if (Licencia is null) return new ResponseType<string> { StatusCode = "101", Succeeded = true, Message = "Licencia no se encuentra disponible o activa" };
 
                     FSDK.ActivateLibrary(Licencia.CodigoLicencia);
                     FSDK.InitializeLibrary();
@@ -958,7 +955,6 @@ public class MarcacionService : IMarcacion
                     
                     FSDK.CImage image = new FSDK.CImage(rutaFinal); // Imagen enviada
                     FSDK.CImage imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
-                    //File.Delete(rutaFinal);
 
                     byte[] template = new byte[FSDK.TemplateSize];
                     byte[] templateImgCola = new byte[FSDK.TemplateSize];
@@ -975,70 +971,64 @@ public class MarcacionService : IMarcacion
                 catch (Exception)
                 {
                     estadoValid = false;
-
                 }
-
-
-
-
 
                 if (Similarity >= 0.85)
                 {
                     estadoRecono = "CORRECTO";
-
-
-
                 }
                 else
                 {
                     estadoRecono = "Novedad " + Math.Round((Similarity * 100), 0) + "% de Similitud.";
                     respMonitorId = null;
                 }
-
                 #endregion
             }
 
-            AccMonitorLog accMonitorLog = new()
-            {
-                State = 0,
-                Time = Request.Time,
-                Pin = Request.CodigoBiometrico,
-                Device_Id = deviceId,
-                Verified = 0,
-                Device_Name = deviceName,
-                Status = 1,
-                Description = "OS",
-                Create_Time = DateTime.Now
-            };
-
+            #region Registro de marcacacion Offline
             //Si viene por txt y no es correcto la comparativa no debe ingresar
             //Si viene por null el tipo de carga si registra
             //Si viene por txt y es correcto la comparativa si registra
             //Si viene por Excel si registra
 
-            if (TipoCarga is null || (TipoCarga == "Txt" && estadoRecono == "CORRECTO") || (TipoCarga == "Excel"))
+            // Tipo Carga es NULL cuando se realiza la carga de Marcaciones Offline mediante SINCRONIZACION DE MARCACIONES OFFLINE desde la TABLET
+            // Tipo Carga es Txt cuando se realiza la carga de Marcaciones Offline mediante la IMPORTACION DEL ARCHIVO TXT, que fuere almacenado en la MICRO SD de la TABLET, desde el Portal Web EnrolApp
+            // Tipo Carga es Excel cuando se realiza la carga de Marcaciones Offline mediante la IMPORTACION DEL ARCHIVO EXCEL desde el Portal Web EnrolApp
+            // Para poder registrar, como VALIDA, la marcacion offline en la tabla ACC_MONITOR_LOG se debe considerar que:
+            // Los Tipos de Carga NULL y TXT deben validar la IMAGEN CAPTURA al momento de la marcacion, con el RECONOCIMIENTO FACIAL del SDK de LUXAND
+            // Mientras que el Tipo de Carga Excel NO requiere de validacion por RECONOCIMIENTO FACIAL
+            if ((TipoCarga is null && estadoRecono == "CORRECTO") || (TipoCarga == "Txt" && estadoRecono == "CORRECTO") || (TipoCarga == "Excel"))
             {
+                #region Registro de marcacion en la tabla de registro de marcaciones ACC_MONITOR_LOG
+                AccMonitorLog accMonitorLog = new()
+                {
+                    State = 0,
+                    Time = Request.Time,
+                    Pin = Request.CodigoBiometrico,
+                    Device_Id = deviceId,
+                    Verified = 0,
+                    Device_Name = deviceName,
+                    Status = 1,
+                    Description = "OS",
+                    Create_Time = DateTime.Now
+                };
                 var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
-
                 if (objResultado is null)
                 {
                     return new ResponseType<string>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
                 }
                 respMonitorId = objResultado.Id.ToString();
+                #endregion
 
-                #region Inicio de Reproceso de marcaciones offline
-
+                #region Reproceso de marcaciones del colaborador para considerar la marcacion offline recientemente registrada
                 string query = "EXEC [dbo].[EAPP_SP_REPROCESA_MARCACIONES_OFFLINE] NULL, NULL, NULL, '" + Request.Time.Date.ToString("yyyy/MM/dd HH:mm:ss") + "' , '" + Request.Time.ToString("yyyy/MM/dd HH:mm:ss") + "',  '" + Request.Identificacion + "';";
                 using IDbConnection con = new SqlConnection(ConnectionString_Marc);
                 if (con.State == ConnectionState.Closed) con.Open();
                 con.Query(query);
                 if (con.State == ConnectionState.Open) con.Close();
-
                 #endregion
             }
-
-
-
+            #endregion
 
             MonitorLogFileOffline objFile = new()
             {
@@ -1052,14 +1042,7 @@ public class MarcacionService : IMarcacion
                 Identificacion = Request.Identificacion,
                 Time = Request.Time
             };
-
-
-
-
-
             var result = await _repoMonitorLogFileAsync.AddAsync(objFile);
-
-
 
             return new ResponseType<string>() { Message = "Marcación Offline registrada correctamente", StatusCode = "100", Succeeded = true };
         }
@@ -1090,10 +1073,6 @@ public class MarcacionService : IMarcacion
             return new ResponseType<List<NovedadesMarcacionOfflineResponse>>() { Message = CodeMessageResponse.GetMessageByCode("002"), StatusCode = "002", Succeeded = false };
 
         }
-        
-
-
-
     }
 
 
