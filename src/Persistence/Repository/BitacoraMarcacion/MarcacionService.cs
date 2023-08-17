@@ -947,6 +947,7 @@ public class MarcacionService : IMarcacion
                     var Licencia = await _repoLicencia.FirstOrDefaultAsync(new LicenciaByServicioSpec(Guid.Parse(GuidLicenciaLuxand)));
                     if (Licencia is null) return new ResponseType<string> { StatusCode = "101", Succeeded = true, Message = "Licencia no se encuentra disponible o activa" };
 
+                    // Obtener la Licencia del SDK de Luxand en la parametrizacion
                     FSDK.ActivateLibrary(Licencia.CodigoLicencia);
                     FSDK.InitializeLibrary();
                     var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Request.Identificacion));
