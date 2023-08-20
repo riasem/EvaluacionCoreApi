@@ -51,8 +51,6 @@ public class Localidad
     [Column("fechaModificacion", Order = 11, TypeName = "datetime2")]
     public DateTime? FechaModificacion { get; set; }
 
-
     public virtual ICollection<LocalidadColaborador> LocalidadColaboradores { get; set; }
-
+    public virtual ICollection<LocalidadAdministrador> LocalidadAdministrador { get; set; }
 }
-
