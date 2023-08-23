@@ -13,7 +13,6 @@ using EvaluacionCore.Application.Features.Biometria.Interfaces;
 using EvaluacionCore.Application.Features.Biometria.Specifications;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Dto;
 using EvaluacionCore.Application.Features.Common.Specifications;
-using EvaluacionCore.Application.Features.EvalCore.Dto;
 using EvaluacionCore.Application.Features.EvalCore.Interfaces;
 using EvaluacionCore.Application.Features.Locacions.Specifications;
 using EvaluacionCore.Application.Features.Marcacion.Commands.CargaMarcacionesExcel;
@@ -36,9 +35,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Globalization;
+<<<<<<< HEAD
 using System.Text.Json.Serialization;
 using TurnoLaboral = EvaluacionCore.Application.Features.Marcacion.Dto.TurnoLaboral;
 using TurnoReceso = EvaluacionCore.Application.Features.Marcacion.Dto.TurnoReceso;
+=======
+>>>>>>> parent of fe9178c (Incluir a Administradores en Listado de Sincronizacion de Colaboradores)
 
 namespace EvaluacionCore.Persistence.Repository.BitacoraMarcacion;
 
@@ -64,8 +66,7 @@ public class MarcacionService : IMarcacion
     private readonly IRepositoryAsync<LocalidadColaborador> _repoLocalColab;
     private readonly IRepositoryGRiasemAsync<MarcacionOffline> _repoMarcacionOffline;
     private readonly IRepositoryAsync<LicenciaTerceroSG> _repoLicencia;
-    private readonly IRepositoryAsync<LocalidadAdministrador> _repoLocalAdministrador;
-
+    
 
     private readonly IConfiguration _config;
     private readonly IBiometria _repoBiometriaAsync;
@@ -91,7 +92,7 @@ public class MarcacionService : IMarcacion
         IRepositoryAsync<Cliente> repoCliente, IRepositoryAsync<LocalidadColaborador> repoLocalColab,
         IRepositoryGRiasemAsync<AccMonitoLogRiasem> repoMonitoLogRiasemAsync, IRepositoryGRiasemAsync<AlertasNovedadMarcacion> repoNovedadMarcacion, IBiometria repoBiometriaAsync, IRepositoryGRiasemAsync<Machines> repoMachinesAsync,IMapper mapper, IRepositoryGRiasemAsync<MonitorLogFileOffline> repoMonitorLogFileAsync,
         IRepositoryGRiasemAsync<MarcacionOffline> repoMarcacionOffline, IRepositoryGRiasemAsync<AccLogMarcacionOffline> repoAccLogMarcacionAsync, IRepositoryGRiasemAsync<DispositivoMarcacion> repoDispMarcaAsync,
-        IMarcacionOffline MarcacionesOffline, IRepositoryAsync<LicenciaTerceroSG> repoLicencia, IRepositoryAsync<LocalidadAdministrador> repoLocalAdministrador)
+        IMarcacionOffline MarcacionesOffline, IRepositoryAsync<LicenciaTerceroSG> repoLicencia)
     {
         _EvaluacionAsync = repository;
         _MarcacionesOffline = MarcacionesOffline;
@@ -121,7 +122,6 @@ public class MarcacionService : IMarcacion
         _repoMonitorLogFileAsync = repoMonitorLogFileAsync;
         _repoDispMarcaAsync = repoDispMarcaAsync;
         _repoLicencia = repoLicencia;
-        _repoLocalAdministrador = repoLocalAdministrador;
     }
     public async Task<ResponseType<MarcacionResponseType>> CreateMarcacion(CreateMarcacionRequest Request, CancellationToken cancellationToken)
     {
@@ -873,21 +873,19 @@ public class MarcacionService : IMarcacion
         try
         {
             var colaboradores = await _repoLocalColab.ListAsync(new GetListadoPersonalByLocalidadSpec(IdentificacionSesion), cancellationToken);
+<<<<<<< HEAD
             var localidadDispositivo = await _repoLocalColab.ListAsync(new GetListadoLocalidadSpec(IdentificacionSesion), cancellationToken);
             var localidad = localidadDispositivo.FirstOrDefault().Localidad.Codigo;
             var administradores = await _repoLocalAdministrador.ListAsync(new GetListadoAdministradorByLocalidadSpec(localidad), cancellationToken);
+=======
+>>>>>>> parent of fe9178c (Incluir a Administradores en Listado de Sincronizacion de Colaboradores)
 
-            if (!colaboradores.Any() && !administradores.Any()) return new ResponseType<List<ColaboradorByLocalidadResponseType>>() { Message = "No existen Colaboradores y Administradores en la localidad", StatusCode = "001", Succeeded = true };
-
-            if (colaboradores.Any()) {
-                colaboradores = colaboradores.DistinctBy(x => x.Colaborador.Identificacion).ToList();
-            }
-            if (administradores.Any()) {
-                administradores = administradores.DistinctBy(x => x.Identificacion).ToList();
-            }
+            if (!colaboradores.Any()) return new ResponseType<List<ColaboradorByLocalidadResponseType>>() { Message = "No existen Colaboradores en la localidad", StatusCode = "001", Succeeded = true };
+            colaboradores = colaboradores.DistinctBy(x => x.Colaborador.Identificacion).ToList();
 
             var result = _mapper.Map<List<ColaboradorByLocalidadResponseType>>(colaboradores);
 
+<<<<<<< HEAD
             // Adiciona, a la lista de colaboradores, los administradores del dispositivo de la localidad, si hubieren
             foreach (var administrador in administradores) {
                 var colaboradorByLocalidadResponse = new ColaboradorByLocalidadResponseType()
@@ -907,11 +905,15 @@ public class MarcacionService : IMarcacion
                 result.Add(colaboradorByLocalidadResponse);
             }
 
+=======
+>>>>>>> parent of fe9178c (Incluir a Administradores en Listado de Sincronizacion de Colaboradores)
             return new ResponseType<List<ColaboradorByLocalidadResponseType>>() { Data = result.OrderBy(x => x.Identificacion).ToList(), Message = CodeMessageResponse.GetMessageByCode("000"),Succeeded = true, StatusCode = "000"};
         }
         catch (Exception ex)
         {
+
             _log.LogError(ex, string.Empty);
+
             return new ResponseType<List<ColaboradorByLocalidadResponseType>>() { Message = CodeMessageResponse.GetMessageByCode("002"), StatusCode = "002", Succeeded = false};
         }
 

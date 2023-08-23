@@ -51,6 +51,13 @@ public class Localidad
     [Column("fechaModificacion", Order = 11, TypeName = "datetime2")]
     public DateTime? FechaModificacion { get; set; }
 
+
     public virtual ICollection<LocalidadColaborador> LocalidadColaboradores { get; set; }
+<<<<<<< HEAD
     public virtual ICollection<LocalidadAdministrador> LocalidadAdministradores { get; set; }
 }
+=======
+
+}
+
+>>>>>>> parent of fe9178c (Incluir a Administradores en Listado de Sincronizacion de Colaboradores)
