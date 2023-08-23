@@ -928,6 +928,8 @@ public class MarcacionService : IMarcacion
             var deviceId = 999;
             var deviceName = "EnrolApp";
 
+            var objA = await _repoEje.ListAsync();
+
             var objUserSesion = await _repoEje.FirstOrDefaultAsync(new GetEjeByIdentificacionSpec(IdentificacionSesion));
             if (objUserSesion != null)
             {
