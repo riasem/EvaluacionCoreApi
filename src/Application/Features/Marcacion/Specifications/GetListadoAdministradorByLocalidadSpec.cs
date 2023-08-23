@@ -5,10 +5,11 @@ namespace EvaluacionCore.Application.Features.Marcacion.Specifications;
 
 public class GetListadoAdministradorByLocalidadSpec : Specification<LocalidadAdministrador>
 {
-    public GetListadoAdministradorByLocalidadSpec(string Identificacion)
+    public GetListadoAdministradorByLocalidadSpec(string codigoLocalidad)
     {
-        Query.Where(p => p.Localidad.LocalidadAdministrador.Where(x => x.Identificacion == Identificacion).Any() && p.Estado == "A" && p.Localidad.Estado == "A")
-            .Include(p => p.Localidad.Empresa)
-            .OrderBy(p => p.Identificacion);
+        Query.Where(p => p.Localidad.Codigo == codigoLocalidad && p.Estado == "A" && p.Localidad.Estado == "A")
+            .Include(p => p.Localidad)
+                .ThenInclude(p => p.Empresa)
+        .OrderBy(p => p.Identificacion);
     }
 }

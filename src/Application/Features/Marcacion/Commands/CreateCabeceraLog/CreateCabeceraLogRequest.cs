@@ -23,6 +23,7 @@ public class CreateCabeceraLogRequest
     public string TipoCarga { get; set; }
 
     public string Estado { get; set; }
+    public string TipoComunicacion { get; set; }
 
 
 }

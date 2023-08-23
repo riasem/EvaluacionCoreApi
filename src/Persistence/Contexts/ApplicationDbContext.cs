@@ -1,4 +1,5 @@
 ﻿using EnrolApp.Domain.Entities.Horario;
+using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using EvaluacionCore.Domain.Entities.Calendario;
 using EvaluacionCore.Domain.Entities.Common;
@@ -56,9 +57,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<LicenciaTerceroSG> LicenciaTerceroSG { get; set; }
     public DbSet<LogLicenciaTerceroSG> LogLicenciaTerceroSG { get; set; }
     public DbSet<ServicioTerceroSG> ServicioTerceroSG { get; set; }
+    public DbSet<LocalidadAdministrador> LocalidadAdministrador { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
-
  
 }

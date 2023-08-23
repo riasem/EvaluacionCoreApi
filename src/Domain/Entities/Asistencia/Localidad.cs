@@ -52,5 +52,5 @@ public class Localidad
     public DateTime? FechaModificacion { get; set; }
 
     public virtual ICollection<LocalidadColaborador> LocalidadColaboradores { get; set; }
-    public virtual ICollection<LocalidadAdministrador> LocalidadAdministrador { get; set; }
+    public virtual ICollection<LocalidadAdministrador> LocalidadAdministradores { get; set; }
 }

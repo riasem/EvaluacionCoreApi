@@ -37,6 +37,8 @@ using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Globalization;
 using System.Text.Json.Serialization;
+using TurnoLaboral = EvaluacionCore.Application.Features.Marcacion.Dto.TurnoLaboral;
+using TurnoReceso = EvaluacionCore.Application.Features.Marcacion.Dto.TurnoReceso;
 
 namespace EvaluacionCore.Persistence.Repository.BitacoraMarcacion;
 
@@ -148,7 +150,15 @@ public class MarcacionService : IMarcacion
                 deviceName = objMachines.MachineAlias;
             }
 
+            // Por defecto asignaremos el tipo de Comunicacion "RED"
+            int tipoComunicacion = 3;
+            // Si se recibe el tipo de Comunicacion desde el dispositivo de marcacion
+            if (Request.TipoComunicacion != null)
+            {
+                tipoComunicacion = Int32.Parse(Request.TipoComunicacion);
+            }
 
+            // Define el registro de marcacion que se almancenara en ACC_MONITOR_LOG
             AccMonitorLog accMonitorLog = new()
             {
                 State = 0,
@@ -158,7 +168,8 @@ public class MarcacionService : IMarcacion
                 Verified = 0,
                 Device_Name = deviceName, //parametrizar desde el request
                 Status = 1,
-                Create_Time = DateTime.Now
+                Create_Time = DateTime.Now,
+                Log_Tag = tipoComunicacion
             };
 
             var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
@@ -200,11 +211,6 @@ public class MarcacionService : IMarcacion
 
             return new ResponseType<MarcacionResponseType>() { Data = objResultFinal, Message = "Marcación registrada correctamente", StatusCode = "100", Succeeded = true };
 
-
-
-            //}
-            //return new ResponseType<MarcacionResponseType>() { Message = "Debe marcar desde su dispositivo movil.", Succeeded = true, StatusCode = "101" };
-
         }
         catch (Exception ex)
         {
@@ -242,14 +248,14 @@ public class MarcacionService : IMarcacion
 
         if (resultBiometria.StatusCode != "100") return new ResponseType<CreateMarcacionResponseType>() { Message = resultBiometria.Message, StatusCode = resultBiometria.StatusCode, Succeeded = resultBiometria.Succeeded };
 
-
-
+        // Define el registro de marcacion que se almacenara en ACC_MONITOR_LOG
         CreateMarcacionRequest requestMarcacion = new()
         {
             CodigoEmpleado = objLocalidadColaborador.ElementAt(0).Colaborador.CodigoConvivencia,
             DispositivoId = Request.DispositivoId,
             LocalidadId = Request.LocalidadId,
-            IdentificacionSesion = IdentificacionSesion
+            IdentificacionSesion = IdentificacionSesion,
+            TipoComunicacion = Request.TipoComunicacion
         };
 
 
@@ -297,7 +303,8 @@ public class MarcacionService : IMarcacion
             CodigoEmpleado = objLocalidadColaborador.ElementAt(0).Colaborador.CodigoConvivencia,
             DispositivoId = Request.DispositivoId,
             //LocalidadId = Request.LocalidadId,
-            IdentificacionSesion = IdentificacionSesion
+            IdentificacionSesion = IdentificacionSesion,
+            TipoComunicacion = Request.TipoComunicacion
         };
 
 
@@ -461,6 +468,8 @@ public class MarcacionService : IMarcacion
         try
         {
             string tipoMarcacion = string.IsNullOrEmpty(Request.TipoMarcacion) ? string.Empty : Request.TipoMarcacion.ToUpper();
+
+            // Se estable que el device_id correspondiente al canal Web es el 998
             int deviceId = 998;
             string deviceName = "ENROLAPP WEB";
 
@@ -500,6 +509,7 @@ public class MarcacionService : IMarcacion
             //if (!localidades.Any())
             //    return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = "Colaborador no corresponde a la localidad", StatusCode = "101", Succeeded = false };
 
+            // Si el tipo de Marcacion es con Reconocimiento Facial
             if (tipoMarcacion == "F")
             {
                 if (colaborador.FacialPersonId == null)
@@ -527,6 +537,15 @@ public class MarcacionService : IMarcacion
             #region Registro de la marcación 
             var marcacionColaborador = DateTime.Now;
 
+            // Por defecto asignaremos el tipo de Comunicacion "RED"
+            int tipoComunicacion = 3;
+            // Si se recibe el tipo de Comunicacion desde el dispositivo de marcacion
+            if (Request.TipoComunicacion != null)
+            {
+                tipoComunicacion = Int32.Parse(Request.TipoComunicacion);
+            }
+
+            // Define el registro de marcacion que se almancenara en ACC_MONITOR_LOG
             AccMonitorLog accMonitorLog = new()
             {
                 State = 0,
@@ -536,7 +555,8 @@ public class MarcacionService : IMarcacion
                 Verified = 0,
                 Device_Name = deviceName,
                 Status = 1,
-                Create_Time = DateTime.Now
+                Create_Time = DateTime.Now,
+                Log_Tag = tipoComunicacion
             };
 
             var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
@@ -657,7 +677,7 @@ public class MarcacionService : IMarcacion
                 
                 for (DateTime dtm = FDesde; dtm <= FHasta; dtm = dtm.AddDays(1))
                 {
-                    List<Novedad> novedades = new();
+                    List<Application.Features.Marcacion.Dto.Novedad> novedades = new();
                     //Se obtiene el turno laboral asignado al colaborador de la fecha en proceso
                     var turnoFiltro = await _repositoryTurnoColAsync.FirstOrDefaultAsync(new TurnoColaboradorTreeSpec(itemCol.Identificacion, dtm), cancellationToken);
 
@@ -797,7 +817,7 @@ public class MarcacionService : IMarcacion
                     {
                         if (filtroNovedades.Contains(item.TipoNovedad))
                         {
-                            novedades.Add(new Novedad
+                            novedades.Add(new Application.Features.Marcacion.Dto.Novedad
                             {
                                 Descripcion = item.DescripcionMensaje,
                                 MinutosNovedad = "",
@@ -853,7 +873,9 @@ public class MarcacionService : IMarcacion
         try
         {
             var colaboradores = await _repoLocalColab.ListAsync(new GetListadoPersonalByLocalidadSpec(IdentificacionSesion), cancellationToken);
-            var administradores = await _repoLocalAdministrador.ListAsync(new GetListadoAdministradorByLocalidadSpec(IdentificacionSesion), cancellationToken);
+            var localidadDispositivo = await _repoLocalColab.ListAsync(new GetListadoLocalidadSpec(IdentificacionSesion), cancellationToken);
+            var localidad = localidadDispositivo.FirstOrDefault().Localidad.Codigo;
+            var administradores = await _repoLocalAdministrador.ListAsync(new GetListadoAdministradorByLocalidadSpec(localidad), cancellationToken);
 
             if (!colaboradores.Any() && !administradores.Any()) return new ResponseType<List<ColaboradorByLocalidadResponseType>>() { Message = "No existen Colaboradores y Administradores en la localidad", StatusCode = "001", Succeeded = true };
 
@@ -873,8 +895,8 @@ public class MarcacionService : IMarcacion
                     Identificacion = administrador.Identificacion,
                     Empleado = null,
                     RutaImagen = null,
-                    NombreUdn = administrador.Localidad.Empresa.RazonSocial,
-                    CodigoUdn = administrador.Localidad.Empresa.Codigo,
+                    NombreUdn = null, //administrador.Localidad.Empresa.RazonSocial,
+                    CodigoUdn = null, //administrador.Localidad.Empresa.Codigo,
                     CodigoBiometrico = null,
                     Administrador = "S",
                     Clave = administrador.ClaveOffLine
@@ -902,6 +924,7 @@ public class MarcacionService : IMarcacion
         {
             MarcacionResponseType objResultFinal = new();
 
+            // Por defecto define el device_id 999 que representa al dispositivo de marcacion celular
             var deviceId = 999;
             var deviceName = "EnrolApp";
 
@@ -945,6 +968,9 @@ public class MarcacionService : IMarcacion
             var rutaFinal = "";
             string estadoRecono = "PENDIENTE";
             float Similarity = 0.0f;
+
+            // Se debe evaluar si es dispositivo exige o no la validacion por reconocimiento facial en el procesamiento
+            // de marcaciones offline, en la tabla CargoEje atributo sdkLuxandOffline (1) Si es requerido y (0) No es requerido
 
             if (TipoCarga is null || TipoCarga == "Txt")
             {
@@ -1002,6 +1028,8 @@ public class MarcacionService : IMarcacion
                     estadoValid = false;
                 }
 
+                // Se debe evaluar el valor de tolerancia de la similitud en el reconocimiento facial, establecido para el dispositivo, en el procesamiento
+                // de marcaciones offline, en la tabla CargoEje atributo similarityOffline, debiendo fluctuar entre 0.00 y 1.00
                 if (Similarity >= 0.85)
                 {
                     estadoRecono = "CORRECTO";
@@ -1014,12 +1042,15 @@ public class MarcacionService : IMarcacion
                 #endregion
             }
 
-            #region Registro de marcacacion Offline
-            //Si viene por txt y no es correcto la comparativa no debe ingresar
-            //Si viene por null el tipo de carga si registra
-            //Si viene por txt y es correcto la comparativa si registra
-            //Si viene por Excel si registra
+            // Por defecto asignaremos el tipo de Comunicacion "RED"
+            int tipoComunicacion = 3;
+            // Si se recibe el tipo de Comunicacion desde el dispositivo de marcacion
+            if (Request.TipoComunicacion != null)
+            {
+                tipoComunicacion = Int32.Parse(Request.TipoComunicacion);
+            }
 
+            #region Registro de marcacacion Offline
             // Tipo Carga es NULL cuando se realiza la carga de Marcaciones Offline mediante SINCRONIZACION DE MARCACIONES OFFLINE desde la TABLET
             // Tipo Carga es Txt cuando se realiza la carga de Marcaciones Offline mediante la IMPORTACION DEL ARCHIVO TXT, que fuere almacenado en la MICRO SD de la TABLET, desde el Portal Web EnrolApp
             // Tipo Carga es Excel cuando se realiza la carga de Marcaciones Offline mediante la IMPORTACION DEL ARCHIVO EXCEL desde el Portal Web EnrolApp
@@ -1029,6 +1060,8 @@ public class MarcacionService : IMarcacion
             if ((TipoCarga is null && estadoRecono == "CORRECTO") || (TipoCarga == "Txt" && estadoRecono == "CORRECTO") || (TipoCarga == "Excel"))
             {
                 #region Registro de marcacion en la tabla de registro de marcaciones ACC_MONITOR_LOG
+
+                // Define el registro de marcacion que se almancenara en ACC_MONITOR_LOG
                 AccMonitorLog accMonitorLog = new()
                 {
                     State = 0,
@@ -1039,7 +1072,8 @@ public class MarcacionService : IMarcacion
                     Device_Name = deviceName,
                     Status = 1,
                     Description = "OS",
-                    Create_Time = DateTime.Now
+                    Create_Time = DateTime.Now,
+                    Log_Tag = tipoComunicacion
                 };
                 var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
                 if (objResultado is null)
@@ -1069,7 +1103,8 @@ public class MarcacionService : IMarcacion
                 FechaRegistro = DateTime.Now,
                 UsuarioCreacion = IdentificacionSesion,
                 Identificacion = Request.Identificacion,
-                Time = Request.Time
+                Time = Request.Time,
+                TipoComunicacion = tipoComunicacion
             };
             var result = await _repoMonitorLogFileAsync.AddAsync(objFile);
 
@@ -1142,7 +1177,8 @@ public class MarcacionService : IMarcacion
             FechaSincronizacion = DateTime.Now,
             IdentificacionFin = lastMarcacion.Identificacion,
             IdentificacionInicio = firstMarcacion.Identificacion,
-            TipoCarga = tipoCarga
+            TipoCarga = tipoCarga,
+            TipoComunicacion = "3" // Tipo Comunicacion por RED
         };
 
 
@@ -1169,7 +1205,8 @@ public class MarcacionService : IMarcacion
                 Extension = null,
                 Time = marcacion.Time,
                 Identificacion = marcacion.Identificacion,
-                CantidadSincronizada = countMarcacion
+                CantidadSincronizada = countMarcacion,
+                TipoComunicacion = "3" // Tipo de Comunicacion RED
                 
             };
             var resultMarcacion = await CreateMarcacionOffline(requestMarcacion,marcacion.IdentificacionDispositivo, tipoCarga, cancellationToken);
@@ -1212,7 +1249,8 @@ public class MarcacionService : IMarcacion
                 FechaSincronizacion = DateTime.Now,
                 IdentificacionFin = lastMarcacion.Identificacion,
                 IdentificacionInicio = firstMarcacion.Identificacion,
-                TipoCarga = tipoCarga
+                TipoCarga = tipoCarga,
+                TipoComunicacion = "3" // Tipo Comunicacion por RED
             };
 
 
@@ -1239,7 +1277,8 @@ public class MarcacionService : IMarcacion
                     Extension = ".png",
                     Time = marcacion.FechaMarcacion,
                     Identificacion = marcacion.Identificacion,
-                    CantidadSincronizada = countMarcacion
+                    CantidadSincronizada = countMarcacion,
+                    TipoComunicacion = "3" // Tipo Comunicacion por RED
 
                 };
                 var resultMarcacion = await CreateMarcacionOffline(requestMarcacion, marcacion.IdentificacionDispositivo, tipoCarga, cancellationToken);

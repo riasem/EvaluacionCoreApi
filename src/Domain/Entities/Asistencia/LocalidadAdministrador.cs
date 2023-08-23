@@ -9,7 +9,7 @@ public class LocalidadAdministrador
     [Key]
     [Required]
     [Column("idLocalidadAdministrador", Order = 0, TypeName = "uniqueidentifier")]
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid IdLocalidadAdministrador { get; set; } = Guid.NewGuid();
 
     [Column("idLocalidad", Order = 1, TypeName = "uniqueidentifier")]
     public Guid IdLocalidad { get; set; }
@@ -37,5 +37,4 @@ public class LocalidadAdministrador
 
     [Column("fechaModificacion", Order = 8, TypeName = "datetime2")]
     public DateTime? FechaModificacion { get; set; }
-
 }
