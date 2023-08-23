@@ -17,12 +17,6 @@ namespace EnrolApp.Persistence.Configurations
               .IsRequired()
               .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasMany(g => g.LocalidadAdministradores)
-              .WithOne(g => g.Localidad)
-              .HasForeignKey(g => g.IdLocalidad)
-              .IsRequired()
-              .OnDelete(DeleteBehavior.Cascade);
-
             builder.Property(x => x.Latitud)
                 .IsRequired();
             builder.Property(x => x.Longitud)

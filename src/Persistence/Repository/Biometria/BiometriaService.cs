@@ -50,8 +50,7 @@ namespace Workflow.Persistence.Repository.Biometria
 
             var identSesion = await _repoCargoEje.FirstOrDefaultAsync(new GetEjeByIdentificacionSpec(IdentificacionSesion));
 
-            bool? apiLuxand = identSesion.ApiLuxand;
-            if (identSesion is not null && apiLuxand == true)
+            if (identSesion is not null && identSesion.ApiLuxand)
             {
                 #region Autenticación con SDK Comentado
 

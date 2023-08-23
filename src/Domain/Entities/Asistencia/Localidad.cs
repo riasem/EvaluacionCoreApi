@@ -53,11 +53,6 @@ public class Localidad
 
 
     public virtual ICollection<LocalidadColaborador> LocalidadColaboradores { get; set; }
-<<<<<<< HEAD
-    public virtual ICollection<LocalidadAdministrador> LocalidadAdministradores { get; set; }
-}
-=======
 
 }
 
->>>>>>> parent of fe9178c (Incluir a Administradores en Listado de Sincronizacion de Colaboradores)

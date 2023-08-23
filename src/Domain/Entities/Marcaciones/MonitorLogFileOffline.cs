@@ -39,8 +39,5 @@ public class MonitorLogFileOffline
     [Column("usuarioCreacion",TypeName = "varchar")]
     public string UsuarioCreacion { get; set; }
 
-    [Column("tipoComunicacion", TypeName = "int")]
-    public int TipoComunicacion { get; set; }
-
 
 }

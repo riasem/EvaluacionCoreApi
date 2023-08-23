@@ -31,8 +31,7 @@ public class CreateMarcacionOfflineRequest
     [JsonPropertyName("cantidadSincronizada")]
     public int CantidadSincronizada { get; set; }
 
-    public string TipoComunicacion { get; set; }
-
     //[JsonPropertyName("imagen")]
     //public IFormFile Imagen { get; set; }
+
 }

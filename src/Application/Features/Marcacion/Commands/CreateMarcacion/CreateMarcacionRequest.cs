@@ -22,7 +22,5 @@ public class CreateMarcacionRequest
     [JsonPropertyName("identificacionSesion")]
     public string IdentificacionSesion { get; set; }
 
-    [JsonPropertyName("tipoComunicacion")]
-    public string TipoComunicacion { get; set; }
 
 }
