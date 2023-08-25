@@ -55,5 +55,5 @@ public class AccLogMarcacionOffline
 	public string TipoCarga { get; set; }
 
     [Column("tipoComunicacion", TypeName = "int")]
-    public int TipoComunicacion{ get; set; }
+    public int? TipoComunicacion{ get; set; }
 }

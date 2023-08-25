@@ -22,13 +22,13 @@ public class MonitorLogFileOffline
     public string RutaImagen { get; set; }
 
     [Column("estadoValidacion", TypeName ="bit")]
-    public bool EstadoValidacion { get; set; }
+    public bool? EstadoValidacion { get; set; }
 
     [Column("estadoReconocimiento", TypeName = "varchar")]
     public string EstadoReconocimiento { get; set; }
 
     [Column("fechaRegistro",TypeName = "datetime2")]
-    public DateTime FechaRegistro { get; set; }
+    public DateTime? FechaRegistro { get; set; }
 
     [Column("identificacion",TypeName = "varchar")]
     public string Identificacion { get; set; }
@@ -40,7 +40,8 @@ public class MonitorLogFileOffline
     public string UsuarioCreacion { get; set; }
 
     [Column("tipoComunicacion", TypeName = "int")]
-    public int TipoComunicacion { get; set; }
+    public int? TipoComunicacion { get; set; }
 
-
+    [Column("mensajeError", TypeName = "varchar")]
+    public string MensajeError { get; set; }
 }

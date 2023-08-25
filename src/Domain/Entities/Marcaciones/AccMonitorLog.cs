@@ -71,23 +71,4 @@ public class AccMonitorLog
     [Column("event_point_name", Order = 21)]
     public string Event_Point_Name { get; set; }
 
-
-    //[Column("idSolicitud")]
-    //public Guid? IdSolicitud { get; set; }
-
-    //[Column("idFeature")]
-    //public Guid? IdFeature { get; set; }
-
-    //[Column("estado")]
-    //public string Estado { get; set; }
-
-    //[Column("fechaSolicitud")]
-    //public DateTime? FechaSolicitud { get; set; }
-
-    //[Column("usuarioSolicitud")]
-    //public string UsuarioSolicitud { get; set; }
-
-    //[Column("estadoSolicitud")]
-    //public Guid? EstadoSolicitud { get; set; }
-
 }

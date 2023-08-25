@@ -127,7 +127,17 @@ public class MarcacionService : IMarcacion
     {
         try
         {
+            string descripcion = "";
+            var consultaMonitoLogRiasem = Request.ConsultaMonitoLogRiasem;
             var marcacionColaborador = DateTime.Now;
+            if (Request.Time != DateTime.MinValue)
+            {
+                marcacionColaborador = Request.Time;
+            }
+            if (Request.Descripcion is not null)
+            {
+                descripcion = Request.Descripcion;
+            }
             MarcacionResponseType objResultFinal = new();
 
             //var objLocalidad = await _repoLocalidad.FirstOrDefaultAsync(new GetLocalidadByIdSpec(Request.LocalidadId, Request.CodigoEmpleado), cancellationToken);
@@ -169,7 +179,8 @@ public class MarcacionService : IMarcacion
                 Device_Name = deviceName, //parametrizar desde el request
                 Status = 1,
                 Create_Time = DateTime.Now,
-                Log_Tag = tipoComunicacion
+                Log_Tag = tipoComunicacion,
+                Description = descripcion
             };
 
             var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
@@ -177,25 +188,36 @@ public class MarcacionService : IMarcacion
             {
                 return new ResponseType<MarcacionResponseType>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
             }
-            //await Task.Delay(1500, cancellationToken);
-            var marcacionEmpl = await _repoMonitoLogRiasemAsync.FirstOrDefaultAsync(new MarcacionByColaboradorAndTime(objResultado.Pin, objResultado.Time, deviceId), cancellationToken);
-
-            if (marcacionEmpl is not null)
+            if (consultaMonitoLogRiasem == true)
             {
-                //string tipoMarcacion = EvaluaTipoMarcacion(marcacionEmpl.Result.State);
-                //string estadoMarcacion = EvaluaEstadoMarcacion(marcacionEmpl.Result.Description);
+                //await Task.Delay(1500, cancellationToken);
+                var marcacionEmpl = await _repoMonitoLogRiasemAsync.FirstOrDefaultAsync(new MarcacionByColaboradorAndTime(objResultado.Pin, objResultado.Time, deviceId), cancellationToken);
 
+                if (marcacionEmpl is not null)
+                {
+                    //string tipoMarcacion = EvaluaTipoMarcacion(marcacionEmpl.Result.State);
+                    //string estadoMarcacion = EvaluaEstadoMarcacion(marcacionEmpl.Result.Description);
+
+                    objResultFinal = new()
+                    {
+                        //MarcacionId = Guid.Parse(marcacionid),  TEMPORAL SE COMENTA HASTA REGULARIZAR 
+                        MarcacionId = marcacionEmpl.Id,
+                        TipoMarcacion = marcacionEmpl.Estado,
+                        EstadoMarcacion = marcacionEmpl.Description
+                    };
+                }
+                else
+                {
+                    objResultFinal = null;
+                }
+            } else
+            {
                 objResultFinal = new()
                 {
-                    //MarcacionId = Guid.Parse(marcacionid),  TEMPORAL SE COMENTA HASTA REGULARIZAR 
-                    MarcacionId = marcacionEmpl.Id,
-                    TipoMarcacion = marcacionEmpl.Estado,
-                    EstadoMarcacion = marcacionEmpl.Description
+                    MarcacionId = objResultado.Id,
+                    TipoMarcacion = null,
+                    EstadoMarcacion = null
                 };
-            }
-            else
-            {
-                objResultFinal = null;
             }
 
             //var colaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByCodBiometrico(Request.CodigoEmpleado), cancellationToken);
@@ -244,7 +266,8 @@ public class MarcacionService : IMarcacion
             Nombre = Request.Nombre,
             Identificacion = Request.Identificacion
         };
-        ResponseType<string> resultBiometria = await _repoBiometriaAsync.AuthenticationFacialAsync(requestFacial, IdentificacionSesion);
+        string OnlineOffline = "ONLINE";
+        ResponseType<string> resultBiometria = await _repoBiometriaAsync.AuthenticationFacialAsync(requestFacial, IdentificacionSesion, OnlineOffline);
 
         if (resultBiometria.StatusCode != "100") return new ResponseType<CreateMarcacionResponseType>() { Message = resultBiometria.Message, StatusCode = resultBiometria.StatusCode, Succeeded = resultBiometria.Succeeded };
 
@@ -255,7 +278,8 @@ public class MarcacionService : IMarcacion
             DispositivoId = Request.DispositivoId,
             LocalidadId = Request.LocalidadId,
             IdentificacionSesion = IdentificacionSesion,
-            TipoComunicacion = Request.TipoComunicacion
+            TipoComunicacion = Request.TipoComunicacion,
+            ConsultaMonitoLogRiasem = false
         };
 
 
@@ -291,8 +315,9 @@ public class MarcacionService : IMarcacion
             AdjuntoFiles = Request.Adjunto,
             Identificacion = Request.Identificacion
 
-        };
-        ResponseType<string> resultBiometria = await _repoBiometriaAsync.AuthenticationFacialLastAsync(requestFacial);
+        }; 
+        String OnlineOffline = "ONLINE";
+        ResponseType<string> resultBiometria = await _repoBiometriaAsync.AuthenticationFacialLastAsync(requestFacial, IdentificacionSesion, OnlineOffline);
 
         if (resultBiometria.StatusCode != "100") return new ResponseType<CreateMarcacionResponseType>() { Message = resultBiometria.Message, StatusCode = resultBiometria.StatusCode, Succeeded = resultBiometria.Succeeded };
 
@@ -304,7 +329,8 @@ public class MarcacionService : IMarcacion
             DispositivoId = Request.DispositivoId,
             //LocalidadId = Request.LocalidadId,
             IdentificacionSesion = IdentificacionSesion,
-            TipoComunicacion = Request.TipoComunicacion
+            TipoComunicacion = Request.TipoComunicacion,
+            ConsultaMonitoLogRiasem = false
         };
 
 
@@ -521,9 +547,11 @@ public class MarcacionService : IMarcacion
                     Nombre = Request.NombreArchivo,
                     Extension = Request.ExtensionArchivo,
                     FacialPersonUid = colaborador.FacialPersonId.ToString(),
+                    Identificacion = Request.IdentificacionColaborador,
                 };
 
-                var respAuth = await _repoBiometriaAsync.AuthenticationFacialAsync(objAuth, Request.IdentificacionJefe);
+                string OnlineOffline = "ONLINE";
+                var respAuth = await _repoBiometriaAsync.AuthenticationFacialAsync(objAuth, Request.IdentificacionJefe, OnlineOffline);
 
                 if (!respAuth.Succeeded)
                     return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = respAuth.Message, StatusCode = "101", Succeeded = false };
@@ -920,6 +948,8 @@ public class MarcacionService : IMarcacion
 
     public async Task<ResponseType<string>> CreateMarcacionOffline(CreateMarcacionOfflineRequest Request,string IdentificacionSesion,string TipoCarga, CancellationToken cancellationToken)
     {
+        FSDK.CImage image;
+        FSDK.CImage imageCola;
         try
         {
             MarcacionResponseType objResultFinal = new();
@@ -968,80 +998,91 @@ public class MarcacionService : IMarcacion
             bool estadoValid = false;
             string respMonitorId = "";
             var rutaFinal = "";
-            string estadoRecono = "PENDIENTE";
+            string estadoRecono = "CORRECTO";
             float Similarity = 0.0f;
+            var mensajeError = "";
 
             // Se debe evaluar si es dispositivo exige o no la validacion por reconocimiento facial en el procesamiento
             // de marcaciones offline, en la tabla CargoEje atributo sdkLuxandOffline (1) Si es requerido y (0) No es requerido
 
             if (TipoCarga is null || TipoCarga == "Txt")
             {
-                #region Conversion de Archivo
-
-                byte[] bytes = Convert.FromBase64String(Request.Imagen);
-                var rutaBase = _config.GetSection("Adjuntos:RutaBase").Get<string>();
-                var directorio = rutaBase + "marcacionOffline/";
-
-                if (!Directory.Exists(directorio))
-                {
-                    Directory.CreateDirectory(directorio);
-                }
-
-                string nombreFile = DateTime.Now.Year.ToString() + "-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString() + "-" + DateTime.Now.Hour.ToString() + "-" + DateTime.Now.Minute.ToString() + "-" + DateTime.Now.Second.ToString();
-                rutaFinal = directorio + nombreFile + "-" + Request.CodigoBiometrico.ToString() + Request.Extension;
-
-                await File.WriteAllBytesAsync(rutaFinal, bytes);
-
-                #endregion
-
-                #region Validacion con el SDK
-
                 try
                 {
+                    #region Conversion de Archivo
+                    byte[] bytes = Convert.FromBase64String(Request.Imagen);
+                    var rutaBase = _config.GetSection("Adjuntos:RutaBase").Get<string>();
+                    var directorio = rutaBase + "marcacionOffline/";
 
-                    //FSDK.ActivateLibrary("OzcLugSo7r/QQc5uUan/hLmtsyw7avFhRPiyRJFXPNg+qnV0VwOkJeefJTLGmmzM+Jclto9Mto6KY64OW419evp+KXZoti3d2dKhzvexBjdANFb93HpJVSYcHPrs/j+bn8iIEHSS8G7r5LV64TyzdUZdVkukOKuF1EeMj4C0/Js=");
-                    var Licencia = await _repoLicencia.FirstOrDefaultAsync(new LicenciaByServicioSpec(Guid.Parse(GuidLicenciaLuxand)));
-                    if (Licencia is null) return new ResponseType<string> { StatusCode = "101", Succeeded = true, Message = "Licencia no se encuentra disponible o activa" };
+                    if (!Directory.Exists(directorio))
+                    {
+                        Directory.CreateDirectory(directorio);
+                    }
 
-                    // Obtener la Licencia del SDK de Luxand en la parametrizacion
-                    FSDK.ActivateLibrary(Licencia.CodigoLicencia);
-                    FSDK.InitializeLibrary();
-                    var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Request.Identificacion));
-                    if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
+                    string nombreFile = DateTime.Now.Year.ToString() + "-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString() + "-" + DateTime.Now.Hour.ToString() + "-" + DateTime.Now.Minute.ToString() + "-" + DateTime.Now.Second.ToString();
+                    rutaFinal = directorio + nombreFile + "-" + Request.CodigoBiometrico.ToString() + Request.Extension;
 
-                    
-                    FSDK.CImage image = new FSDK.CImage(rutaFinal); // Imagen enviada
-                    FSDK.CImage imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
+                    await File.WriteAllBytesAsync(rutaFinal, bytes);
+                    #endregion
 
-                    byte[] template = new byte[FSDK.TemplateSize];
-                    byte[] templateImgCola = new byte[FSDK.TemplateSize];
-                    FSDK.TFacePosition facePosition = new FSDK.TFacePosition();
-                    FSDK.TFacePosition facePositionCola = new FSDK.TFacePosition();
-                    facePosition = image.DetectFace();
-                    facePositionCola = imageCola.DetectFace();
-                    template = image.GetFaceTemplateInRegion(ref facePosition);
-                    templateImgCola = imageCola.GetFaceTemplateInRegion(ref facePositionCola);
+                    if (objUserSesion.SdkLuxandOffline == true)
+                    {
 
-                    FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
-                    estadoValid = true;
+                        #region Validacion con el SDK
+                        //FSDK.ActivateLibrary("OzcLugSo7r/QQc5uUan/hLmtsyw7avFhRPiyRJFXPNg+qnV0VwOkJeefJTLGmmzM+Jclto9Mto6KY64OW419evp+KXZoti3d2dKhzvexBjdANFb93HpJVSYcHPrs/j+bn8iIEHSS8G7r5LV64TyzdUZdVkukOKuF1EeMj4C0/Js=");
+                        var Licencia = await _repoLicencia.FirstOrDefaultAsync(new LicenciaByServicioSpec(Guid.Parse(GuidLicenciaLuxand)));
+                        if (Licencia is null) return new ResponseType<string> { StatusCode = "101", Succeeded = true, Message = "Licencia no se encuentra disponible o activa" };
+
+                        // Obtener la Licencia del SDK de Luxand en la parametrizacion
+                        FSDK.ActivateLibrary(Licencia.CodigoLicencia);
+                        FSDK.InitializeLibrary();
+                        var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Request.Identificacion));
+                        if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
+
+                        try
+                        {
+                            image = new FSDK.CImage(rutaFinal); // Imagen enviada
+                            byte[] template = new byte[FSDK.TemplateSize];
+                            FSDK.TFacePosition facePosition = new FSDK.TFacePosition();
+                            facePosition = image.DetectFace();
+                            template = image.GetFaceTemplateInRegion(ref facePosition);
+                            imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
+                            byte[] templateImgCola = new byte[FSDK.TemplateSize];
+                            FSDK.TFacePosition facePositionCola = new FSDK.TFacePosition();
+                            facePositionCola = imageCola.DetectFace();
+                            templateImgCola = imageCola.GetFaceTemplateInRegion(ref facePositionCola);
+                            FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
+                        }
+                        catch (Exception ex)
+                        {
+                            mensajeError = ex.Message;
+                            estadoRecono = "NO VALIDO";
+                            estadoValid = false;
+                        }
+                        if (mensajeError == "")
+                        {
+                            // Se debe evaluar el valor de tolerancia de la similitud en el reconocimiento facial, establecido para el dispositivo, en el procesamiento
+                            // de marcaciones offline, en la tabla CargoEje atributo similarityOffline, debiendo fluctuar entre 0.00 y 1.00
+                            if (Similarity >= 0.85)
+                            {
+                                estadoRecono = "CORRECTO";
+                            }
+                            else
+                            {
+                                estadoRecono = "Novedad " + Math.Round((Similarity * 100), 0) + "% de Similitud.";
+                                respMonitorId = null;
+                            }
+                            estadoValid = true;
+                            #endregion
+                        }
+                    }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    mensajeError = ex.Message;
+                    estadoRecono = "NO VALIDO";
                     estadoValid = false;
                 }
-
-                // Se debe evaluar el valor de tolerancia de la similitud en el reconocimiento facial, establecido para el dispositivo, en el procesamiento
-                // de marcaciones offline, en la tabla CargoEje atributo similarityOffline, debiendo fluctuar entre 0.00 y 1.00
-                if (Similarity >= 0.85)
-                {
-                    estadoRecono = "CORRECTO";
-                }
-                else
-                {
-                    estadoRecono = "Novedad " + Math.Round((Similarity * 100), 0) + "% de Similitud.";
-                    respMonitorId = null;
-                }
-                #endregion
             }
 
             // Por defecto asignaremos el tipo de Comunicacion "RED"
@@ -1063,26 +1104,24 @@ public class MarcacionService : IMarcacion
             {
                 #region Registro de marcacion en la tabla de registro de marcaciones ACC_MONITOR_LOG
 
-                // Define el registro de marcacion que se almancenara en ACC_MONITOR_LOG
-                AccMonitorLog accMonitorLog = new()
+
+                // Define el registro de marcacion que se almacenara en ACC_MONITOR_LOG
+                CreateMarcacionRequest requestMarcacion = new()
                 {
-                    State = 0,
+                    CodigoEmpleado = Request.CodigoBiometrico,
+                    DispositivoId = deviceId.ToString(),
+                    IdentificacionSesion = IdentificacionSesion,
+                    TipoComunicacion = Request.TipoComunicacion,
+                    ConsultaMonitoLogRiasem = false,
                     Time = Request.Time,
-                    Pin = Request.CodigoBiometrico,
-                    Device_Id = deviceId,
-                    Verified = 0,
-                    Device_Name = deviceName,
-                    Status = 1,
-                    Description = "OS",
-                    Create_Time = DateTime.Now,
-                    Log_Tag = tipoComunicacion
+                    Descripcion = "OS"
                 };
-                var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
-                if (objResultado is null)
+                var resultMarcacion = await CreateMarcacion(requestMarcacion, cancellationToken);
+                if (resultMarcacion is null)
                 {
                     return new ResponseType<string>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
                 }
-                respMonitorId = objResultado.Id.ToString();
+                respMonitorId = resultMarcacion.Data.MarcacionId.ToString();
                 #endregion
 
                 #region Reproceso de marcaciones del colaborador para considerar la marcacion offline recientemente registrada
@@ -1106,7 +1145,8 @@ public class MarcacionService : IMarcacion
                 UsuarioCreacion = IdentificacionSesion,
                 Identificacion = Request.Identificacion,
                 Time = Request.Time,
-                TipoComunicacion = tipoComunicacion
+                TipoComunicacion = tipoComunicacion,
+                MensajeError = mensajeError
             };
             var result = await _repoMonitorLogFileAsync.AddAsync(objFile);
 
