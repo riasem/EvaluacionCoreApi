@@ -1000,6 +1000,11 @@ public class MarcacionService : IMarcacion
             var rutaFinal = "";
             string estadoRecono = "CORRECTO";
             float Similarity = 0.0f;
+            float SimilarityDefinition = 0.85f;
+            if (objUserSesion.SimilarityOffline is not null)
+            {
+                SimilarityDefinition = float.Parse(objUserSesion.SimilarityOffline.ToString(), CultureInfo.InvariantCulture.NumberFormat);
+            }
             var mensajeError = "";
 
             // Se debe evaluar si es dispositivo exige o no la validacion por reconocimiento facial en el procesamiento
@@ -1063,7 +1068,7 @@ public class MarcacionService : IMarcacion
                         {
                             // Se debe evaluar el valor de tolerancia de la similitud en el reconocimiento facial, establecido para el dispositivo, en el procesamiento
                             // de marcaciones offline, en la tabla CargoEje atributo similarityOffline, debiendo fluctuar entre 0.00 y 1.00
-                            if (Similarity >= 0.85)
+                            if (Similarity >= SimilarityDefinition)
                             {
                                 estadoRecono = "CORRECTO";
                             }
