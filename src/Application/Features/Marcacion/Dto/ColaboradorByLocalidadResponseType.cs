@@ -32,5 +32,4 @@ public class ColaboradorByLocalidadResponseType
 
     [JsonPropertyName("clave")]
     public string Clave { get; set; }
-
 }

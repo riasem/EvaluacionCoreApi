@@ -15,6 +15,7 @@ using System.Net.Http.Json;
 using Luxand;
 using EvaluacionCore.Domain.Entities.Seguridad;
 using EvaluacionCore.Application.Features.Biometria.Specifications;
+using System.Globalization;
 
 namespace Workflow.Persistence.Repository.Biometria
 {
@@ -50,7 +51,11 @@ namespace Workflow.Persistence.Repository.Biometria
             try
             {
                 var identSesion = await _repoCargoEje.FirstOrDefaultAsync(new GetEjeByIdentificacionSpec(IdentificacionSesion));
-
+                float SimilarityDefinition = 0.85f;
+                if (identSesion.SimilarityOnline is not null)
+                {
+                    SimilarityDefinition = float.Parse(identSesion.SimilarityOnline.ToString(), CultureInfo.InvariantCulture.NumberFormat);
+                }
                 bool? apiLuxand = identSesion.ApiLuxand;
                 if (apiLuxand == false)
                 {
@@ -81,8 +86,12 @@ namespace Workflow.Persistence.Repository.Biometria
                             var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(request.Identificacion));
                             if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
 
-//                            FSDK.ActivateLibrary(Licencia.CodigoLicencia);
-                            var xxx = FSDK.ActivateLibrary("YK6tt2AQmhevRUTW9hDnev5pB14PEjdaSzXfchF8Z/cJix53l2mt38mNEJUkfXPmWQ8TKQyZQsXlLRFiVkgrDj86co0xYLhoJltayZlea1zmqyzaN/yre+zOqEyr/1fDXLWkE4MEoQY8eOpj6hCrRsDP10EkunTtiz6mC8ar6AU=");
+                            var xxx = FSDK.ActivateLibrary(Licencia.CodigoLicencia);
+
+                            var licenseInfo = Licencia.CodigoLicencia;
+                            var zzz = FSDK.GetLicenseInfo(out licenseInfo);
+
+                            //                            var xxx = FSDK.ActivateLibrary("YK6tt2AQmhevRUTW9hDnev5pB14PEjdaSzXfchF8Z/cJix53l2mt38mNEJUkfXPmWQ8TKQyZQsXlLRFiVkgrDj86co0xYLhoJltayZlea1zmqyzaN/yre+zOqEyr/1fDXLWkE4MEoQY8eOpj6hCrRsDP10EkunTtiz6mC8ar6AU=");
                             var yyy = FSDK.InitializeLibrary();
                             FSDK.CImage imageCola;
                             try
@@ -121,7 +130,7 @@ namespace Workflow.Persistence.Repository.Biometria
                             FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
                             #endregion
 
-                            if (Similarity >= 0.85)
+                            if (Similarity >= SimilarityDefinition)
                             {
                                 return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
                             }
@@ -178,7 +187,7 @@ namespace Workflow.Persistence.Repository.Biometria
 
                             if (responseType.Status == "success")
                             {
-                                if (responseType.Probability > 0.96)
+                                if (responseType.Probability > SimilarityDefinition)
                                     return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
                                 else
                                     return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
@@ -216,12 +225,17 @@ namespace Workflow.Persistence.Repository.Biometria
                 bool? apiLuxand = false;
                 bool? sdkLuxandOnline = true;
                 bool? sdkLuxandOffline = true;
+                float SimilarityDefinition = 0.85f;
                 if (IdentificacionSesion != null)
                 {
                     var identSesion = await _repoCargoEje.FirstOrDefaultAsync(new GetEjeByIdentificacionSpec(IdentificacionSesion));
                     apiLuxand = identSesion.ApiLuxand;
                     sdkLuxandOnline = identSesion.SdkLuxandOnline;
                     sdkLuxandOffline = identSesion.SdkLuxandOffline;
+                    if (identSesion.SimilarityOnline is not null)
+                    {
+                        SimilarityDefinition = float.Parse(identSesion.SimilarityOnline.ToString(), CultureInfo.InvariantCulture.NumberFormat);
+                    }
                 }
 
                 if (apiLuxand == false)
@@ -295,7 +309,7 @@ namespace Workflow.Persistence.Repository.Biometria
                             //FSDK.GetMatchingThresholdAtFAR(96 / 100, ref Threshold);
                             FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
 
-                            if (Similarity >= 0.96)
+                            if (Similarity >= SimilarityDefinition)
                             {
                                 return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
                             }
@@ -343,7 +357,7 @@ namespace Workflow.Persistence.Repository.Biometria
 
                             if (responseType.Status == "success")
                             {
-                                if (responseType.Probability > 0.96)
+                                if (responseType.Probability > SimilarityDefinition)
                                     return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
                                 else
                                     return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };

@@ -1,5 +1,4 @@
 ﻿using EnrolApp.Domain.Entities.Horario;
-using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using EvaluacionCore.Domain.Entities.Calendario;
 using EvaluacionCore.Domain.Entities.Common;
@@ -61,5 +60,6 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+
  
 }

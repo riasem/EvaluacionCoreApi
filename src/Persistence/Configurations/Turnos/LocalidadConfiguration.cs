@@ -8,7 +8,6 @@ namespace EnrolApp.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Localidad> builder)
         {
-
             builder.HasKey(x => x.Id);
 
             builder.HasMany(g => g.LocalidadColaboradores)
