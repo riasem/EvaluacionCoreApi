@@ -90,8 +90,9 @@ namespace Workflow.Persistence.Repository.Biometria
                             var xxx = FSDK.ActivateLibrary("JOassJsQHq6XVRdg5bUgLyUsSEXDS3qPFSRfzJ9WYMSrPYmp7TCFiytbKyVOZZeFacobAJyN1zRqPNIX2mBVJQERs3s4EIyU5b7Eb7UcjG8Tx+ovF2hw8HuktW+vQuuxp8txaYZcc4nL4oi2y+3gTPTzmXn+6YoLPvr5ZEWJ+XQ=");
                             string hardwareID;
                             var www = FSDK.GetHardware_ID(out hardwareID);
-                            int num = 4;
+                            int num = 0;
                             var qqq = FSDK.GetNumThreads(ref num);
+                            qqq = num;
                             var licenseInfo = Licencia.CodigoLicencia;
                             var zzz = FSDK.GetLicenseInfo(out licenseInfo);
 
@@ -136,10 +137,10 @@ namespace Workflow.Persistence.Repository.Biometria
 
                             var datos = new
                             {
-                                numero_nucleos = qqq,
-                                id = www,
-                                hardwareID = hardwareID,
-                                nucleos = num
+                                datoRetornoNumeroNucleos = qqq,
+                                argumentoMucleosEnviados = num,
+                                datoRetornoHardwareID = www,
+                                resulthardwareID = hardwareID
 
                             };
 
