@@ -86,8 +86,12 @@ namespace Workflow.Persistence.Repository.Biometria
                             var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(request.Identificacion));
                             if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
 
-                            var xxx = FSDK.ActivateLibrary(Licencia.CodigoLicencia);
-
+//                            var xxx = FSDK.ActivateLibrary(Licencia.CodigoLicencia);
+                            var xxx = FSDK.ActivateLibrary("JOassJsQHq6XVRdg5bUgLyUsSEXDS3qPFSRfzJ9WYMSrPYmp7TCFiytbKyVOZZeFacobAJyN1zRqPNIX2mBVJQERs3s4EIyU5b7Eb7UcjG8Tx+ovF2hw8HuktW+vQuuxp8txaYZcc4nL4oi2y+3gTPTzmXn+6YoLPvr5ZEWJ+XQ=");
+                            string hardwareID;
+                            var www = FSDK.GetHardware_ID(out hardwareID);
+                            int num = 4;
+                            var qqq = FSDK.GetNumThreads(ref num);
                             var licenseInfo = Licencia.CodigoLicencia;
                             var zzz = FSDK.GetLicenseInfo(out licenseInfo);
 
