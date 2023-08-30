@@ -27,9 +27,5 @@ public class ColaboradorByLocalidadResponseType
     [JsonPropertyName("codigoBiometrico")]
     public string CodigoBiometrico { get; set; }
 
-    [JsonPropertyName("administrador")]
-    public string Administrador { get; set; }
 
-    [JsonPropertyName("clave")]
-    public string Clave { get; set; }
 }

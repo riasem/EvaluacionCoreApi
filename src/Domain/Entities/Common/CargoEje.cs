@@ -42,78 +42,7 @@ namespace EvaluacionCore.Domain.Entities.Common
         public string DeviceName { get; set; }
 
         [Column("apiLuxand", Order = 11, TypeName = "bit")]
-        public bool? ApiLuxand { get; set; }
+        public bool ApiLuxand { get; set; }
 
-        [Column("similarityOnline", Order = 12, TypeName = "numeric")]
-        public float? SimilarityOnline { get; set; }
-
-        [Column("similarityOffline", Order = 13, TypeName = "numeric")]
-        public float? SimilarityOffline { get; set; }
-
-        [Column("sdkLuxandOnline", Order = 14, TypeName = "bit")]
-        public bool? SdkLuxandOnline { get; set; }
-
-        [Column("sdkLuxandOffline", Order = 15, TypeName = "bit")]
-        public bool? SdkLuxandOffline { get; set; }
-
-        [Column("cronUnoStatus", Order = 16, TypeName = "bit")]
-        public bool? CronUnoStatus { get; set; }
-
-        [Column("cronUnoHorario", Order = 17, TypeName = "datetime")]
-        public DateTime? CronUnoHorario { get; set; }
-
-        [Column("cronDosStatus", Order = 18, TypeName = "bit")]
-        public bool? CronDosStatus { get; set; }
-
-        [Column("cronDosHorario", Order = 19, TypeName = "datetime")]
-        public DateTime? CronDosHorario { get; set; }
-
-        [Column("cronTresStatus", Order = 20, TypeName = "bit")]
-        public bool? CronTresStatus { get; set; }
-
-        [Column("cronTresHorario", Order = 21, TypeName = "datetime")]
-        public DateTime? CronTresHorario { get; set; }
-
-        [Column("cronCuatroStatus", Order = 22, TypeName = "bit")]
-        public bool? CronCuatroStatus { get; set; }
-
-        [Column("cronCuatroHorario", Order = 23, TypeName = "datetime")]
-        public DateTime? CronCuatroHorario { get; set; }
-
-        [Column("cronCincoStatus", Order = 24, TypeName = "bit")]
-        public bool? CronCincoStatus { get; set; }
-
-        [Column("cronCincoHorario", Order = 25, TypeName = "datetime")]
-        public DateTime? CronCincoHorario { get; set; }
-
-        [Column("cronSeisStatus", Order = 26, TypeName = "bit")]
-        public bool? CronSeisStatus { get; set; }
-
-        [Column("cronSeisHorario", Order = 27, TypeName = "datetime")]
-        public DateTime? CronSeisHorario { get; set; }
-
-        [Column("cronSieteStatus", Order = 28, TypeName = "bit")]
-        public bool? CronSieteStatus { get; set; }
-
-        [Column("cronSieteHorario", Order = 29, TypeName = "datetime")]
-        public DateTime? CronSieteHorario { get; set; }
-
-        [Column("cronOchoStatus", Order = 30, TypeName = "bit")]
-        public bool? CronOchoStatus { get; set; }
-
-        [Column("cronOchoHorario", Order = 31, TypeName = "datetime")]
-        public DateTime? CronOchoHorario { get; set; }
-
-        [Column("cronNueveStatus", Order = 32, TypeName = "bit")]
-        public bool? CronNueveStatus { get; set; }
-
-        [Column("cronNueveHorario", Order = 33, TypeName = "datetime")]
-        public DateTime? CronNueveHorario { get; set; }
-
-        [Column("cronDiezStatus", Order = 34, TypeName = "bit")]
-        public bool? CronDiezStatus { get; set; }
-
-        [Column("cronDiezHorario", Order = 35, TypeName = "datetime")]
-        public DateTime? CronDiezHorario { get; set; }
     }
 }

@@ -9,6 +9,5 @@
         public string Base64Archivo { get; set; } = string.Empty;
         public string NombreArchivo { get; set; } = string.Empty;
         public string ExtensionArchivo { get; set; } = string.Empty;
-        public string TipoComunicacion { get; set; } = string.Empty;
     }
 }
