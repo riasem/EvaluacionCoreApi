@@ -286,7 +286,7 @@ public class MarcacionService : IMarcacion
         var resultMarcacion = await CreateMarcacion(requestMarcacion, cancellationToken);
         CreateMarcacionResponseType data = new();
         data.Colaborador = objLocalidadColaborador.ElementAt(0).Colaborador.Nombres + " " + objLocalidadColaborador.ElementAt(0).Colaborador.Apellidos;
-        data.RutaImagen = objLocalidadColaborador.ElementAt(0).Colaborador.ImagenPerfilId is null ? "" : objLocalidadColaborador.ElementAt(0).Colaborador.ImagenPerfil.RutaAcceso;
+        data.RutaImagen = resultBiometria.Data.ToString(); //objLocalidadColaborador.ElementAt(0).Colaborador.ImagenPerfilId is null ? "" : objLocalidadColaborador.ElementAt(0).Colaborador.ImagenPerfil.RutaAcceso;
         data.Marcacion = DateTime.Now;
 
         return new ResponseType<CreateMarcacionResponseType>() { Message = resultMarcacion.Message ,StatusCode = resultMarcacion.StatusCode, Data = data,  Succeeded = resultMarcacion.Succeeded };
