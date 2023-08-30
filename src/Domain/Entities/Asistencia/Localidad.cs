@@ -53,6 +53,6 @@ public class Localidad
 
 
     public virtual ICollection<LocalidadColaborador> LocalidadColaboradores { get; set; }
-
+    public virtual ICollection<LocalidadAdministrador> LocalidadAdministradores { get; set; }
 }
 

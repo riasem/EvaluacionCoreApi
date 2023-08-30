@@ -15,6 +15,7 @@ using System.Net.Http.Json;
 using Luxand;
 using EvaluacionCore.Domain.Entities.Seguridad;
 using EvaluacionCore.Application.Features.Biometria.Specifications;
+using System.Globalization;
 
 namespace Workflow.Persistence.Repository.Biometria
 {
@@ -45,215 +46,359 @@ namespace Workflow.Persistence.Repository.Biometria
             _repoLicencia= repoLicencia;
         }
 
-        public async Task<ResponseType<string>> AuthenticationFacialAsync(AuthenticationFacialRequest request, string IdentificacionSesion)
+        public async Task<ResponseType<string>> AuthenticationFacialAsync(AuthenticationFacialRequest request, string IdentificacionSesion, string OnlineOffline)
         {
-
-            var identSesion = await _repoCargoEje.FirstOrDefaultAsync(new GetEjeByIdentificacionSpec(IdentificacionSesion));
-
-            if (identSesion is not null && identSesion.ApiLuxand)
-            {
-                #region Autenticación con SDK Comentado
-
-
-                try
-                {
-
-                    #region Parametros archivo y nombre persona
-                    byte[] bytes = Convert.FromBase64String(request.Base64);
-                    var rutaBase = _config.GetSection("Adjuntos:RutaBase").Get<string>();
-                    var directorio = rutaBase + "temp/";
-                    if (!Directory.Exists(directorio))
-                    {
-                        Directory.CreateDirectory(directorio);
-                    }
-                    var rutafinal = directorio + "imagen." + request.Extension;
-                    await File.WriteAllBytesAsync(rutafinal, bytes);
-                    #endregion
-
-                    #region Luxand
-
-                    var Licencia = await _repoLicencia.FirstOrDefaultAsync(new LicenciaByServicioSpec(Guid.Parse(GuidLicenciaLuxand)));
-                    if (Licencia is null) return new ResponseType<string> { StatusCode = "101", Succeeded = true, Message = "No se ha podido obtener datos de Licencia" };
-
-                    FSDK.ActivateLibrary(Licencia.CodigoLicencia);
-                    FSDK.InitializeLibrary();
-                    var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(request.Identificacion));
-                    if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
-
-                    FSDK.CImage imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
-                    FSDK.CImage image = new FSDK.CImage(rutafinal); // Imagen enviada
-
-                    File.Delete(rutafinal);
-
-                    byte[] template = new byte[FSDK.TemplateSize];
-                    byte[] templateImgCola = new byte[FSDK.TemplateSize];
-                    FSDK.TFacePosition facePosition = new FSDK.TFacePosition();
-                    FSDK.TFacePosition facePositionCola = new FSDK.TFacePosition();
-                    facePosition = image.DetectFace();
-                    facePositionCola = imageCola.DetectFace();
-                    template = image.GetFaceTemplateInRegion(ref facePosition);
-                    templateImgCola = imageCola.GetFaceTemplateInRegion(ref facePositionCola);
-
-                    float Similarity = 0.0f;
-
-                    FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
-                    #endregion
-
-                    if (Similarity >= 0.85)
-                    {
-                        return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
-                    }
-                    else
-                    {
-                        return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
-                    }
-
-                }
-                catch (Exception ex)
-                {
-                    _log.LogError(ex, string.Empty);
-                    return new ResponseType<string>() { Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
-                }
-                #endregion
-            }
-
             try
             {
-                nombreEnpoint = _config.GetSection("Luxand:FaceVerification").Get<string>();
-                uriEndPoint = string.Concat(apiBaseLuxand, nombreEnpoint);
-
-                using var client = new HttpClient();
-                client.DefaultRequestHeaders.Add("token", apiKeyLuxand ?? string.Empty);
-
-                #region Parametros archivo y nombre persona
-                byte[] bytes = Convert.FromBase64String(request.Base64);
-
-                Stream stream = new MemoryStream(bytes);
-
-                using var multipartFormContent = new MultipartFormDataContent();
-
-                var fileStreamContent = new StreamContent(stream);
-                fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue(string.Concat("image/", request.Extension));
-
-                multipartFormContent.Add(fileStreamContent, name: "photo", fileName: string.Concat(request.Nombre, ".", request.Extension));
-                #endregion
-                //Consultamos los datos del colaborador
-                //var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(request.Identificacion));
-
-                var resLuxand = await client.PostAsync(string.Concat(uriEndPoint, "/", request.FacialPersonUid), multipartFormContent);
-
-                var responseType = resLuxand.Content.ReadFromJsonAsync<AuthenticationFacialResponseType>().Result;
-
-                if (responseType.Status == "success")
+                var identSesion = await _repoCargoEje.FirstOrDefaultAsync(new GetEjeByIdentificacionSpec(IdentificacionSesion));
+                float SimilarityDefinition = 0.85f;
+                if (identSesion.SimilarityOnline is not null)
                 {
-                    if (responseType.Probability > 0.96)
-                        return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
+                    SimilarityDefinition = float.Parse(identSesion.SimilarityOnline.ToString(), CultureInfo.InvariantCulture.NumberFormat);
+                }
+                bool? apiLuxand = identSesion.ApiLuxand;
+                if (apiLuxand == false)
+                {
+                    #region Autenticación con SDK Comentado
+                    if ((identSesion is not null && OnlineOffline == "ONLINE" && identSesion.SdkLuxandOnline == true) ||
+                    (identSesion is not null && OnlineOffline == "OFFLINE" && identSesion.SdkLuxandOffline == true))
+                    {
+                        try
+                        {
+
+                            #region Parametros archivo y nombre persona
+                            byte[] bytes = Convert.FromBase64String(request.Base64);
+                            var rutaBase = _config.GetSection("Adjuntos:RutaBase").Get<string>();
+                            var directorio = rutaBase + "temp/";
+                            if (!Directory.Exists(directorio))
+                            {
+                                Directory.CreateDirectory(directorio);
+                            }
+                            var rutafinal = directorio + "imagen." + request.Extension;
+                            await File.WriteAllBytesAsync(rutafinal, bytes);
+                            #endregion
+
+                            #region Luxand
+
+                            var Licencia = await _repoLicencia.FirstOrDefaultAsync(new LicenciaByServicioSpec(Guid.Parse(GuidLicenciaLuxand)));
+                            if (Licencia is null) return new ResponseType<string> { StatusCode = "101", Succeeded = true, Message = "No se ha podido obtener datos de Licencia" };
+
+                            var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(request.Identificacion));
+                            if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
+                            string licencia;
+                            licencia = Licencia.CodigoLicencia;
+                            //  ilimitada               licencia = "JOassJsQHq6XVRdg5bUgLyUsSEXDS3qPFSRfzJ9WYMSrPYmp7TCFiytbKyVOZZeFacobAJyN1zRqPNIX2mBVJQERs3s4EIyU5b7Eb7UcjG8Tx+ovF2hw8HuktW+vQuuxp8txaYZcc4nL4oi2y+3gTPTzmXn+6YoLPvr5ZEWJ+XQ=";
+                            //  temporal                licencia = "YK6tt2AQmhevRUTW9hDnev5pB14PEjdaSzXfchF8Z/cJix53l2mt38mNEJUkfXPmWQ8TKQyZQsXlLRFiVkgrDj86co0xYLhoJltayZlea1zmqyzaN/yre+zOqEyr/1fDXLWkE4MEoQY8eOpj6hCrRsDP10EkunTtiz6mC8ar6AU=";
+                            var xxx = FSDK.ActivateLibrary(licencia);
+
+                            string hardwareID;
+                            var www = FSDK.GetHardware_ID(out hardwareID);
+                            int num = 0;
+                            var qqq = FSDK.GetNumThreads(ref num);
+                            qqq = num;
+                            var licenseInfo = Licencia.CodigoLicencia;
+                            var zzz = FSDK.GetLicenseInfo(out licenseInfo);
+
+                            //                            var xxx = FSDK.ActivateLibrary("YK6tt2AQmhevRUTW9hDnev5pB14PEjdaSzXfchF8Z/cJix53l2mt38mNEJUkfXPmWQ8TKQyZQsXlLRFiVkgrDj86co0xYLhoJltayZlea1zmqyzaN/yre+zOqEyr/1fDXLWkE4MEoQY8eOpj6hCrRsDP10EkunTtiz6mC8ar6AU=");
+                            var yyy = FSDK.InitializeLibrary();
+                            FSDK.CImage imageCola;
+                            try
+                            {
+                                imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
+                            }
+                            catch (Exception ex)
+                            {
+                                _log.LogError(ex, string.Empty);
+                                return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
+                            }
+                            FSDK.CImage image;
+                            try
+                            {
+                                image = new FSDK.CImage(rutafinal); // Imagen enviada
+                            }
+                            catch (Exception ex)
+                            {
+                                _log.LogError(ex, string.Empty);
+                                return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
+                            }
+
+                            File.Delete(rutafinal);
+
+                            byte[] template = new byte[FSDK.TemplateSize];
+                            byte[] templateImgCola = new byte[FSDK.TemplateSize];
+                            FSDK.TFacePosition facePosition = new FSDK.TFacePosition();
+                            FSDK.TFacePosition facePositionCola = new FSDK.TFacePosition();
+                            facePosition = image.DetectFace();
+                            facePositionCola = imageCola.DetectFace();
+                            template = image.GetFaceTemplateInRegion(ref facePosition);
+                            templateImgCola = imageCola.GetFaceTemplateInRegion(ref facePositionCola);
+
+                            float Similarity = 0.0f;
+
+                            FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
+                            #endregion
+
+                            var datos = new
+                            {
+                                licencia = licencia,
+                                datoRetornoNumeroNucleos = qqq,
+                                argumentoMucleosEnviados = num,
+                                datoRetornoHardwareID = www,
+                                resulthardwareID = hardwareID
+
+                            };
+
+                            if (Similarity >= SimilarityDefinition)
+                            {
+                                return new ResponseType<string>() { Data = datos.ToString(), Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
+                            }
+                            else
+                            {
+                                return new ResponseType<string>() { Data = datos.ToString(), Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+                            _log.LogError(ex, string.Empty);
+                            return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
+                        }
+                    }
                     else
-                        return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
+                    {
+                        return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
+                    }
+                    #endregion
+
+                }
+                else if (apiLuxand == true)
+                {
+                    if ((identSesion is not null && OnlineOffline == "ONLINE" && identSesion.SdkLuxandOnline == true) ||
+                    (identSesion is not null && OnlineOffline == "OFFLINE" && identSesion.SdkLuxandOffline == true))
+                    {
+                        try
+                        {
+                            nombreEnpoint = _config.GetSection("Luxand:FaceVerification").Get<string>();
+                            uriEndPoint = string.Concat(apiBaseLuxand, nombreEnpoint);
+
+                            using var client = new HttpClient();
+                            client.DefaultRequestHeaders.Add("token", apiKeyLuxand ?? string.Empty);
+
+                            #region Parametros archivo y nombre persona
+                            byte[] bytes = Convert.FromBase64String(request.Base64);
+
+                            Stream stream = new MemoryStream(bytes);
+
+                            using var multipartFormContent = new MultipartFormDataContent();
+
+                            var fileStreamContent = new StreamContent(stream);
+                            fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue(string.Concat("image/", request.Extension));
+
+                            multipartFormContent.Add(fileStreamContent, name: "photo", fileName: string.Concat(request.Nombre, ".", request.Extension));
+                            #endregion
+                            //Consultamos los datos del colaborador
+                            //var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(request.Identificacion));
+
+                            var resLuxand = await client.PostAsync(string.Concat(uriEndPoint, "/", request.FacialPersonUid), multipartFormContent);
+
+                            var responseType = resLuxand.Content.ReadFromJsonAsync<AuthenticationFacialResponseType>().Result;
+
+                            if (responseType.Status == "success")
+                            {
+                                if (responseType.Probability > SimilarityDefinition)
+                                    return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
+                                else
+                                    return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
+                            }
+                            else
+                                return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
+                        }
+                        catch (Exception ex)
+                        {
+                            _log.LogError(ex, string.Empty);
+                            return new ResponseType<string>() { Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
+                        }
+                    }
+                    else
+                    {
+                        return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
+                    }
+
                 }
                 else
-                    return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
-            }
-            catch (Exception ex)
+                {
+                    return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
+                }
+            } catch (Exception ex)
             {
                 _log.LogError(ex, string.Empty);
                 return new ResponseType<string>() { Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
             }
-
-
-
-            
         }
 
-        public async Task<ResponseType<string>> AuthenticationFacialLastAsync(AuthenticationFacialLastRequest request)
+        public async Task<ResponseType<string>> AuthenticationFacialLastAsync(AuthenticationFacialLastRequest request, string IdentificacionSesion, string OnlineOffline)
         {
             try
             {
-                //Consultamos los datos del colaborador
-                var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(request.Identificacion));
-                if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
-
-                #region Guardar temporalmente Archivo
-                var rutaBase = _config.GetSection("Adjuntos:RutaBase").Get<string>();
-                var directorio = rutaBase + "temp/";
-                if (!Directory.Exists(directorio))
+                bool? apiLuxand = false;
+                bool? sdkLuxandOnline = true;
+                bool? sdkLuxandOffline = true;
+                float SimilarityDefinition = 0.85f;
+                if (IdentificacionSesion != null)
                 {
-                    Directory.CreateDirectory(directorio);
+                    var identSesion = await _repoCargoEje.FirstOrDefaultAsync(new GetEjeByIdentificacionSpec(IdentificacionSesion));
+                    apiLuxand = identSesion.ApiLuxand;
+                    sdkLuxandOnline = identSesion.SdkLuxandOnline;
+                    sdkLuxandOffline = identSesion.SdkLuxandOffline;
+                    if (identSesion.SimilarityOnline is not null)
+                    {
+                        SimilarityDefinition = float.Parse(identSesion.SimilarityOnline.ToString(), CultureInfo.InvariantCulture.NumberFormat);
+                    }
                 }
 
-                var rutaFinal = directorio + request.AdjuntoFiles.FileName;
-
-                using (var stream = System.IO.File.Create(rutaFinal))
+                if (apiLuxand == false)
                 {
-                    await request.AdjuntoFiles.CopyToAsync(stream);
+                    #region Autenticación con SDK Comentado
+                    if ((OnlineOffline == "ONLINE" && sdkLuxandOnline == true) ||
+                    (OnlineOffline == "OFFLINE" && sdkLuxandOffline == true))
+                    {
+                        try
+                        {
+                            //Consultamos los datos del colaborador
+                            var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(request.Identificacion));
+                            if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
+
+                            #region Guardar temporalmente Archivo
+                            var rutaBase = _config.GetSection("Adjuntos:RutaBase").Get<string>();
+                            var directorio = rutaBase + "temp/";
+                            if (!Directory.Exists(directorio))
+                            {
+                                Directory.CreateDirectory(directorio);
+                            }
+
+                            var rutaFinal = directorio + request.AdjuntoFiles.FileName;
+
+                            using (var stream = System.IO.File.Create(rutaFinal))
+                            {
+                                await request.AdjuntoFiles.CopyToAsync(stream);
+                            }
+
+                            #endregion
+
+
+                            #region Luxand
+                            var Licencia = await _repoLicencia.FirstOrDefaultAsync(new LicenciaByServicioSpec(Guid.Parse(GuidLicenciaLuxand)));
+                            if (Licencia is null) return new ResponseType<string> { StatusCode = "101", Succeeded = true, Message = "No se ha podido obtener datos de Licencia" };
+
+                            FSDK.ActivateLibrary(Licencia.CodigoLicencia);
+                            FSDK.InitializeLibrary();
+                            FSDK.CImage imageCola;
+                            try
+                            {
+                                imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
+                            } catch(Exception ex)
+                            {
+                                _log.LogError(ex, string.Empty);
+                                return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
+                            }
+                            FSDK.CImage image;
+                            try
+                            {
+                                image = new FSDK.CImage(rutaFinal); // Imagen enviada
+                            }
+                            catch (Exception ex)
+                            {
+                                _log.LogError(ex, string.Empty);
+                                return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
+                            }
+                            byte[] template = new byte[FSDK.TemplateSize];
+                            byte[] templateImgCola = new byte[FSDK.TemplateSize];
+                            FSDK.TFacePosition facePosition = new FSDK.TFacePosition();
+                            FSDK.TFacePosition facePositionCola = new FSDK.TFacePosition();
+                            facePosition = image.DetectFace();
+                            facePositionCola = imageCola.DetectFace();
+                            template = image.GetFaceTemplateInRegion(ref facePosition);
+                            templateImgCola = imageCola.GetFaceTemplateInRegion(ref facePositionCola);
+
+                            #endregion
+
+                            float Similarity = 0.0f;
+                            File.Delete(rutaFinal);
+                            //FSDK.GetMatchingThresholdAtFAR(96 / 100, ref Threshold);
+                            FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
+
+                            if (Similarity >= SimilarityDefinition)
+                            {
+                                return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
+                            }
+                            else
+                            {
+                                return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _log.LogError(ex, string.Empty);
+                            return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
+                        }
+                    }
+                    else
+                    {
+                        return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
+                    }
+                    #endregion
+
                 }
-
-                #endregion
-
-
-                #region Luxand
-                var Licencia = await _repoLicencia.FirstOrDefaultAsync(new LicenciaByServicioSpec(Guid.Parse(GuidLicenciaLuxand)));
-                if (Licencia is null) return new ResponseType<string> { StatusCode = "101", Succeeded = true, Message = "No se ha podido obtener datos de Licencia" };
-
-                FSDK.ActivateLibrary(Licencia.CodigoLicencia);
-                FSDK.InitializeLibrary();
-
-                FSDK.CImage imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
-                FSDK.CImage image = new FSDK.CImage(rutaFinal); // Imagen enviada
-
-
-                byte[] template = new byte[FSDK.TemplateSize];
-                byte[] templateImgCola = new byte[FSDK.TemplateSize];
-                FSDK.TFacePosition facePosition = new FSDK.TFacePosition();
-                FSDK.TFacePosition facePositionCola = new FSDK.TFacePosition();
-                facePosition = image.DetectFace();
-                facePositionCola = imageCola.DetectFace();
-                template = image.GetFaceTemplateInRegion(ref facePosition);
-                templateImgCola = imageCola.GetFaceTemplateInRegion(ref facePositionCola);
-
-                #endregion
-
-                float Similarity = 0.0f;
-                File.Delete(rutaFinal);
-                //FSDK.GetMatchingThresholdAtFAR(96 / 100, ref Threshold);
-                FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
-
-                if (Similarity >= 0.96)
+                else if (apiLuxand == true)
                 {
-                    return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
+                    if ((OnlineOffline == "ONLINE" && sdkLuxandOnline == true) ||
+                    (OnlineOffline == "OFFLINE" && sdkLuxandOffline == true))
+                    {
+                        try
+                        {
+                            nombreEnpoint = _config.GetSection("Luxand:FaceVerification").Get<string>();
+                            uriEndPoint = string.Concat(apiBaseLuxand, nombreEnpoint);
+
+                            using var client = new HttpClient();
+                            client.DefaultRequestHeaders.Add("token", apiKeyLuxand ?? string.Empty);
+
+                            #region Parametros archivo y nombre persona
+
+                            using var multipartFormContent = new MultipartFormDataContent();
+                            var fileStreamContent = new StreamContent(request.AdjuntoFiles.OpenReadStream());
+                            multipartFormContent.Add(fileStreamContent, name: "photo", fileName: request.AdjuntoFiles.FileName);
+                            #endregion
+
+                            var resLuxand = await client.PostAsync(string.Concat(uriEndPoint, "/", request.FacialPersonUid), multipartFormContent);
+
+                            var responseType = resLuxand.Content.ReadFromJsonAsync<AuthenticationFacialResponseType>().Result;
+
+                            if (responseType.Status == "success")
+                            {
+                                if (responseType.Probability > SimilarityDefinition)
+                                    return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
+                                else
+                                    return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
+                            }
+                            else
+                                return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
+                        }
+                        catch (Exception ex)
+                        {
+                            _log.LogError(ex, string.Empty);
+                            return new ResponseType<string>() { Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
+                        }
+                    }
+
+                    else
+                    {
+                        return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
+                    }
                 }
                 else
                 {
-                    return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
+                    return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
                 }
-
-                //nombreEnpoint = _config.GetSection("Luxand:FaceVerification").Get<string>();
-                //uriEndPoint = string.Concat(apiBaseLuxand, nombreEnpoint);
-
-                //using var client = new HttpClient();
-                //client.DefaultRequestHeaders.Add("token", apiKeyLuxand ?? string.Empty);
-
-                //#region Parametros archivo y nombre persona
-
-                //using var multipartFormContent = new MultipartFormDataContent();
-                //var fileStreamContent = new StreamContent(request.AdjuntoFiles.OpenReadStream());
-                //multipartFormContent.Add(fileStreamContent, name: "photo", fileName: request.AdjuntoFiles.FileName);
-
-                //#endregion
-
-                //var resLuxand = await client.PostAsync(string.Concat(uriEndPoint, "/", request.FacialPersonUid), multipartFormContent);
-
-                //var responseType = resLuxand.Content.ReadFromJsonAsync<AuthenticationFacialResponseType>().Result;
-
-                //if (responseType.Status == "success")
-                //{
-                //    if (responseType.Probability > 0.96)
-                //        return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
-                //    else
-                //        return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
-                //}
-                //else
-                //    return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
             }
             catch (Exception ex)
             {
