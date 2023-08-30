@@ -16,6 +16,7 @@ using Luxand;
 using EvaluacionCore.Domain.Entities.Seguridad;
 using EvaluacionCore.Application.Features.Biometria.Specifications;
 using System.Globalization;
+using EvaluacionCore.Application.Features.Licencia.Interfaces;
 
 namespace Workflow.Persistence.Repository.Biometria
 {
@@ -160,7 +161,16 @@ namespace Workflow.Persistence.Repository.Biometria
                             }
                             else
                             {
-                                return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
+                                var datos = new
+                                {
+                                    licencia = licencia,
+                                    retornaNucleos = qqq,
+                                    cantidadNucleos = num,
+                                    retornaHardwareID = www,
+                                    resulthardwareID = hardwareID
+
+                                };
+                                return new ResponseType<string>() { Data = datos.ToString(), Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
                             }
                         }
                         catch (Exception ex)
@@ -296,6 +306,12 @@ namespace Workflow.Persistence.Repository.Biometria
                             if (Licencia is null) return new ResponseType<string> { StatusCode = "101", Succeeded = true, Message = "No se ha podido obtener datos de Licencia" };
 
                             var xxx = FSDK.ActivateLibrary(Licencia.CodigoLicencia);
+                            string hardwareID;
+                            var www = FSDK.GetHardware_ID(out hardwareID);
+                            int num = 0;
+                            var qqq = FSDK.GetNumThreads(ref num);
+                            var licenseInfo = Licencia.CodigoLicencia;
+                            var zzz = FSDK.GetLicenseInfo(out licenseInfo);
                             var yyy = FSDK.InitializeLibrary();
                             if (xxx != -2)
                             {
@@ -335,17 +351,36 @@ namespace Workflow.Persistence.Repository.Biometria
                                 //FSDK.GetMatchingThresholdAtFAR(96 / 100, ref Threshold);
                                 FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
 
+                                var datos = new
+                                {
+                                    licencia = Licencia.CodigoLicencia,
+                                    retornaNucleos = qqq,
+                                    cantidadNucleos = num,
+                                    retornaHardwareID = www,
+                                    resulthardwareID = hardwareID
+
+                                };
+
                                 if (Similarity >= SimilarityDefinition)
                                 {
-                                    return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
+                                    return new ResponseType<string>() { Data = datos.ToString(), Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
                                 }
                                 else
                                 {
-                                    return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
+                                    return new ResponseType<string>() { Data = datos.ToString(), Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
                                 }
                             } else
                             {
-                                return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
+                                var datos = new
+                                {
+                                    licencia = Licencia.CodigoLicencia,
+                                    retornaNucleos = qqq,
+                                    cantidadNucleos = num,
+                                    retornaHardwareID = www,
+                                    resulthardwareID = hardwareID
+
+                                };
+                                return new ResponseType<string>() { Data = datos.ToString(), Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
                             }
                         }
                         catch (Exception ex)
