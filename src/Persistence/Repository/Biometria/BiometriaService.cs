@@ -54,7 +54,7 @@ namespace Workflow.Persistence.Repository.Biometria
                 float SimilarityDefinition = 0.85f;
                 if (identSesion.SimilarityOnline is not null)
                 {
-                    SimilarityDefinition = float.Parse(identSesion.SimilarityOnline.ToString(), CultureInfo.InvariantCulture.NumberFormat);
+                    SimilarityDefinition = float.Parse(identSesion.SimilarityOnline.ToString(), CultureInfo.InvariantCulture.NumberFormat)/100;
                 }
                 bool? apiLuxand = identSesion.ApiLuxand;
                 if (apiLuxand == false)
@@ -95,7 +95,6 @@ namespace Workflow.Persistence.Repository.Biometria
                             var www = FSDK.GetHardware_ID(out hardwareID);
                             int num = 0;
                             var qqq = FSDK.GetNumThreads(ref num);
-                            qqq = num;
                             var licenseInfo = Licencia.CodigoLicencia;
                             var zzz = FSDK.GetLicenseInfo(out licenseInfo);
 
@@ -141,9 +140,9 @@ namespace Workflow.Persistence.Repository.Biometria
                             var datos = new
                             {
                                 licencia = licencia,
-                                datoRetornoNumeroNucleos = qqq,
-                                argumentoMucleosEnviados = num,
-                                datoRetornoHardwareID = www,
+                                retornaNucleos = qqq,
+                                cantidadNucleos = num,
+                                retornaHardwareID = www,
                                 resulthardwareID = hardwareID
 
                             };
@@ -252,7 +251,7 @@ namespace Workflow.Persistence.Repository.Biometria
                     sdkLuxandOffline = identSesion.SdkLuxandOffline;
                     if (identSesion.SimilarityOnline is not null)
                     {
-                        SimilarityDefinition = float.Parse(identSesion.SimilarityOnline.ToString(), CultureInfo.InvariantCulture.NumberFormat);
+                        SimilarityDefinition = float.Parse(identSesion.SimilarityOnline.ToString(), CultureInfo.InvariantCulture.NumberFormat)/100;
                     }
                 }
 

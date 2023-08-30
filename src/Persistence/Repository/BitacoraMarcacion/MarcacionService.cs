@@ -250,11 +250,11 @@ public class MarcacionService : IMarcacion
         if (!objLocalidadColaborador.Any()) return new ResponseType<CreateMarcacionResponseType>() { Message = "No tiene Localidad Asignada", StatusCode = "101", Succeeded = true };
         var localidadSesion = await _repoLocalColab.ListAsync(new GetLocationByColaboradorSpec(IdentificacionSesion));
         //if (!objLocalidadColaborador.Any()) return new ResponseType<CreateMarcacionResponseType>() { Message = "No existe el colaborador", StatusCode = "101", Succeeded = true };
-        if (objLocalidadColaborador.ElementAt(0).Colaborador.FacialPersonId is null) return new ResponseType<CreateMarcacionResponseType>() { Message = "Debes registrar tus datos biométricos", StatusCode = "101", Succeeded = true };
+        if (objLocalidadColaborador.ElementAt(0).Colaborador.FacialPersonId is null) return new ResponseType<CreateMarcacionResponseType>() { Message = "Debes registrar tu foto de perfil para poder realizar reconocimiento facial", StatusCode = "101", Succeeded = true };
 
         #region Validacion de localidades
         var resultLocalidad = objLocalidadColaborador.Any(x => localidadSesion.Any(ls => ls.IdLocalidad == x.IdLocalidad));
-        if (!resultLocalidad) return new ResponseType<CreateMarcacionResponseType>() { Message = "No puede registrar marcación en esta localidad", StatusCode = "101", Succeeded = true };
+        if (!resultLocalidad) return new ResponseType<CreateMarcacionResponseType>() { Message = "No estas autorizado para registrar tu marcación en esta localidad", StatusCode = "101", Succeeded = true };
 
         #endregion
 
@@ -1003,7 +1003,7 @@ public class MarcacionService : IMarcacion
             float SimilarityDefinition = 0.85f;
             if (objUserSesion.SimilarityOffline is not null)
             {
-                SimilarityDefinition = float.Parse(objUserSesion.SimilarityOffline.ToString(), CultureInfo.InvariantCulture.NumberFormat);
+                SimilarityDefinition = float.Parse(objUserSesion.SimilarityOffline.ToString(), CultureInfo.InvariantCulture.NumberFormat)/100;
             }
             var mensajeError = "";
 
