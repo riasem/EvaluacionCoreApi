@@ -134,13 +134,22 @@ namespace Workflow.Persistence.Repository.Biometria
                             FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
                             #endregion
 
+                            var datos = new
+                            {
+                                numero_nucleos = qqq,
+                                id = www,
+                                hardwareID = hardwareID,
+                                nucleos = num
+
+                            };
+
                             if (Similarity >= SimilarityDefinition)
                             {
-                                return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
+                                return new ResponseType<string>() { Data = datos.ToString(), Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
                             }
                             else
                             {
-                                return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
+                                return new ResponseType<string>() { Data = datos.ToString(), Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
                             }
 
                         }
