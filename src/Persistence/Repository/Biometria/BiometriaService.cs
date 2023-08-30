@@ -100,62 +100,68 @@ namespace Workflow.Persistence.Repository.Biometria
 
                             //                            var xxx = FSDK.ActivateLibrary("YK6tt2AQmhevRUTW9hDnev5pB14PEjdaSzXfchF8Z/cJix53l2mt38mNEJUkfXPmWQ8TKQyZQsXlLRFiVkgrDj86co0xYLhoJltayZlea1zmqyzaN/yre+zOqEyr/1fDXLWkE4MEoQY8eOpj6hCrRsDP10EkunTtiz6mC8ar6AU=");
                             var yyy = FSDK.InitializeLibrary();
-                            FSDK.CImage imageCola;
-                            try
+                            if (xxx != -2)
                             {
-                                imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
-                            }
-                            catch (Exception ex)
-                            {
-                                _log.LogError(ex, string.Empty);
-                                return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
-                            }
-                            FSDK.CImage image;
-                            try
-                            {
-                                image = new FSDK.CImage(rutafinal); // Imagen enviada
-                            }
-                            catch (Exception ex)
-                            {
-                                _log.LogError(ex, string.Empty);
-                                return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
-                            }
+                                FSDK.CImage imageCola;
+                                try
+                                {
+                                    imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
+                                }
+                                catch (Exception ex)
+                                {
+                                    _log.LogError(ex, string.Empty);
+                                    return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
+                                }
+                                FSDK.CImage image;
+                                try
+                                {
+                                    image = new FSDK.CImage(rutafinal); // Imagen enviada
+                                }
+                                catch (Exception ex)
+                                {
+                                    _log.LogError(ex, string.Empty);
+                                    return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
+                                }
 
-                            File.Delete(rutafinal);
+                                File.Delete(rutafinal);
 
-                            byte[] template = new byte[FSDK.TemplateSize];
-                            byte[] templateImgCola = new byte[FSDK.TemplateSize];
-                            FSDK.TFacePosition facePosition = new FSDK.TFacePosition();
-                            FSDK.TFacePosition facePositionCola = new FSDK.TFacePosition();
-                            facePosition = image.DetectFace();
-                            facePositionCola = imageCola.DetectFace();
-                            template = image.GetFaceTemplateInRegion(ref facePosition);
-                            templateImgCola = imageCola.GetFaceTemplateInRegion(ref facePositionCola);
+                                byte[] template = new byte[FSDK.TemplateSize];
+                                byte[] templateImgCola = new byte[FSDK.TemplateSize];
+                                FSDK.TFacePosition facePosition = new FSDK.TFacePosition();
+                                FSDK.TFacePosition facePositionCola = new FSDK.TFacePosition();
+                                facePosition = image.DetectFace();
+                                facePositionCola = imageCola.DetectFace();
+                                template = image.GetFaceTemplateInRegion(ref facePosition);
+                                templateImgCola = imageCola.GetFaceTemplateInRegion(ref facePositionCola);
 
-                            float Similarity = 0.0f;
+                                float Similarity = 0.0f;
 
-                            FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
-                            #endregion
+                                FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
+                                #endregion
 
-                            var datos = new
-                            {
-                                licencia = licencia,
-                                retornaNucleos = qqq,
-                                cantidadNucleos = num,
-                                retornaHardwareID = www,
-                                resulthardwareID = hardwareID
+                                var datos = new
+                                {
+                                    licencia = licencia,
+                                    retornaNucleos = qqq,
+                                    cantidadNucleos = num,
+                                    retornaHardwareID = www,
+                                    resulthardwareID = hardwareID
 
-                            };
+                                };
 
-                            if (Similarity >= SimilarityDefinition)
-                            {
-                                return new ResponseType<string>() { Data = datos.ToString(), Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
+                                if (Similarity >= SimilarityDefinition)
+                                {
+                                    return new ResponseType<string>() { Data = datos.ToString(), Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
+                                }
+                                else
+                                {
+                                    return new ResponseType<string>() { Data = datos.ToString(), Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
+                                }
                             }
                             else
                             {
-                                return new ResponseType<string>() { Data = datos.ToString(), Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
+                                return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
                             }
-
                         }
                         catch (Exception ex)
                         {
@@ -289,50 +295,57 @@ namespace Workflow.Persistence.Repository.Biometria
                             var Licencia = await _repoLicencia.FirstOrDefaultAsync(new LicenciaByServicioSpec(Guid.Parse(GuidLicenciaLuxand)));
                             if (Licencia is null) return new ResponseType<string> { StatusCode = "101", Succeeded = true, Message = "No se ha podido obtener datos de Licencia" };
 
-                            FSDK.ActivateLibrary(Licencia.CodigoLicencia);
-                            FSDK.InitializeLibrary();
-                            FSDK.CImage imageCola;
-                            try
+                            var xxx = FSDK.ActivateLibrary(Licencia.CodigoLicencia);
+                            var yyy = FSDK.InitializeLibrary();
+                            if (xxx != -2)
                             {
-                                imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
-                            } catch(Exception ex)
-                            {
-                                _log.LogError(ex, string.Empty);
-                                return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
-                            }
-                            FSDK.CImage image;
-                            try
-                            {
-                                image = new FSDK.CImage(rutaFinal); // Imagen enviada
-                            }
-                            catch (Exception ex)
-                            {
-                                _log.LogError(ex, string.Empty);
-                                return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
-                            }
-                            byte[] template = new byte[FSDK.TemplateSize];
-                            byte[] templateImgCola = new byte[FSDK.TemplateSize];
-                            FSDK.TFacePosition facePosition = new FSDK.TFacePosition();
-                            FSDK.TFacePosition facePositionCola = new FSDK.TFacePosition();
-                            facePosition = image.DetectFace();
-                            facePositionCola = imageCola.DetectFace();
-                            template = image.GetFaceTemplateInRegion(ref facePosition);
-                            templateImgCola = imageCola.GetFaceTemplateInRegion(ref facePositionCola);
+                                FSDK.CImage imageCola;
+                                try
+                                {
+                                    imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
+                                }
+                                catch (Exception ex)
+                                {
+                                    _log.LogError(ex, string.Empty);
+                                    return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
+                                }
+                                FSDK.CImage image;
+                                try
+                                {
+                                    image = new FSDK.CImage(rutaFinal); // Imagen enviada
+                                }
+                                catch (Exception ex)
+                                {
+                                    _log.LogError(ex, string.Empty);
+                                    return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
+                                }
+                                byte[] template = new byte[FSDK.TemplateSize];
+                                byte[] templateImgCola = new byte[FSDK.TemplateSize];
+                                FSDK.TFacePosition facePosition = new FSDK.TFacePosition();
+                                FSDK.TFacePosition facePositionCola = new FSDK.TFacePosition();
+                                facePosition = image.DetectFace();
+                                facePositionCola = imageCola.DetectFace();
+                                template = image.GetFaceTemplateInRegion(ref facePosition);
+                                templateImgCola = imageCola.GetFaceTemplateInRegion(ref facePositionCola);
 
-                            #endregion
+                                #endregion
 
-                            float Similarity = 0.0f;
-                            File.Delete(rutaFinal);
-                            //FSDK.GetMatchingThresholdAtFAR(96 / 100, ref Threshold);
-                            FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
+                                float Similarity = 0.0f;
+                                File.Delete(rutaFinal);
+                                //FSDK.GetMatchingThresholdAtFAR(96 / 100, ref Threshold);
+                                FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
 
-                            if (Similarity >= SimilarityDefinition)
+                                if (Similarity >= SimilarityDefinition)
+                                {
+                                    return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
+                                }
+                                else
+                                {
+                                    return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
+                                }
+                            } else
                             {
                                 return new ResponseType<string>() { Data = null, Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
-                            }
-                            else
-                            {
-                                return new ResponseType<string>() { Data = null, Message = "Autenticación fallida", StatusCode = "101", Succeeded = false };
                             }
                         }
                         catch (Exception ex)

@@ -1039,30 +1039,56 @@ public class MarcacionService : IMarcacion
                         if (Licencia is null) return new ResponseType<string> { StatusCode = "101", Succeeded = true, Message = "Licencia no se encuentra disponible o activa" };
 
                         // Obtener la Licencia del SDK de Luxand en la parametrizacion
-                        FSDK.ActivateLibrary(Licencia.CodigoLicencia);
-                        FSDK.InitializeLibrary();
+                        var xxx = FSDK.ActivateLibrary(Licencia.CodigoLicencia);
+
+                        string hardwareID;
+                        var www = FSDK.GetHardware_ID(out hardwareID);
+                        int num = 0;
+                        var qqq = FSDK.GetNumThreads(ref num);
+                        var licenseInfo = Licencia.CodigoLicencia;
+                        var zzz = FSDK.GetLicenseInfo(out licenseInfo);
+ 
+                        var yyy = FSDK.InitializeLibrary();
+
                         var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Request.Identificacion));
                         if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
 
-                        try
+                        if (xxx != -2)
                         {
-                            image = new FSDK.CImage(rutaFinal); // Imagen enviada
-                            byte[] template = new byte[FSDK.TemplateSize];
-                            FSDK.TFacePosition facePosition = new FSDK.TFacePosition();
-                            facePosition = image.DetectFace();
-                            template = image.GetFaceTemplateInRegion(ref facePosition);
-                            imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
-                            byte[] templateImgCola = new byte[FSDK.TemplateSize];
-                            FSDK.TFacePosition facePositionCola = new FSDK.TFacePosition();
-                            facePositionCola = imageCola.DetectFace();
-                            templateImgCola = imageCola.GetFaceTemplateInRegion(ref facePositionCola);
-                            FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
-                        }
-                        catch (Exception ex)
+                            try
+                            {
+                                image = new FSDK.CImage(rutaFinal); // Imagen enviada
+                                byte[] template = new byte[FSDK.TemplateSize];
+                                FSDK.TFacePosition facePosition = new FSDK.TFacePosition();
+                                facePosition = image.DetectFace();
+                                template = image.GetFaceTemplateInRegion(ref facePosition);
+                                imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
+                                byte[] templateImgCola = new byte[FSDK.TemplateSize];
+                                FSDK.TFacePosition facePositionCola = new FSDK.TFacePosition();
+                                facePositionCola = imageCola.DetectFace();
+                                templateImgCola = imageCola.GetFaceTemplateInRegion(ref facePositionCola);
+                                FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
+                            }
+                            catch (Exception ex)
+                            {
+                                mensajeError = ex.Message;
+                                estadoRecono = "NO VALIDO";
+                                estadoValid = false;
+                            }
+
+                        } else
                         {
-                            mensajeError = ex.Message;
-                            estadoRecono = "NO VALIDO";
-                            estadoValid = false;
+                            var datos = new
+                            {
+                                licencia = Licencia.CodigoLicencia,
+                                retornaNucleos = qqq,
+                                cantidadNucleos = num,
+                                retornaHardwareID = www,
+                                resulthardwareID = hardwareID
+
+                            };
+                            mensajeError = datos.ToString();
+
                         }
                         if (mensajeError == "")
                         {
