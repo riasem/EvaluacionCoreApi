@@ -99,7 +99,6 @@ namespace Workflow.Persistence.Repository.Biometria
                             var licenseInfo = Licencia.CodigoLicencia;
                             var zzz = FSDK.GetLicenseInfo(out licenseInfo);
 
-                            //                            var xxx = FSDK.ActivateLibrary("YK6tt2AQmhevRUTW9hDnev5pB14PEjdaSzXfchF8Z/cJix53l2mt38mNEJUkfXPmWQ8TKQyZQsXlLRFiVkgrDj86co0xYLhoJltayZlea1zmqyzaN/yre+zOqEyr/1fDXLWkE4MEoQY8eOpj6hCrRsDP10EkunTtiz6mC8ar6AU=");
                             var yyy = FSDK.InitializeLibrary();
                             if (xxx != -2)
                             {
@@ -211,8 +210,6 @@ namespace Workflow.Persistence.Repository.Biometria
 
                             multipartFormContent.Add(fileStreamContent, name: "photo", fileName: string.Concat(request.Nombre, ".", request.Extension));
                             #endregion
-                            //Consultamos los datos del colaborador
-                            //var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(request.Identificacion));
 
                             var resLuxand = await client.PostAsync(string.Concat(uriEndPoint, "/", request.FacialPersonUid), multipartFormContent);
 
@@ -348,7 +345,6 @@ namespace Workflow.Persistence.Repository.Biometria
 
                                 float Similarity = 0.0f;
                                 File.Delete(rutaFinal);
-                                //FSDK.GetMatchingThresholdAtFAR(96 / 100, ref Threshold);
                                 FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
 
                                 var datos = new
