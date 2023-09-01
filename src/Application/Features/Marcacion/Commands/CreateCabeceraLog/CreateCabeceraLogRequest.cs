@@ -24,7 +24,7 @@ public class CreateCabeceraLogRequest
 
     public string Estado { get; set; }
 
-    public string TipoComunicacion { get; set; }
+
 }
 
 

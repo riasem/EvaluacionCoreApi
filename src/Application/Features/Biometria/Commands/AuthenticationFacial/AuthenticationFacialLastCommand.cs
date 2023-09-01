@@ -24,8 +24,7 @@ public class AuthenticationFacialLastCommandHandler : IRequestHandler<Authentica
     {
         try
         {
-            string OnlineOffline = "ONLINE";
-            var objResult = await _repoBiometriaAsync.AuthenticationFacialLastAsync(request.BiometriaRequest, null, OnlineOffline);
+            var objResult = await _repoBiometriaAsync.AuthenticationFacialLastAsync(request.BiometriaRequest);
 
             return objResult;
         }

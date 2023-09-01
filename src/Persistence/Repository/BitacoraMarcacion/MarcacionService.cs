@@ -13,7 +13,6 @@ using EvaluacionCore.Application.Features.Biometria.Interfaces;
 using EvaluacionCore.Application.Features.Biometria.Specifications;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Dto;
 using EvaluacionCore.Application.Features.Common.Specifications;
-using EvaluacionCore.Application.Features.EvalCore.Dto;
 using EvaluacionCore.Application.Features.EvalCore.Interfaces;
 using EvaluacionCore.Application.Features.Locacions.Specifications;
 using EvaluacionCore.Application.Features.Marcacion.Commands.CargaMarcacionesExcel;
@@ -36,9 +35,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Globalization;
-using System.Text.Json.Serialization;
-using TurnoLaboral = EvaluacionCore.Application.Features.Marcacion.Dto.TurnoLaboral;
-using TurnoReceso = EvaluacionCore.Application.Features.Marcacion.Dto.TurnoReceso;
 
 namespace EvaluacionCore.Persistence.Repository.BitacoraMarcacion;
 
@@ -64,8 +60,7 @@ public class MarcacionService : IMarcacion
     private readonly IRepositoryAsync<LocalidadColaborador> _repoLocalColab;
     private readonly IRepositoryGRiasemAsync<MarcacionOffline> _repoMarcacionOffline;
     private readonly IRepositoryAsync<LicenciaTerceroSG> _repoLicencia;
-    private readonly IRepositoryAsync<LocalidadAdministrador> _repoLocalAdministrador;
-
+    
 
     private readonly IConfiguration _config;
     private readonly IBiometria _repoBiometriaAsync;
@@ -91,7 +86,7 @@ public class MarcacionService : IMarcacion
         IRepositoryAsync<Cliente> repoCliente, IRepositoryAsync<LocalidadColaborador> repoLocalColab,
         IRepositoryGRiasemAsync<AccMonitoLogRiasem> repoMonitoLogRiasemAsync, IRepositoryGRiasemAsync<AlertasNovedadMarcacion> repoNovedadMarcacion, IBiometria repoBiometriaAsync, IRepositoryGRiasemAsync<Machines> repoMachinesAsync,IMapper mapper, IRepositoryGRiasemAsync<MonitorLogFileOffline> repoMonitorLogFileAsync,
         IRepositoryGRiasemAsync<MarcacionOffline> repoMarcacionOffline, IRepositoryGRiasemAsync<AccLogMarcacionOffline> repoAccLogMarcacionAsync, IRepositoryGRiasemAsync<DispositivoMarcacion> repoDispMarcaAsync,
-        IMarcacionOffline MarcacionesOffline, IRepositoryAsync<LicenciaTerceroSG> repoLicencia, IRepositoryAsync<LocalidadAdministrador> repoLocalAdministrador)
+        IMarcacionOffline MarcacionesOffline, IRepositoryAsync<LicenciaTerceroSG> repoLicencia)
     {
         _EvaluacionAsync = repository;
         _MarcacionesOffline = MarcacionesOffline;
@@ -121,23 +116,12 @@ public class MarcacionService : IMarcacion
         _repoMonitorLogFileAsync = repoMonitorLogFileAsync;
         _repoDispMarcaAsync = repoDispMarcaAsync;
         _repoLicencia = repoLicencia;
-        _repoLocalAdministrador = repoLocalAdministrador;
     }
     public async Task<ResponseType<MarcacionResponseType>> CreateMarcacion(CreateMarcacionRequest Request, CancellationToken cancellationToken)
     {
         try
         {
-            string descripcion = "";
-            var consultaMonitoLogRiasem = Request.ConsultaMonitoLogRiasem;
             var marcacionColaborador = DateTime.Now;
-            if (Request.Time != DateTime.MinValue)
-            {
-                marcacionColaborador = Request.Time;
-            }
-            if (Request.Descripcion is not null)
-            {
-                descripcion = Request.Descripcion;
-            }
             MarcacionResponseType objResultFinal = new();
 
             //var objLocalidad = await _repoLocalidad.FirstOrDefaultAsync(new GetLocalidadByIdSpec(Request.LocalidadId, Request.CodigoEmpleado), cancellationToken);
@@ -160,15 +144,7 @@ public class MarcacionService : IMarcacion
                 deviceName = objMachines.MachineAlias;
             }
 
-            // Por defecto asignaremos el tipo de Comunicacion "RED"
-            int tipoComunicacion = 3;
-            // Si se recibe el tipo de Comunicacion desde el dispositivo de marcacion
-            if (Request.TipoComunicacion != null)
-            {
-                tipoComunicacion = Int32.Parse(Request.TipoComunicacion);
-            }
 
-            // Define el registro de marcacion que se almancenara en ACC_MONITOR_LOG
             AccMonitorLog accMonitorLog = new()
             {
                 State = 0,
@@ -178,9 +154,7 @@ public class MarcacionService : IMarcacion
                 Verified = 0,
                 Device_Name = deviceName, //parametrizar desde el request
                 Status = 1,
-                Create_Time = DateTime.Now,
-                Log_Tag = tipoComunicacion,
-                Description = descripcion
+                Create_Time = DateTime.Now
             };
 
             var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
@@ -188,36 +162,25 @@ public class MarcacionService : IMarcacion
             {
                 return new ResponseType<MarcacionResponseType>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
             }
-            if (consultaMonitoLogRiasem == true)
-            {
-                //await Task.Delay(1500, cancellationToken);
-                var marcacionEmpl = await _repoMonitoLogRiasemAsync.FirstOrDefaultAsync(new MarcacionByColaboradorAndTime(objResultado.Pin, objResultado.Time, deviceId), cancellationToken);
+            //await Task.Delay(1500, cancellationToken);
+            var marcacionEmpl = await _repoMonitoLogRiasemAsync.FirstOrDefaultAsync(new MarcacionByColaboradorAndTime(objResultado.Pin, objResultado.Time, deviceId), cancellationToken);
 
-                if (marcacionEmpl is not null)
-                {
-                    //string tipoMarcacion = EvaluaTipoMarcacion(marcacionEmpl.Result.State);
-                    //string estadoMarcacion = EvaluaEstadoMarcacion(marcacionEmpl.Result.Description);
-
-                    objResultFinal = new()
-                    {
-                        //MarcacionId = Guid.Parse(marcacionid),  TEMPORAL SE COMENTA HASTA REGULARIZAR 
-                        MarcacionId = marcacionEmpl.Id,
-                        TipoMarcacion = marcacionEmpl.Estado,
-                        EstadoMarcacion = marcacionEmpl.Description
-                    };
-                }
-                else
-                {
-                    objResultFinal = null;
-                }
-            } else
+            if (marcacionEmpl is not null)
             {
+                //string tipoMarcacion = EvaluaTipoMarcacion(marcacionEmpl.Result.State);
+                //string estadoMarcacion = EvaluaEstadoMarcacion(marcacionEmpl.Result.Description);
+
                 objResultFinal = new()
                 {
-                    MarcacionId = objResultado.Id,
-                    TipoMarcacion = null,
-                    EstadoMarcacion = null
+                    //MarcacionId = Guid.Parse(marcacionid),  TEMPORAL SE COMENTA HASTA REGULARIZAR 
+                    MarcacionId = marcacionEmpl.Id,
+                    TipoMarcacion = marcacionEmpl.Estado,
+                    EstadoMarcacion = marcacionEmpl.Description
                 };
+            }
+            else
+            {
+                objResultFinal = null;
             }
 
             //var colaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByCodBiometrico(Request.CodigoEmpleado), cancellationToken);
@@ -232,6 +195,11 @@ public class MarcacionService : IMarcacion
             //if (con.State == ConnectionState.Open) con.Close();
 
             return new ResponseType<MarcacionResponseType>() { Data = objResultFinal, Message = "Marcación registrada correctamente", StatusCode = "100", Succeeded = true };
+
+
+
+            //}
+            //return new ResponseType<MarcacionResponseType>() { Message = "Debe marcar desde su dispositivo movil.", Succeeded = true, StatusCode = "101" };
 
         }
         catch (Exception ex)
@@ -249,11 +217,12 @@ public class MarcacionService : IMarcacion
         var objLocalidadColaborador = await _repoLocalColab.ListAsync(new GetLocationByColaboradorSpec(Request.Identificacion));
         if (!objLocalidadColaborador.Any()) return new ResponseType<CreateMarcacionResponseType>() { Message = "No tiene Localidad Asignada", StatusCode = "101", Succeeded = true };
         var localidadSesion = await _repoLocalColab.ListAsync(new GetLocationByColaboradorSpec(IdentificacionSesion));
-        if (objLocalidadColaborador.ElementAt(0).Colaborador.FacialPersonId is null) return new ResponseType<CreateMarcacionResponseType>() { Message = "Debes registrar tu foto de perfil para poder realizar reconocimiento facial", StatusCode = "101", Succeeded = true };
+        //if (!objLocalidadColaborador.Any()) return new ResponseType<CreateMarcacionResponseType>() { Message = "No existe el colaborador", StatusCode = "101", Succeeded = true };
+        if (objLocalidadColaborador.ElementAt(0).Colaborador.FacialPersonId is null) return new ResponseType<CreateMarcacionResponseType>() { Message = "Debes registrar tus datos biométricos", StatusCode = "101", Succeeded = true };
 
         #region Validacion de localidades
         var resultLocalidad = objLocalidadColaborador.Any(x => localidadSesion.Any(ls => ls.IdLocalidad == x.IdLocalidad));
-        if (!resultLocalidad) return new ResponseType<CreateMarcacionResponseType>() { Message = "No estas autorizado para registrar tu marcación en esta localidad", StatusCode = "101", Succeeded = true };
+        if (!resultLocalidad) return new ResponseType<CreateMarcacionResponseType>() { Message = "No puede registrar marcación en esta localidad", StatusCode = "101", Succeeded = true };
 
         #endregion
 
@@ -265,32 +234,28 @@ public class MarcacionService : IMarcacion
             Nombre = Request.Nombre,
             Identificacion = Request.Identificacion
         };
-        string OnlineOffline = "ONLINE";
-        ResponseType<string> resultBiometria = await _repoBiometriaAsync.AuthenticationFacialAsync(requestFacial, IdentificacionSesion, OnlineOffline);
+        ResponseType<string> resultBiometria = await _repoBiometriaAsync.AuthenticationFacialAsync(requestFacial, IdentificacionSesion);
 
         if (resultBiometria.StatusCode != "100") return new ResponseType<CreateMarcacionResponseType>() { Message = resultBiometria.Message, StatusCode = resultBiometria.StatusCode, Succeeded = resultBiometria.Succeeded };
 
-        // Define el registro de marcacion que se almacenara en ACC_MONITOR_LOG
+
+
         CreateMarcacionRequest requestMarcacion = new()
         {
             CodigoEmpleado = objLocalidadColaborador.ElementAt(0).Colaborador.CodigoConvivencia,
             DispositivoId = Request.DispositivoId,
             LocalidadId = Request.LocalidadId,
-            IdentificacionSesion = IdentificacionSesion,
-            TipoComunicacion = Request.TipoComunicacion,
-            ConsultaMonitoLogRiasem = false
+            IdentificacionSesion = IdentificacionSesion
         };
 
 
         var resultMarcacion = await CreateMarcacion(requestMarcacion, cancellationToken);
         CreateMarcacionResponseType data = new();
         data.Colaborador = objLocalidadColaborador.ElementAt(0).Colaborador.Nombres + " " + objLocalidadColaborador.ElementAt(0).Colaborador.Apellidos;
-        // Esta asignacion a data.Colaborador se la utiliza para que en el Response presente la informacion tecnica de nucleos y hardware que requiere Luxand
-        // data.Colaborador = resultBiometria.Data.ToString();
         data.RutaImagen = objLocalidadColaborador.ElementAt(0).Colaborador.ImagenPerfilId is null ? "" : objLocalidadColaborador.ElementAt(0).Colaborador.ImagenPerfil.RutaAcceso;
         data.Marcacion = DateTime.Now;
 
-        return new ResponseType<CreateMarcacionResponseType>() { Message = resultMarcacion.Message, StatusCode = resultMarcacion.StatusCode, Data = data, Succeeded = resultMarcacion.Succeeded };
+        return new ResponseType<CreateMarcacionResponseType>() { Message = resultMarcacion.Message ,StatusCode = resultMarcacion.StatusCode, Data = data,  Succeeded = resultMarcacion.Succeeded };
 
 
     }
@@ -300,6 +265,7 @@ public class MarcacionService : IMarcacion
         var objLocalidadColaborador = await _repoLocalColab.ListAsync(new GetLocationByColaboradorSpec(Request.Identificacion));
         if (!objLocalidadColaborador.Any()) return new ResponseType<CreateMarcacionResponseType>() { Message = "No tiene Localidad Asignada", StatusCode = "101", Succeeded = true };
         var localidadSesion = await _repoLocalColab.ListAsync(new GetLocationByColaboradorSpec(IdentificacionSesion));
+        //if (!objLocalidadColaborador.Any()) return new ResponseType<CreateMarcacionResponseType>() { Message = "No existe el colaborador", StatusCode = "101", Succeeded = true };
         if (objLocalidadColaborador.ElementAt(0).Colaborador.FacialPersonId is null) return new ResponseType<CreateMarcacionResponseType>() { Message = "Debes registrar tus datos biométricos", StatusCode = "101", Succeeded = true };
 
         #region Validacion de localidades
@@ -315,9 +281,8 @@ public class MarcacionService : IMarcacion
             AdjuntoFiles = Request.Adjunto,
             Identificacion = Request.Identificacion
 
-        }; 
-        String OnlineOffline = "ONLINE";
-        ResponseType<string> resultBiometria = await _repoBiometriaAsync.AuthenticationFacialLastAsync(requestFacial, IdentificacionSesion, OnlineOffline);
+        };
+        ResponseType<string> resultBiometria = await _repoBiometriaAsync.AuthenticationFacialLastAsync(requestFacial);
 
         if (resultBiometria.StatusCode != "100") return new ResponseType<CreateMarcacionResponseType>() { Message = resultBiometria.Message, StatusCode = resultBiometria.StatusCode, Succeeded = resultBiometria.Succeeded };
 
@@ -327,9 +292,8 @@ public class MarcacionService : IMarcacion
         {
             CodigoEmpleado = objLocalidadColaborador.ElementAt(0).Colaborador.CodigoConvivencia,
             DispositivoId = Request.DispositivoId,
-            IdentificacionSesion = IdentificacionSesion,
-            TipoComunicacion = Request.TipoComunicacion,
-            ConsultaMonitoLogRiasem = false
+            //LocalidadId = Request.LocalidadId,
+            IdentificacionSesion = IdentificacionSesion
         };
 
 
@@ -493,8 +457,6 @@ public class MarcacionService : IMarcacion
         try
         {
             string tipoMarcacion = string.IsNullOrEmpty(Request.TipoMarcacion) ? string.Empty : Request.TipoMarcacion.ToUpper();
-
-            // Se estable que el device_id correspondiente al canal Web es el 998
             int deviceId = 998;
             string deviceName = "ENROLAPP WEB";
 
@@ -529,12 +491,11 @@ public class MarcacionService : IMarcacion
             if (!colaboradorLocalidad.Any())
                 return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = "Colaborador no tiene localidades asignadas", StatusCode = "101", Succeeded = false };
 
-            // Valida si el colaborador que esta marcando pertenece o no a la localidad de su jefe establecido
             //var localidades = jefeLocalidad.Where(jl => colaboradorLocalidad.Any(cl => cl.IdLocalidad == jl.IdLocalidad)).ToList();
+
             //if (!localidades.Any())
             //    return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = "Colaborador no corresponde a la localidad", StatusCode = "101", Succeeded = false };
 
-            // Si el tipo de Marcacion es con Reconocimiento Facial
             if (tipoMarcacion == "F")
             {
                 if (colaborador.FacialPersonId == null)
@@ -546,11 +507,9 @@ public class MarcacionService : IMarcacion
                     Nombre = Request.NombreArchivo,
                     Extension = Request.ExtensionArchivo,
                     FacialPersonUid = colaborador.FacialPersonId.ToString(),
-                    Identificacion = Request.IdentificacionColaborador,
                 };
 
-                string OnlineOffline = "ONLINE";
-                var respAuth = await _repoBiometriaAsync.AuthenticationFacialAsync(objAuth, Request.IdentificacionJefe, OnlineOffline);
+                var respAuth = await _repoBiometriaAsync.AuthenticationFacialAsync(objAuth, Request.IdentificacionJefe);
 
                 if (!respAuth.Succeeded)
                     return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = respAuth.Message, StatusCode = "101", Succeeded = false };
@@ -564,15 +523,6 @@ public class MarcacionService : IMarcacion
             #region Registro de la marcación 
             var marcacionColaborador = DateTime.Now;
 
-            // Por defecto asignaremos el tipo de Comunicacion "RED"
-            int tipoComunicacion = 3;
-            // Si se recibe el tipo de Comunicacion desde el dispositivo de marcacion
-            if (Request.TipoComunicacion != null)
-            {
-                tipoComunicacion = Int32.Parse(Request.TipoComunicacion);
-            }
-
-            // Define el registro de marcacion que se almancenara en ACC_MONITOR_LOG
             AccMonitorLog accMonitorLog = new()
             {
                 State = 0,
@@ -582,8 +532,7 @@ public class MarcacionService : IMarcacion
                 Verified = 0,
                 Device_Name = deviceName,
                 Status = 1,
-                Create_Time = DateTime.Now,
-                Log_Tag = tipoComunicacion
+                Create_Time = DateTime.Now
             };
 
             var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
@@ -704,7 +653,7 @@ public class MarcacionService : IMarcacion
                 
                 for (DateTime dtm = FDesde; dtm <= FHasta; dtm = dtm.AddDays(1))
                 {
-                    List<Application.Features.Marcacion.Dto.Novedad> novedades = new();
+                    List<Novedad> novedades = new();
                     //Se obtiene el turno laboral asignado al colaborador de la fecha en proceso
                     var turnoFiltro = await _repositoryTurnoColAsync.FirstOrDefaultAsync(new TurnoColaboradorTreeSpec(itemCol.Identificacion, dtm), cancellationToken);
 
@@ -844,7 +793,7 @@ public class MarcacionService : IMarcacion
                     {
                         if (filtroNovedades.Contains(item.TipoNovedad))
                         {
-                            novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                            novedades.Add(new Novedad
                             {
                                 Descripcion = item.DescripcionMensaje,
                                 MinutosNovedad = "",
@@ -884,6 +833,7 @@ public class MarcacionService : IMarcacion
             //                                     filtroNovedades.Contains(e.Novedades.Select(e => e.EstadoMarcacion).ToString())).ToList();
 
             return new ResponseType<List<NovedadMarcacionWebType>>() { Data = listaEvaluacionAsistencia, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
+            //return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = listaEvaluacionAsistencia, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
 
         }
         catch (Exception e)
@@ -899,45 +849,19 @@ public class MarcacionService : IMarcacion
         try
         {
             var colaboradores = await _repoLocalColab.ListAsync(new GetListadoPersonalByLocalidadSpec(IdentificacionSesion), cancellationToken);
-            var localidadDispositivo = await _repoLocalColab.ListAsync(new GetListadoLocalidadSpec(IdentificacionSesion), cancellationToken);
-            var localidad = localidadDispositivo.FirstOrDefault().Localidad.Codigo;
-            var administradores = await _repoLocalAdministrador.ListAsync(new GetListadoAdministradorByLocalidadSpec(localidad), cancellationToken);
 
-            if (!colaboradores.Any() && !administradores.Any()) return new ResponseType<List<ColaboradorByLocalidadResponseType>>() { Message = "No existen Colaboradores y Administradores en la localidad", StatusCode = "001", Succeeded = true };
-
-            if (colaboradores.Any()) {
-                colaboradores = colaboradores.DistinctBy(x => x.Colaborador.Identificacion).ToList();
-            }
-            if (administradores.Any()) {
-                administradores = administradores.DistinctBy(x => x.Identificacion).ToList();
-            }
+            if (!colaboradores.Any()) return new ResponseType<List<ColaboradorByLocalidadResponseType>>() { Message = "No existen Colaboradores en la localidad", StatusCode = "001", Succeeded = true };
+            colaboradores = colaboradores.DistinctBy(x => x.Colaborador.Identificacion).ToList();
 
             var result = _mapper.Map<List<ColaboradorByLocalidadResponseType>>(colaboradores);
-
-            // Adiciona, a la lista de colaboradores, los administradores del dispositivo de la localidad, si hubieren
-            foreach (var administrador in administradores) {
-                var colaboradorByLocalidadResponse = new ColaboradorByLocalidadResponseType()
-                {
-                    Identificacion = administrador.Identificacion,
-                    Empleado = null,
-                    RutaImagen = null,
-                    NombreUdn = null, //administrador.Localidad.Empresa.RazonSocial,
-                    CodigoUdn = null, //administrador.Localidad.Empresa.Codigo,
-                    CodigoBiometrico = null,
-                    Administrador = "S",
-                    Clave = administrador.ClaveOffLine
-                };
-                if (!result.Any()) {
-                    result = new();
-                }
-                result.Add(colaboradorByLocalidadResponse);
-            }
 
             return new ResponseType<List<ColaboradorByLocalidadResponseType>>() { Data = result.OrderBy(x => x.Identificacion).ToList(), Message = CodeMessageResponse.GetMessageByCode("000"),Succeeded = true, StatusCode = "000"};
         }
         catch (Exception ex)
         {
+
             _log.LogError(ex, string.Empty);
+
             return new ResponseType<List<ColaboradorByLocalidadResponseType>>() { Message = CodeMessageResponse.GetMessageByCode("002"), StatusCode = "002", Succeeded = false};
         }
 
@@ -946,17 +870,12 @@ public class MarcacionService : IMarcacion
 
     public async Task<ResponseType<string>> CreateMarcacionOffline(CreateMarcacionOfflineRequest Request,string IdentificacionSesion,string TipoCarga, CancellationToken cancellationToken)
     {
-        FSDK.CImage image;
-        FSDK.CImage imageCola;
         try
         {
             MarcacionResponseType objResultFinal = new();
 
-            // Por defecto define el device_id 999 que representa al dispositivo de marcacion celular
             var deviceId = 999;
             var deviceName = "EnrolApp";
-
-            var objA = await _repoEje.ListAsync();
 
             var objUserSesion = await _repoEje.FirstOrDefaultAsync(new GetEjeByIdentificacionSpec(IdentificacionSesion));
             if (objUserSesion != null)
@@ -996,132 +915,83 @@ public class MarcacionService : IMarcacion
             bool estadoValid = false;
             string respMonitorId = "";
             var rutaFinal = "";
-            string estadoRecono = "CORRECTO";
+            string estadoRecono = "PENDIENTE";
             float Similarity = 0.0f;
-            float SimilarityDefinition = 0.85f;
-            if (objUserSesion.SimilarityOffline is not null)
-            {
-                SimilarityDefinition = float.Parse(objUserSesion.SimilarityOffline.ToString(), CultureInfo.InvariantCulture.NumberFormat)/100;
-            }
-            var mensajeError = "";
-
-            // Se debe evaluar si es dispositivo exige o no la validacion por reconocimiento facial en el procesamiento
-            // de marcaciones offline, en la tabla CargoEje atributo sdkLuxandOffline (1) Si es requerido y (0) No es requerido
 
             if (TipoCarga is null || TipoCarga == "Txt")
             {
+                #region Conversion de Archivo
+
+                byte[] bytes = Convert.FromBase64String(Request.Imagen);
+                var rutaBase = _config.GetSection("Adjuntos:RutaBase").Get<string>();
+                var directorio = rutaBase + "marcacionOffline/";
+
+                if (!Directory.Exists(directorio))
+                {
+                    Directory.CreateDirectory(directorio);
+                }
+
+                string nombreFile = DateTime.Now.Year.ToString() + "-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString() + "-" + DateTime.Now.Hour.ToString() + "-" + DateTime.Now.Minute.ToString() + "-" + DateTime.Now.Second.ToString();
+                rutaFinal = directorio + nombreFile + "-" + Request.CodigoBiometrico.ToString() + Request.Extension;
+
+                await File.WriteAllBytesAsync(rutaFinal, bytes);
+
+                #endregion
+
+                #region Validacion con el SDK
+
                 try
                 {
-                    #region Conversion de Archivo
-                    byte[] bytes = Convert.FromBase64String(Request.Imagen);
-                    var rutaBase = _config.GetSection("Adjuntos:RutaBase").Get<string>();
-                    var directorio = rutaBase + "marcacionOffline/";
 
-                    if (!Directory.Exists(directorio))
-                    {
-                        Directory.CreateDirectory(directorio);
-                    }
+                    //FSDK.ActivateLibrary("OzcLugSo7r/QQc5uUan/hLmtsyw7avFhRPiyRJFXPNg+qnV0VwOkJeefJTLGmmzM+Jclto9Mto6KY64OW419evp+KXZoti3d2dKhzvexBjdANFb93HpJVSYcHPrs/j+bn8iIEHSS8G7r5LV64TyzdUZdVkukOKuF1EeMj4C0/Js=");
+                    var Licencia = await _repoLicencia.FirstOrDefaultAsync(new LicenciaByServicioSpec(Guid.Parse(GuidLicenciaLuxand)));
+                    if (Licencia is null) return new ResponseType<string> { StatusCode = "101", Succeeded = true, Message = "Licencia no se encuentra disponible o activa" };
 
-                    string nombreFile = DateTime.Now.Year.ToString() + "-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString() + "-" + DateTime.Now.Hour.ToString() + "-" + DateTime.Now.Minute.ToString() + "-" + DateTime.Now.Second.ToString();
-                    rutaFinal = directorio + nombreFile + "-" + Request.CodigoBiometrico.ToString() + Request.Extension;
+                    // Obtener la Licencia del SDK de Luxand en la parametrizacion
+                    FSDK.ActivateLibrary(Licencia.CodigoLicencia);
+                    FSDK.InitializeLibrary();
+                    var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Request.Identificacion));
+                    if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
 
-                    await File.WriteAllBytesAsync(rutaFinal, bytes);
-                    #endregion
+                    
+                    FSDK.CImage image = new FSDK.CImage(rutaFinal); // Imagen enviada
+                    FSDK.CImage imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
 
-                    if (objUserSesion.SdkLuxandOffline == true)
-                    {
+                    byte[] template = new byte[FSDK.TemplateSize];
+                    byte[] templateImgCola = new byte[FSDK.TemplateSize];
+                    FSDK.TFacePosition facePosition = new FSDK.TFacePosition();
+                    FSDK.TFacePosition facePositionCola = new FSDK.TFacePosition();
+                    facePosition = image.DetectFace();
+                    facePositionCola = imageCola.DetectFace();
+                    template = image.GetFaceTemplateInRegion(ref facePosition);
+                    templateImgCola = imageCola.GetFaceTemplateInRegion(ref facePositionCola);
 
-                        #region Validacion con el SDK
-                        var Licencia = await _repoLicencia.FirstOrDefaultAsync(new LicenciaByServicioSpec(Guid.Parse(GuidLicenciaLuxand)));
-                        if (Licencia is null) return new ResponseType<string> { StatusCode = "101", Succeeded = true, Message = "Licencia no se encuentra disponible o activa" };
-
-                        // Obtener la Licencia del SDK de Luxand en la parametrizacion
-                        var xxx = FSDK.ActivateLibrary(Licencia.CodigoLicencia);
-
-                        string hardwareID;
-                        var www = FSDK.GetHardware_ID(out hardwareID);
-                        int num = 0;
-                        var qqq = FSDK.GetNumThreads(ref num);
-                        var licenseInfo = Licencia.CodigoLicencia;
-                        var zzz = FSDK.GetLicenseInfo(out licenseInfo);
- 
-                        var yyy = FSDK.InitializeLibrary();
-
-                        var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Request.Identificacion));
-                        if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
-
-                        if (xxx != -2)
-                        {
-                            try
-                            {
-                                image = new FSDK.CImage(rutaFinal); // Imagen enviada
-                                byte[] template = new byte[FSDK.TemplateSize];
-                                FSDK.TFacePosition facePosition = new FSDK.TFacePosition();
-                                facePosition = image.DetectFace();
-                                template = image.GetFaceTemplateInRegion(ref facePosition);
-                                imageCola = new FSDK.CImage(objColaborador.ImagenPerfil.RutaAcceso.ToString());
-                                byte[] templateImgCola = new byte[FSDK.TemplateSize];
-                                FSDK.TFacePosition facePositionCola = new FSDK.TFacePosition();
-                                facePositionCola = imageCola.DetectFace();
-                                templateImgCola = imageCola.GetFaceTemplateInRegion(ref facePositionCola);
-                                FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
-                            }
-                            catch (Exception ex)
-                            {
-                                mensajeError = ex.Message;
-                                estadoRecono = "NO VALIDO";
-                                estadoValid = false;
-                            }
-
-                        } else
-                        {
-                            var datos = new
-                            {
-                                licencia = Licencia.CodigoLicencia,
-                                retornaNucleos = qqq,
-                                cantidadNucleos = num,
-                                retornaHardwareID = www,
-                                resulthardwareID = hardwareID
-
-                            };
-                            mensajeError = datos.ToString();
-
-                        }
-                        if (mensajeError == "")
-                        {
-                            // Se debe evaluar el valor de tolerancia de la similitud en el reconocimiento facial, establecido para el dispositivo, en el procesamiento
-                            // de marcaciones offline, en la tabla CargoEje atributo similarityOffline, debiendo fluctuar entre 0.00 y 1.00
-                            if (Similarity >= SimilarityDefinition)
-                            {
-                                estadoRecono = "CORRECTO";
-                            }
-                            else
-                            {
-                                estadoRecono = "Novedad " + Math.Round((Similarity * 100), 0) + "% de Similitud.";
-                                respMonitorId = null;
-                            }
-                            estadoValid = true;
-                            #endregion
-                        }
-                    }
+                    FSDK.MatchFaces(ref template, ref templateImgCola, ref Similarity);
+                    estadoValid = true;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    mensajeError = ex.Message;
-                    estadoRecono = "NO VALIDO";
                     estadoValid = false;
                 }
-            }
 
-            // Por defecto asignaremos el tipo de Comunicacion "RED"
-            int tipoComunicacion = 3;
-            // Si se recibe el tipo de Comunicacion desde el dispositivo de marcacion
-            if (Request.TipoComunicacion != null)
-            {
-                tipoComunicacion = Int32.Parse(Request.TipoComunicacion);
+                if (Similarity >= 0.85)
+                {
+                    estadoRecono = "CORRECTO";
+                }
+                else
+                {
+                    estadoRecono = "Novedad " + Math.Round((Similarity * 100), 0) + "% de Similitud.";
+                    respMonitorId = null;
+                }
+                #endregion
             }
 
             #region Registro de marcacacion Offline
+            //Si viene por txt y no es correcto la comparativa no debe ingresar
+            //Si viene por null el tipo de carga si registra
+            //Si viene por txt y es correcto la comparativa si registra
+            //Si viene por Excel si registra
+
             // Tipo Carga es NULL cuando se realiza la carga de Marcaciones Offline mediante SINCRONIZACION DE MARCACIONES OFFLINE desde la TABLET
             // Tipo Carga es Txt cuando se realiza la carga de Marcaciones Offline mediante la IMPORTACION DEL ARCHIVO TXT, que fuere almacenado en la MICRO SD de la TABLET, desde el Portal Web EnrolApp
             // Tipo Carga es Excel cuando se realiza la carga de Marcaciones Offline mediante la IMPORTACION DEL ARCHIVO EXCEL desde el Portal Web EnrolApp
@@ -1131,25 +1001,24 @@ public class MarcacionService : IMarcacion
             if ((TipoCarga is null && estadoRecono == "CORRECTO") || (TipoCarga == "Txt" && estadoRecono == "CORRECTO") || (TipoCarga == "Excel"))
             {
                 #region Registro de marcacion en la tabla de registro de marcaciones ACC_MONITOR_LOG
-
-
-                // Define el registro de marcacion que se almacenara en ACC_MONITOR_LOG
-                CreateMarcacionRequest requestMarcacion = new()
+                AccMonitorLog accMonitorLog = new()
                 {
-                    CodigoEmpleado = Request.CodigoBiometrico,
-                    DispositivoId = deviceId.ToString(),
-                    IdentificacionSesion = IdentificacionSesion,
-                    TipoComunicacion = Request.TipoComunicacion,
-                    ConsultaMonitoLogRiasem = false,
+                    State = 0,
                     Time = Request.Time,
-                    Descripcion = "OS"
+                    Pin = Request.CodigoBiometrico,
+                    Device_Id = deviceId,
+                    Verified = 0,
+                    Device_Name = deviceName,
+                    Status = 1,
+                    Description = "OS",
+                    Create_Time = DateTime.Now
                 };
-                var resultMarcacion = await CreateMarcacion(requestMarcacion, cancellationToken);
-                if (resultMarcacion is null)
+                var objResultado = await _repoMonitorLogAsync.AddAsync(accMonitorLog, cancellationToken);
+                if (objResultado is null)
                 {
                     return new ResponseType<string>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
                 }
-                respMonitorId = resultMarcacion.Data.MarcacionId.ToString();
+                respMonitorId = objResultado.Id.ToString();
                 #endregion
 
                 #region Reproceso de marcaciones del colaborador para considerar la marcacion offline recientemente registrada
@@ -1172,9 +1041,7 @@ public class MarcacionService : IMarcacion
                 FechaRegistro = DateTime.Now,
                 UsuarioCreacion = IdentificacionSesion,
                 Identificacion = Request.Identificacion,
-                Time = Request.Time,
-                TipoComunicacion = tipoComunicacion,
-                MensajeError = mensajeError
+                Time = Request.Time
             };
             var result = await _repoMonitorLogFileAsync.AddAsync(objFile);
 
@@ -1247,8 +1114,7 @@ public class MarcacionService : IMarcacion
             FechaSincronizacion = DateTime.Now,
             IdentificacionFin = lastMarcacion.Identificacion,
             IdentificacionInicio = firstMarcacion.Identificacion,
-            TipoCarga = tipoCarga,
-            TipoComunicacion = "3" // Tipo Comunicacion por RED
+            TipoCarga = tipoCarga
         };
 
 
@@ -1275,8 +1141,7 @@ public class MarcacionService : IMarcacion
                 Extension = null,
                 Time = marcacion.Time,
                 Identificacion = marcacion.Identificacion,
-                CantidadSincronizada = countMarcacion,
-                TipoComunicacion = "3" // Tipo de Comunicacion RED
+                CantidadSincronizada = countMarcacion
                 
             };
             var resultMarcacion = await CreateMarcacionOffline(requestMarcacion,marcacion.IdentificacionDispositivo, tipoCarga, cancellationToken);
@@ -1319,8 +1184,7 @@ public class MarcacionService : IMarcacion
                 FechaSincronizacion = DateTime.Now,
                 IdentificacionFin = lastMarcacion.Identificacion,
                 IdentificacionInicio = firstMarcacion.Identificacion,
-                TipoCarga = tipoCarga,
-                TipoComunicacion = "3" // Tipo Comunicacion por RED
+                TipoCarga = tipoCarga
             };
 
 
@@ -1347,8 +1211,7 @@ public class MarcacionService : IMarcacion
                     Extension = ".png",
                     Time = marcacion.FechaMarcacion,
                     Identificacion = marcacion.Identificacion,
-                    CantidadSincronizada = countMarcacion,
-                    TipoComunicacion = "3" // Tipo Comunicacion por RED
+                    CantidadSincronizada = countMarcacion
 
                 };
                 var resultMarcacion = await CreateMarcacionOffline(requestMarcacion, marcacion.IdentificacionDispositivo, tipoCarga, cancellationToken);

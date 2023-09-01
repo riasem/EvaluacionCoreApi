@@ -21,8 +21,7 @@ namespace EvaluacionCore.Application.Features.Biometria.Commands.AuthenticationF
         {
             try
             {
-                string OnlineOffline = "ONLINE";
-                var objResult = await _repoBiometriaAsync.AuthenticationFacialAsync(request.BiometriaRequest, request.IdentificacionSesion, OnlineOffline);
+                var objResult = await _repoBiometriaAsync.AuthenticationFacialAsync(request.BiometriaRequest, request.IdentificacionSesion);
 
                 return objResult;
             }
