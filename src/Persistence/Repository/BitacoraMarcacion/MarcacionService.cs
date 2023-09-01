@@ -121,6 +121,7 @@ public class MarcacionService : IMarcacion
     {
         try
         {
+            _log.LogInformation("VACIADO: CreateMarcacion-> CodigoEmpleado: " + Request.CodigoEmpleado+ ", DispositivoId: " + Request.DispositivoId+ ", IdentificacionSesion: " + Request.IdentificacionSesion+ ", LocalidadId: " + Request.LocalidadId);
             var marcacionColaborador = DateTime.Now;
             MarcacionResponseType objResultFinal = new();
 
@@ -214,6 +215,7 @@ public class MarcacionService : IMarcacion
 
     public async Task<ResponseType<CreateMarcacionResponseType>> CreateMarcacionApp(CreateMarcacionAppRequest Request, string IdentificacionSesion, CancellationToken cancellationToken)
     {
+        _log.LogInformation("VACIADO: CreateMarcacionApp-> Extension: " + Request.Extension + ", DispositivoId: " + Request.DispositivoId + ", Identificacion: " + Request.Identificacion + ", LocalidadId: " + Request.LocalidadId+ ", Nombre: " + Request.Nombre);
         var objLocalidadColaborador = await _repoLocalColab.ListAsync(new GetLocationByColaboradorSpec(Request.Identificacion));
         if (!objLocalidadColaborador.Any()) return new ResponseType<CreateMarcacionResponseType>() { Message = "No tiene Localidad Asignada", StatusCode = "101", Succeeded = true };
         var localidadSesion = await _repoLocalColab.ListAsync(new GetLocationByColaboradorSpec(IdentificacionSesion));
@@ -262,6 +264,7 @@ public class MarcacionService : IMarcacion
 
     public async Task<ResponseType<CreateMarcacionResponseType>> CreateMarcacionAppLast(CreateMarcacionAppLastRequest Request, string IdentificacionSesion, CancellationToken cancellationToken)
     {
+        _log.LogInformation("VACIADO: CreateMarcacionApp-> Adjunto: " + Request.Adjunto + ", DispositivoId: " + Request.DispositivoId + ", Identificacion: " + Request.Identificacion);
         var objLocalidadColaborador = await _repoLocalColab.ListAsync(new GetLocationByColaboradorSpec(Request.Identificacion));
         if (!objLocalidadColaborador.Any()) return new ResponseType<CreateMarcacionResponseType>() { Message = "No tiene Localidad Asignada", StatusCode = "101", Succeeded = true };
         var localidadSesion = await _repoLocalColab.ListAsync(new GetLocationByColaboradorSpec(IdentificacionSesion));
@@ -454,6 +457,7 @@ public class MarcacionService : IMarcacion
 
     public async Task<ResponseType<MarcacionWebResponseType>> CreateMarcacionWeb(CreateMarcacionWebRequest Request, CancellationToken cancellationToken)
     {
+        _log.LogInformation("VACIADO: CreateMarcacionWeb-> TipoMarcacion: " + Request.TipoMarcacion + ", ExtensionArchivo: " + Request.ExtensionArchivo + ", IdentificacionColaborador: " + Request.IdentificacionColaborador + ", IdentificacionJefe: " + Request.IdentificacionJefe + ", NombreArchivo: " + Request.NombreArchivo +", PinColaborador: "+Request.PinColaborador + ", Base64Archivo: " + Request.Base64Archivo);
         try
         {
             string tipoMarcacion = string.IsNullOrEmpty(Request.TipoMarcacion) ? string.Empty : Request.TipoMarcacion.ToUpper();
@@ -870,6 +874,7 @@ public class MarcacionService : IMarcacion
 
     public async Task<ResponseType<string>> CreateMarcacionOffline(CreateMarcacionOfflineRequest Request,string IdentificacionSesion,string TipoCarga, CancellationToken cancellationToken)
     {
+        _log.LogInformation("VACIADO: CreateMarcacionWeb-> Identificacion: " + Request.Identificacion + ", IdCabecera: " + Request.IdCabecera + ", CantidadSincronizada: " + Request.CantidadSincronizada + ", CodigoBiometrico: " + Request.CodigoBiometrico + ", Time: " + Request.Time + ", Extension: " + Request.Extension + ", Imagen: " + Request.Imagen);
         try
         {
             MarcacionResponseType objResultFinal = new();
