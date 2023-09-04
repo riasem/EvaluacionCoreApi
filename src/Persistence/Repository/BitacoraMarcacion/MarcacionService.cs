@@ -273,7 +273,7 @@ public class MarcacionService : IMarcacion
             };
             string OnlineOffline = "ONLINE";
             ResponseType<string> resultBiometria = await _repoBiometriaAsync.AuthenticationFacialAsync(requestFacial, IdentificacionSesion, OnlineOffline);
-
+            _log.LogInformation("RESPUESTA AuthenticationFacialAsync:resultBiometria - StatusCode: " + resultBiometria.StatusCode + ", Message: " + resultBiometria.Message + ",Succeeded " + resultBiometria.Succeeded);
             if (resultBiometria.StatusCode != "100") return new ResponseType<CreateMarcacionResponseType>() { Message = resultBiometria.Message, StatusCode = resultBiometria.StatusCode, Succeeded = resultBiometria.Succeeded };
 
             // Se define por defecto el tipo comunicacion por Datos Moviles
@@ -335,6 +335,7 @@ public class MarcacionService : IMarcacion
         }; 
         String OnlineOffline = "ONLINE";
         ResponseType<string> resultBiometria = await _repoBiometriaAsync.AuthenticationFacialLastAsync(requestFacial, IdentificacionSesion, OnlineOffline);
+        _log.LogInformation("RESPUESTA AuthenticationFacialAsync:resultBiometria - StatusCode: " + resultBiometria.StatusCode + ", Message: " + resultBiometria.Message + ",Succeeded " + resultBiometria.Succeeded);
 
         if (resultBiometria.StatusCode != "100") return new ResponseType<CreateMarcacionResponseType>() { Message = resultBiometria.Message, StatusCode = resultBiometria.StatusCode, Succeeded = resultBiometria.Succeeded };
 
