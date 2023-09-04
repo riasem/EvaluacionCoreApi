@@ -109,7 +109,7 @@ namespace Workflow.Persistence.Repository.Biometria
                                 }
                                 catch (Exception ex)
                                 {
-                                    _log.LogInformation("EXCEPTION: " + ex.Message);
+                                    _log.LogInformation("EXCEPTION LUXAND 1: " + ex.Message + objColaborador.ImagenPerfil.RutaAcceso.ToString());
                                     _log.LogError(ex, string.Empty);
                                     return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
                                 }
@@ -121,7 +121,7 @@ namespace Workflow.Persistence.Repository.Biometria
                                 catch (Exception ex)
                                 {
                                     _log.LogError(ex, string.Empty);
-                                    _log.LogInformation("EXCEPTION: " + ex.Message);
+                                    _log.LogInformation("EXCEPTION LUXAND 2: " + ex.Message + rutafinal);
                                     return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
                                 }
 
@@ -176,7 +176,7 @@ namespace Workflow.Persistence.Repository.Biometria
                         }
                         catch (Exception ex)
                         {
-                            _log.LogInformation("EXCEPTION: " + ex.Message);
+                            _log.LogInformation("EXCEPTION 1: " + ex.Message);
                             _log.LogError(ex, string.Empty);
                             return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
                         }
@@ -231,7 +231,7 @@ namespace Workflow.Persistence.Repository.Biometria
                         catch (Exception ex)
                         {
                             _log.LogError(ex, string.Empty);
-                            _log.LogInformation("EXCEPTION: "+ex.Message);
+                            _log.LogInformation("EXCEPTION 2: "+ex.Message);
                             return new ResponseType<string>() { Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
                         }
                     }
@@ -247,7 +247,7 @@ namespace Workflow.Persistence.Repository.Biometria
                 }
             } catch (Exception ex)
             {
-                _log.LogInformation("EXCEPTION: " + ex.Message);
+                _log.LogInformation("EXCEPTION 3: " + ex.Message);
                 _log.LogError(ex, string.Empty);
                 return new ResponseType<string>() { Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
             }
@@ -324,6 +324,7 @@ namespace Workflow.Persistence.Repository.Biometria
                                 }
                                 catch (Exception ex)
                                 {
+                                    _log.LogInformation("EXCEPTION 4: " + ex.Message);
                                     _log.LogError(ex, string.Empty);
                                     return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
                                 }
@@ -334,6 +335,7 @@ namespace Workflow.Persistence.Repository.Biometria
                                 }
                                 catch (Exception ex)
                                 {
+                                    _log.LogInformation("EXCEPTION 5: " + ex.Message);
                                     _log.LogError(ex, string.Empty);
                                     return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
                                 }
@@ -386,6 +388,7 @@ namespace Workflow.Persistence.Repository.Biometria
                         }
                         catch (Exception ex)
                         {
+                            _log.LogInformation("EXCEPTION 6: " + ex.Message);
                             _log.LogError(ex, string.Empty);
                             return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
                         }
@@ -433,6 +436,7 @@ namespace Workflow.Persistence.Repository.Biometria
                         }
                         catch (Exception ex)
                         {
+                            _log.LogInformation("EXCEPTION 7: " + ex.Message);
                             _log.LogError(ex, string.Empty);
                             return new ResponseType<string>() { Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
                         }
@@ -450,6 +454,7 @@ namespace Workflow.Persistence.Repository.Biometria
             }
             catch (Exception ex)
             {
+                _log.LogInformation("EXCEPTION 8: " + ex.Message);
                 _log.LogError(ex, string.Empty);
                 return new ResponseType<string>() { Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
             }
@@ -497,6 +502,7 @@ namespace Workflow.Persistence.Repository.Biometria
             }
             catch (Exception ex)
             {
+                _log.LogInformation("EXCEPTION 9: " + ex.Message);
                 _log.LogError(ex, string.Empty);
                 return new ResponseType<string>() { Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
             }
@@ -540,6 +546,7 @@ namespace Workflow.Persistence.Repository.Biometria
             }
             catch (Exception ex)
             {
+                _log.LogInformation("EXCEPTION 10: " + ex.Message);
                 _log.LogError(ex, string.Empty);
                 return new ResponseType<string>() { Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
             }
