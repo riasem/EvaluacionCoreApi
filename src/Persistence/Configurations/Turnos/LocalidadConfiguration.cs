@@ -8,10 +8,15 @@ namespace EnrolApp.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Localidad> builder)
         {
-
             builder.HasKey(x => x.Id);
 
             builder.HasMany(g => g.LocalidadColaboradores)
+              .WithOne(g => g.Localidad)
+              .HasForeignKey(g => g.IdLocalidad)
+              .IsRequired()
+              .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(g => g.LocalidadAdministradores)
               .WithOne(g => g.Localidad)
               .HasForeignKey(g => g.IdLocalidad)
               .IsRequired()

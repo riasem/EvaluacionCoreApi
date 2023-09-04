@@ -22,5 +22,15 @@ public class CreateMarcacionRequest
     [JsonPropertyName("identificacionSesion")]
     public string IdentificacionSesion { get; set; }
 
+    [JsonPropertyName("tipoComunicacion")]
+    public string TipoComunicacion { get; set; }
 
+    [JsonPropertyName("consultaMonitoLogRiasem")]
+    public bool ConsultaMonitoLogRiasem { get; set; } = true;
+
+    [JsonPropertyName("time")]
+    public DateTime Time { get; set; }
+
+    [JsonPropertyName("descripcion")]
+    public string Descripcion { get; set; } = String.Empty;
 }
