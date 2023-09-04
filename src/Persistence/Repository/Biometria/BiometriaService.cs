@@ -109,6 +109,7 @@ namespace Workflow.Persistence.Repository.Biometria
                                 }
                                 catch (Exception ex)
                                 {
+                                    _log.LogInformation("EXCEPTION: " + ex.Message);
                                     _log.LogError(ex, string.Empty);
                                     return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
                                 }
@@ -120,6 +121,7 @@ namespace Workflow.Persistence.Repository.Biometria
                                 catch (Exception ex)
                                 {
                                     _log.LogError(ex, string.Empty);
+                                    _log.LogInformation("EXCEPTION: " + ex.Message);
                                     return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
                                 }
 
@@ -174,6 +176,7 @@ namespace Workflow.Persistence.Repository.Biometria
                         }
                         catch (Exception ex)
                         {
+                            _log.LogInformation("EXCEPTION: " + ex.Message);
                             _log.LogError(ex, string.Empty);
                             return new ResponseType<string>() { Message = ex.Message, StatusCode = "500", Succeeded = false };
                         }
@@ -228,6 +231,7 @@ namespace Workflow.Persistence.Repository.Biometria
                         catch (Exception ex)
                         {
                             _log.LogError(ex, string.Empty);
+                            _log.LogInformation("EXCEPTION: "+ex.Message);
                             return new ResponseType<string>() { Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
                         }
                     }
@@ -243,6 +247,7 @@ namespace Workflow.Persistence.Repository.Biometria
                 }
             } catch (Exception ex)
             {
+                _log.LogInformation("EXCEPTION: " + ex.Message);
                 _log.LogError(ex, string.Empty);
                 return new ResponseType<string>() { Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
             }
