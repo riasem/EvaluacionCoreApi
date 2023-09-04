@@ -251,7 +251,7 @@ public class MarcacionService : IMarcacion
     {
         try
         {
-            _log.LogInformation("VACIADO: CreateMarcacionApp-> Extension: " + Request.Extension + ", DispositivoId: " + Request.DispositivoId + ", Identificacion: " + Request.Identificacion + ", LocalidadId: " + Request.LocalidadId + ", Nombre: " + Request.Nombre + ", tipoComunicacion: " + Request.TipoComunicacion);
+            _log.LogInformation("VACIADO: CreateMarcacionApp-> Extension: " + Request.Extension + ", DispositivoId: " + Request.DispositivoId + ", Identificacion: " + Request.Identificacion + ", LocalidadId: " + Request.LocalidadId + ", Nombre: " + Request.Nombre + ", tipoComunicacion: " + Request.TipoComunicacion + ", IdentificacionSesion: " + IdentificacionSesion);
             var objLocalidadColaborador = await _repoLocalColab.ListAsync(new GetLocationByColaboradorSpec(Request.Identificacion));
             if (!objLocalidadColaborador.Any()) return new ResponseType<CreateMarcacionResponseType>() { Message = "No tiene Localidad Asignada", StatusCode = "101", Succeeded = true };
             var localidadSesion = await _repoLocalColab.ListAsync(new GetLocationByColaboradorSpec(IdentificacionSesion));
