@@ -239,6 +239,7 @@ public class MarcacionService : IMarcacion
         catch (Exception ex)
         {
             _log.LogError(ex, string.Empty);
+            _log.LogInformation("EXCEPCION: " + ex.Message);
             return new ResponseType<MarcacionResponseType>() { Message = CodeMessageResponse.GetMessageByCode("102"), StatusCode = "102", Succeeded = false };
         }
 
@@ -248,61 +249,66 @@ public class MarcacionService : IMarcacion
 
     public async Task<ResponseType<CreateMarcacionResponseType>> CreateMarcacionApp(CreateMarcacionAppRequest Request, string IdentificacionSesion, CancellationToken cancellationToken)
     {
-        _log.LogInformation("VACIADO: CreateMarcacionApp-> Extension: " + Request.Extension + ", DispositivoId: " + Request.DispositivoId + ", Identificacion: " + Request.Identificacion + ", LocalidadId: " + Request.LocalidadId + ", Nombre: " + Request.Nombre + ", tipoComunicacion: "+Request.TipoComunicacion);
-        var objLocalidadColaborador = await _repoLocalColab.ListAsync(new GetLocationByColaboradorSpec(Request.Identificacion));
-        if (!objLocalidadColaborador.Any()) return new ResponseType<CreateMarcacionResponseType>() { Message = "No tiene Localidad Asignada", StatusCode = "101", Succeeded = true };
-        var localidadSesion = await _repoLocalColab.ListAsync(new GetLocationByColaboradorSpec(IdentificacionSesion));
-        if (objLocalidadColaborador.ElementAt(0).Colaborador.FacialPersonId is null) return new ResponseType<CreateMarcacionResponseType>() { Message = "Debes registrar tu foto de perfil para poder realizar reconocimiento facial", StatusCode = "101", Succeeded = true };
-
-        #region Validacion de localidades
-        var resultLocalidad = objLocalidadColaborador.Any(x => localidadSesion.Any(ls => ls.IdLocalidad == x.IdLocalidad));
-        if (!resultLocalidad) return new ResponseType<CreateMarcacionResponseType>() { Message = "No estas autorizado para registrar tu marcación en esta localidad", StatusCode = "101", Succeeded = true };
-
-        #endregion
-
-        AuthenticationFacialRequest requestFacial = new()
+        try
         {
-            Base64 = Request.Base64,
-            Extension = Request.Extension,
-            FacialPersonUid = objLocalidadColaborador.ElementAt(0).Colaborador.FacialPersonId.ToString(),
-            Nombre = Request.Nombre,
-            Identificacion = Request.Identificacion
-        };
-        string OnlineOffline = "ONLINE";
-        ResponseType<string> resultBiometria = await _repoBiometriaAsync.AuthenticationFacialAsync(requestFacial, IdentificacionSesion, OnlineOffline);
+            _log.LogInformation("VACIADO: CreateMarcacionApp-> Extension: " + Request.Extension + ", DispositivoId: " + Request.DispositivoId + ", Identificacion: " + Request.Identificacion + ", LocalidadId: " + Request.LocalidadId + ", Nombre: " + Request.Nombre + ", tipoComunicacion: " + Request.TipoComunicacion);
+            var objLocalidadColaborador = await _repoLocalColab.ListAsync(new GetLocationByColaboradorSpec(Request.Identificacion));
+            if (!objLocalidadColaborador.Any()) return new ResponseType<CreateMarcacionResponseType>() { Message = "No tiene Localidad Asignada", StatusCode = "101", Succeeded = true };
+            var localidadSesion = await _repoLocalColab.ListAsync(new GetLocationByColaboradorSpec(IdentificacionSesion));
+            if (objLocalidadColaborador.ElementAt(0).Colaborador.FacialPersonId is null) return new ResponseType<CreateMarcacionResponseType>() { Message = "Debes registrar tu foto de perfil para poder realizar reconocimiento facial", StatusCode = "101", Succeeded = true };
 
-        if (resultBiometria.StatusCode != "100") return new ResponseType<CreateMarcacionResponseType>() { Message = resultBiometria.Message, StatusCode = resultBiometria.StatusCode, Succeeded = resultBiometria.Succeeded };
+            #region Validacion de localidades
+            var resultLocalidad = objLocalidadColaborador.Any(x => localidadSesion.Any(ls => ls.IdLocalidad == x.IdLocalidad));
+            if (!resultLocalidad) return new ResponseType<CreateMarcacionResponseType>() { Message = "No estas autorizado para registrar tu marcación en esta localidad", StatusCode = "101", Succeeded = true };
 
-        // Se define por defecto el tipo comunicacion por Datos Moviles
-        var tipoComunicacion = "1";
-        if (Request.TipoComunicacion != null && Request.TipoComunicacion != "")
+            #endregion
+
+            AuthenticationFacialRequest requestFacial = new()
+            {
+                Base64 = Request.Base64,
+                Extension = Request.Extension,
+                FacialPersonUid = objLocalidadColaborador.ElementAt(0).Colaborador.FacialPersonId.ToString(),
+                Nombre = Request.Nombre,
+                Identificacion = Request.Identificacion
+            };
+            string OnlineOffline = "ONLINE";
+            ResponseType<string> resultBiometria = await _repoBiometriaAsync.AuthenticationFacialAsync(requestFacial, IdentificacionSesion, OnlineOffline);
+
+            if (resultBiometria.StatusCode != "100") return new ResponseType<CreateMarcacionResponseType>() { Message = resultBiometria.Message, StatusCode = resultBiometria.StatusCode, Succeeded = resultBiometria.Succeeded };
+
+            // Se define por defecto el tipo comunicacion por Datos Moviles
+            var tipoComunicacion = "1";
+            if (Request.TipoComunicacion != null && Request.TipoComunicacion != "")
+            {
+                tipoComunicacion = Request.TipoComunicacion;
+            }
+
+            // Define el registro de marcacion que se almacenara en ACC_MONITOR_LOG
+            CreateMarcacionRequest requestMarcacion = new()
+            {
+                CodigoEmpleado = objLocalidadColaborador.ElementAt(0).Colaborador.CodigoConvivencia,
+                DispositivoId = Request.DispositivoId,
+                LocalidadId = Request.LocalidadId,
+                IdentificacionSesion = IdentificacionSesion,
+                TipoComunicacion = tipoComunicacion,
+                ConsultaMonitoLogRiasem = false
+            };
+
+
+            var resultMarcacion = await CreateMarcacion(requestMarcacion, cancellationToken);
+            CreateMarcacionResponseType data = new();
+            data.Colaborador = objLocalidadColaborador.ElementAt(0).Colaborador.Nombres + " " + objLocalidadColaborador.ElementAt(0).Colaborador.Apellidos;
+            // Esta asignacion a data.Colaborador se la utiliza para que en el Response presente la informacion tecnica de nucleos y hardware que requiere Luxand
+            // data.Colaborador = resultBiometria.Data.ToString();
+            data.RutaImagen = objLocalidadColaborador.ElementAt(0).Colaborador.ImagenPerfilId is null ? "" : objLocalidadColaborador.ElementAt(0).Colaborador.ImagenPerfil.RutaAcceso;
+            data.Marcacion = DateTime.Now;
+
+            return new ResponseType<CreateMarcacionResponseType>() { Message = resultMarcacion.Message, StatusCode = resultMarcacion.StatusCode, Data = data, Succeeded = resultMarcacion.Succeeded };
+        } catch (Exception ex)
         {
-            tipoComunicacion = Request.TipoComunicacion;
+            _log.LogInformation("EXCEPCION: " + ex.Message);
+            throw;
         }
-
-        // Define el registro de marcacion que se almacenara en ACC_MONITOR_LOG
-        CreateMarcacionRequest requestMarcacion = new()
-        {
-            CodigoEmpleado = objLocalidadColaborador.ElementAt(0).Colaborador.CodigoConvivencia,
-            DispositivoId = Request.DispositivoId,
-            LocalidadId = Request.LocalidadId,
-            IdentificacionSesion = IdentificacionSesion,
-            TipoComunicacion = tipoComunicacion,
-            ConsultaMonitoLogRiasem = false
-        };
-
-
-        var resultMarcacion = await CreateMarcacion(requestMarcacion, cancellationToken);
-        CreateMarcacionResponseType data = new();
-        data.Colaborador = objLocalidadColaborador.ElementAt(0).Colaborador.Nombres + " " + objLocalidadColaborador.ElementAt(0).Colaborador.Apellidos;
-        // Esta asignacion a data.Colaborador se la utiliza para que en el Response presente la informacion tecnica de nucleos y hardware que requiere Luxand
-        // data.Colaborador = resultBiometria.Data.ToString();
-        data.RutaImagen = objLocalidadColaborador.ElementAt(0).Colaborador.ImagenPerfilId is null ? "" : objLocalidadColaborador.ElementAt(0).Colaborador.ImagenPerfil.RutaAcceso;
-        data.Marcacion = DateTime.Now;
-
-        return new ResponseType<CreateMarcacionResponseType>() { Message = resultMarcacion.Message, StatusCode = resultMarcacion.StatusCode, Data = data, Succeeded = resultMarcacion.Succeeded };
-
-
     }
 
     public async Task<ResponseType<CreateMarcacionResponseType>> CreateMarcacionAppLast(CreateMarcacionAppLastRequest Request, string IdentificacionSesion, CancellationToken cancellationToken)
