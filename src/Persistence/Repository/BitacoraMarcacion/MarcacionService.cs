@@ -152,14 +152,17 @@ public class MarcacionService : IMarcacion
             //if (Request.DispositivoId == objLocalidad.LocalidadColaboradores.ElementAt(0).Colaborador.DispositivoId)
             //{
             var deviceId = 999;
-            var deviceName = "EnrolApp";
+            var deviceName = "ENROLAPP";
 
             var objUserSesion = await _repoEje.FirstOrDefaultAsync(new GetEjeByIdentificacionSpec(Request.IdentificacionSesion));
             if (objUserSesion != null)
             {
                 var objMachines = await _repoMachinesAsync.GetByIdAsync(objUserSesion.DeviceId);
-                deviceId = objMachines.ID;
-                deviceName = objMachines.MachineAlias;
+                if (objMachines != null)
+                {
+                    deviceId = objMachines.ID;
+                    deviceName = objMachines.MachineAlias;
+                }
             }
 
             // Por defecto asignaremos el tipo de Comunicacion "RED"
@@ -271,8 +274,16 @@ public class MarcacionService : IMarcacion
                 Nombre = Request.Nombre,
                 Identificacion = Request.Identificacion
             };
+
+            // Si la identificacion de la persona que marca es la misma que la del dispositivo
+            var identificacionDispositivo = IdentificacionSesion;
+            if (IdentificacionSesion == Request.Identificacion)
+            {
+                identificacionDispositivo = "0123456781"; // Identificacion que represta a la App EnrolApp (dispositivo 999)
+            }
+
             string OnlineOffline = "ONLINE";
-            ResponseType<string> resultBiometria = await _repoBiometriaAsync.AuthenticationFacialAsync(requestFacial, IdentificacionSesion, OnlineOffline);
+            ResponseType<string> resultBiometria = await _repoBiometriaAsync.AuthenticationFacialAsync(requestFacial, identificacionDispositivo, OnlineOffline);
             _log.LogInformation("RESPUESTA AuthenticationFacialAsync:resultBiometria - StatusCode: " + resultBiometria.StatusCode + ", Message: " + resultBiometria.Message + ",Succeeded " + resultBiometria.Succeeded);
             if (resultBiometria.StatusCode != "100") return new ResponseType<CreateMarcacionResponseType>() { Message = resultBiometria.Message, StatusCode = resultBiometria.StatusCode, Succeeded = resultBiometria.Succeeded };
 
@@ -289,7 +300,7 @@ public class MarcacionService : IMarcacion
                 CodigoEmpleado = objLocalidadColaborador.ElementAt(0).Colaborador.CodigoConvivencia,
                 DispositivoId = Request.DispositivoId,
                 LocalidadId = Request.LocalidadId,
-                IdentificacionSesion = IdentificacionSesion,
+                IdentificacionSesion = identificacionDispositivo,
                 TipoComunicacion = tipoComunicacion,
                 ConsultaMonitoLogRiasem = false
             };
