@@ -125,7 +125,7 @@ public class MarcacionService : IMarcacion
     }
     public async Task<ResponseType<MarcacionResponseType>> CreateMarcacion(CreateMarcacionRequest Request, CancellationToken cancellationToken)
     {
-        _log.LogInformation("VACIADO: CreateMarcacion-> CodigoEmpleado: " + Request.CodigoEmpleado + ", DispositivoId: " + Request.DispositivoId + ", IdentificacionSesion: " + Request.IdentificacionSesion + ", LocalidadId: " + Request.LocalidadId + ", tipoComunicacion: "+Request.TipoComunicacion);
+        _log.LogInformation("VACIADO: CreateMarcacion-> CodigoEmpleado: " + Request.CodigoEmpleado + ", DispositivoId: " + Request.DispositivoId + ", IdentificacionSesion: " + Request.IdentificacionSesion + ", LocalidadId: " + Request.LocalidadId + ", tipoComunicacion: " + Request.TipoComunicacion + ", IdetificacionSesion: " + Request.IdentificacionSesion);
         try
         {
             string descripcion = "";
