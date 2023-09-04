@@ -306,7 +306,7 @@ public class MarcacionService : IMarcacion
             return new ResponseType<CreateMarcacionResponseType>() { Message = resultMarcacion.Message, StatusCode = resultMarcacion.StatusCode, Data = data, Succeeded = resultMarcacion.Succeeded };
         } catch (Exception ex)
         {
-            _log.LogInformation("EXCEPCION: " + ex.Message);
+            _log.LogInformation("EXCEPCION 0: " + ex.Message);
             throw;
         }
     }
@@ -636,6 +636,7 @@ public class MarcacionService : IMarcacion
         }
         catch (Exception ex)
         {
+            _log.LogInformation("EXCEPTION 20: " + ex.Message);
             _log.LogError(ex, string.Empty);
             return new ResponseType<MarcacionWebResponseType>() { Data = null, Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
         }
