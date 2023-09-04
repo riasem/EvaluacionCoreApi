@@ -165,7 +165,7 @@ public class MarcacionService : IMarcacion
             // Por defecto asignaremos el tipo de Comunicacion "RED"
             int tipoComunicacion = 3;
             // Si se recibe el tipo de Comunicacion desde el dispositivo de marcacion
-            if (Request.TipoComunicacion != null)
+            if (Request.TipoComunicacion != null && Request.TipoComunicacion != "")
             {
                 tipoComunicacion = Int32.Parse(Request.TipoComunicacion);
             }
@@ -273,6 +273,13 @@ public class MarcacionService : IMarcacion
 
         if (resultBiometria.StatusCode != "100") return new ResponseType<CreateMarcacionResponseType>() { Message = resultBiometria.Message, StatusCode = resultBiometria.StatusCode, Succeeded = resultBiometria.Succeeded };
 
+        // Se define por defecto el tipo comunicacion por Datos Moviles
+        var tipoComunicacion = "1";
+        if (Request.TipoComunicacion != null && Request.TipoComunicacion != "")
+        {
+            tipoComunicacion = Request.TipoComunicacion;
+        }
+
         // Define el registro de marcacion que se almacenara en ACC_MONITOR_LOG
         CreateMarcacionRequest requestMarcacion = new()
         {
@@ -280,7 +287,7 @@ public class MarcacionService : IMarcacion
             DispositivoId = Request.DispositivoId,
             LocalidadId = Request.LocalidadId,
             IdentificacionSesion = IdentificacionSesion,
-            TipoComunicacion = Request.TipoComunicacion,
+            TipoComunicacion = tipoComunicacion,
             ConsultaMonitoLogRiasem = false
         };
 
@@ -325,14 +332,19 @@ public class MarcacionService : IMarcacion
 
         if (resultBiometria.StatusCode != "100") return new ResponseType<CreateMarcacionResponseType>() { Message = resultBiometria.Message, StatusCode = resultBiometria.StatusCode, Succeeded = resultBiometria.Succeeded };
 
-
+        // Se define por defecto el tipo comunicacion por Datos Moviles
+        var tipoComunicacion = "1";
+        if (Request.TipoComunicacion != null && Request.TipoComunicacion != "")
+        {
+            tipoComunicacion = Request.TipoComunicacion;
+        }
 
         CreateMarcacionRequest requestMarcacion = new()
         {
             CodigoEmpleado = objLocalidadColaborador.ElementAt(0).Colaborador.CodigoConvivencia,
             DispositivoId = Request.DispositivoId,
             IdentificacionSesion = IdentificacionSesion,
-            TipoComunicacion = Request.TipoComunicacion,
+            TipoComunicacion = tipoComunicacion,
             ConsultaMonitoLogRiasem = false
         };
 
@@ -572,7 +584,7 @@ public class MarcacionService : IMarcacion
             // Por defecto asignaremos el tipo de Comunicacion "RED"
             int tipoComunicacion = 3;
             // Si se recibe el tipo de Comunicacion desde el dispositivo de marcacion
-            if (Request.TipoComunicacion != null)
+            if (Request.TipoComunicacion != null && Request.TipoComunicacion != "")
             {
                 tipoComunicacion = Int32.Parse(Request.TipoComunicacion);
             }
@@ -1122,7 +1134,7 @@ public class MarcacionService : IMarcacion
             // Por defecto asignaremos el tipo de Comunicacion "RED"
             int tipoComunicacion = 3;
             // Si se recibe el tipo de Comunicacion desde el dispositivo de marcacion
-            if (Request.TipoComunicacion != null)
+            if (Request.TipoComunicacion != null && Request.TipoComunicacion != "")
             {
                 tipoComunicacion = Int32.Parse(Request.TipoComunicacion);
             }
@@ -1151,7 +1163,7 @@ public class MarcacionService : IMarcacion
                     Descripcion = "OS"
                 };
                 var resultMarcacion = await CreateMarcacion(requestMarcacion, cancellationToken);
-                if (resultMarcacion is null)
+                if (resultMarcacion is null || resultMarcacion.StatusCode != "100")
                 {
                     return new ResponseType<string>() { Message = "No se ha podido registrar su marcación", StatusCode = "101", Succeeded = true };
                 }
