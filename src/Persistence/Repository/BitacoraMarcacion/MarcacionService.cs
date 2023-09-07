@@ -11,7 +11,6 @@ using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.Biometria.Commands.AuthenticationFacial;
 using EvaluacionCore.Application.Features.Biometria.Interfaces;
 using EvaluacionCore.Application.Features.Biometria.Specifications;
-using EvaluacionCore.Application.Features.BitacoraMarcacion.Dto;
 using EvaluacionCore.Application.Features.Common.Specifications;
 using EvaluacionCore.Application.Features.EvalCore.Dto;
 using EvaluacionCore.Application.Features.EvalCore.Interfaces;
@@ -25,7 +24,6 @@ using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionWeb;
 using EvaluacionCore.Application.Features.Marcacion.Dto;
 using EvaluacionCore.Application.Features.Marcacion.Interfaces;
 using EvaluacionCore.Application.Features.Marcacion.Specifications;
-using EvaluacionCore.Application.Features.Turnos.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using EvaluacionCore.Domain.Entities.Common;
 using EvaluacionCore.Domain.Entities.Marcaciones;
@@ -36,7 +34,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Globalization;
-using System.Text.Json.Serialization;
 using TurnoLaboral = EvaluacionCore.Application.Features.Marcacion.Dto.TurnoLaboral;
 using TurnoReceso = EvaluacionCore.Application.Features.Marcacion.Dto.TurnoReceso;
 
@@ -726,152 +723,183 @@ public class MarcacionService : IMarcacion
             TurnoColaborador turnoRecesoFiltro = new();
             string[] Identificaciones = Identificacion.Split(",");
             bool poseeTurnoReceso = false;
-            //var listaColaboradores = await _EvaluacionAsync.ConsultaColaboradores(request.Udn, request.Area, request.Departamento, request.Suscriptor);
 
             string[] filtroNovedades = FiltroNovedades.Split(",");
 
 
             foreach (var col in Identificaciones)
             {
-
                 var itemCol = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(col), cancellationToken);
-
                 if (itemCol is null) continue;
-                
-                for (DateTime dtm = FDesde; dtm <= FHasta; dtm = dtm.AddDays(1))
+
+                var colaborador = await _EvaluacionAsync.ConsultaColaborador(itemCol.Identificacion);
+                List<ControlAsistenciaType> objControlAsistencia = await _EvaluacionAsync.ConsultaAsistencia(itemCol.CodigoConvivencia, FDesde, FHasta.AddHours(23).AddMinutes(59));
+                foreach (var turnoColaborador in objControlAsistencia)
                 {
                     List<Application.Features.Marcacion.Dto.Novedad> novedades = new();
-                    //Se obtiene el turno laboral asignado al colaborador de la fecha en proceso
-                    var turnoFiltro = await _repositoryTurnoColAsync.FirstOrDefaultAsync(new TurnoColaboradorTreeSpec(itemCol.Identificacion, dtm), cancellationToken);
-
-
-                    #region consulta y procesamiento de turno laboral
-
-                    DateTime turnoLabDesde = dtm;
-                    DateTime turnoLabHasta = dtm.AddHours(23).AddMinutes(59);
-
-                    if (turnoFiltro != null)
-                    {
-                        turnoLabDesde = dtm.AddHours(turnoFiltro?.Turno?.Entrada.Hour ?? 0).AddMinutes(turnoFiltro?.Turno?.Entrada.Minute ?? 0);
-                        turnoLabHasta = dtm.AddHours(turnoFiltro?.Turno?.Salida.Hour ?? 0).AddMinutes(turnoFiltro?.Turno?.Salida.Minute ?? 0);
-                        turnoRecesoFiltro = await _repositoryTurnoColAsync.FirstOrDefaultAsync(new TurnoRecesoColaboradorTreeSpec(itemCol.Identificacion, dtm, turnoFiltro?.Turno.Id), cancellationToken);
-                        if (turnoRecesoFiltro != null) poseeTurnoReceso = true;
-                    }
-                    if (turnoLabDesde > turnoLabHasta) turnoLabHasta.AddDays(1);
-
-                    //SE OBTIENE MARCACIONES DE LA FECHA EN PROCESO
-
-                    string codMarcacionEntrada = (turnoFiltro?.Turno?.CodigoEntrada?.ToString()) ?? "10";
-                    string codMarcacionSalida = (turnoFiltro?.Turno?.CodigoSalida?.ToString()) ?? "11";
-
-
-                    List<BitacoraMarcacionType> objMarcacionColEntrada_ = await _EvaluacionAsync.ConsultaMarcaciones(itemCol.Identificacion, dtm, dtm.AddHours(23).AddMinutes(59), codMarcacionEntrada);
-                    BitacoraMarcacionType objMarcacionColEntrada = objMarcacionColEntrada_.FirstOrDefault();
-                    List<BitacoraMarcacionType> objMarcacionColSalida_ = new();
-                    BitacoraMarcacionType objMarcacionColSalida;
-
-                    if (objMarcacionColEntrada != null)
-                    {
-                        string timeString = objMarcacionColEntrada?.Time;
-                        DateTime date3 = DateTime.ParseExact(timeString, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
-                        objMarcacionColSalida_ = await _EvaluacionAsync.ConsultaMarcaciones(itemCol.Identificacion, date3, turnoLabDesde.AddDays(1), codMarcacionSalida);
-                    }
-
-                    objMarcacionColSalida = objMarcacionColSalida_.FirstOrDefault();
-
-
-                    string fEntrada = objMarcacionColEntrada?.Time.ToString();
+                    string fEntrada = turnoColaborador?.FechaHoraIngreso.ToString();
                     DateTime? fechaEntrada = !string.IsNullOrEmpty(fEntrada) ? Convert.ToDateTime(fEntrada, CultureInfo.InvariantCulture) : null;
-
-
-                    string fSalida = objMarcacionColSalida?.Time.ToString();
+                    string fSalida = turnoColaborador?.FechaHoraSalida.ToString();
                     DateTime? fechaSalida = !string.IsNullOrEmpty(fSalida) ? Convert.ToDateTime(fSalida, CultureInfo.InvariantCulture) : null;
 
-                    //SE PREPARA LA INFORMACION DE RETORNO
+                    string fEntradaReceso = turnoColaborador?.FechaHoraEntradaReceso.ToString();
+                    DateTime? fechaEntradaReceso = !string.IsNullOrEmpty(fEntradaReceso) ? Convert.ToDateTime(fEntradaReceso, CultureInfo.InvariantCulture) : null;
+                    string fSalidaReceso = turnoColaborador?.FechaHoraSalidaReceso.ToString();
+                    DateTime? fechaSalidaReceso = !string.IsNullOrEmpty(fSalidaReceso) ? Convert.ToDateTime(fSalidaReceso, CultureInfo.InvariantCulture) : null;
+
+                    // Se prepara la informacion de retorno del turno de labores
                     TurnoLaboral turnoLaborall = new()
                     {
                         //turno
-                        Id = turnoFiltro?.Id,
-                        Entrada = turnoFiltro?.Turno?.Entrada ?? null,
-                        Salida = turnoFiltro?.Turno?.Salida ?? null,
-                        TotalHoras = (turnoFiltro?.Turno?.TotalHoras) ?? "0",
+                        Id = turnoColaborador?.IdTurno ?? null,
+                        CodigoTurno = turnoColaborador ?.CodigoTurno ?? null,
+                        ClaseTurno = turnoColaborador ?.ClaseTurno ?? null,
+                        Entrada = turnoColaborador?.Entrada ?? null,
+                        Salida = turnoColaborador?.Salida ?? null,
+                        TotalHoras = turnoColaborador?.TotalHoras ?? "0",
 
                         MarcacionEntrada = fechaEntrada,
-                        EstadoEntrada = objMarcacionColEntrada?.EstadoMarcacion ?? "",
-                        FechaSolicitudEntrada = objMarcacionColEntrada?.FechaSolicitud != null ? DateTime.ParseExact(objMarcacionColEntrada.FechaSolicitud, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : DateTime.Parse("01-01-1900"),
-                        UsuarioSolicitudEntrada = objMarcacionColEntrada?.UsuarioSolicitud ?? "0",
-                        IdSolicitudEntrada = objMarcacionColEntrada?.IdSolicitud ?? Guid.Empty,
-                        IdFeatureEntrada = objMarcacionColEntrada?.IdFeature ?? Guid.Empty,
-                        TipoSolicitudEntrada = EvaluaTipoSolicitud(objMarcacionColEntrada?.IdFeature),
+                        EstadoEntrada = turnoColaborador?.EstadoIngreso ?? "",
+                        MinutosNovedadIngreso = turnoColaborador?.MinutosNovedadIngreso ?? '0',
+                        NovedadIngreso = turnoColaborador?.NovedadIngreso ?? "",
+                        FechaSolicitudEntrada = turnoColaborador?.FechaSolicitudIngreso ?? null,
+                        UsuarioSolicitudEntrada = turnoColaborador?.UsuarioSolicitudIngreso ?? "0",
+                        IdSolicitudEntrada = turnoColaborador?.IdSolicitudIngreso ?? Guid.Empty,
+                        IdFeatureEntrada = turnoColaborador?.IdFeatureIngreso ?? Guid.Empty,
+                        TipoSolicitudEntrada = EvaluaTipoSolicitud(turnoColaborador?.IdFeatureIngreso),
 
                         MarcacionSalida = fechaSalida,
-                        EstadoSalida = objMarcacionColSalida?.EstadoMarcacion ?? "",
-                        FechaSolicitudSalida = objMarcacionColSalida?.FechaSolicitud != null ? DateTime.ParseExact(objMarcacionColSalida.FechaSolicitud, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : DateTime.Parse("01-01-1900"),
-                        UsuarioSolicitudSalida = objMarcacionColSalida?.UsuarioSolicitud ?? "0",
-                        IdSolicitudSalida = objMarcacionColSalida?.IdSolicitud ?? Guid.Empty,
-                        IdFeatureSalida = objMarcacionColSalida?.IdFeature ?? Guid.Empty,
-                        TipoSolicitudSalida = EvaluaTipoSolicitud(objMarcacionColSalida?.IdFeature)
-
+                        EstadoSalida = turnoColaborador?.EstadoSalida ?? "",
+                        MinutosNovedadSalida = turnoColaborador?.MinutosNovedadSalida ?? '0',
+                        NovedadSalida = turnoColaborador?.NovedadSalida ?? "",
+                        FechaSolicitudSalida = turnoColaborador?.FechaSolicitudSalida ?? null,
+                        UsuarioSolicitudSalida = turnoColaborador?.UsuarioSolicitudSalida ?? "0",
+                        IdSolicitudSalida = turnoColaborador?.IdSolicitudSalida ?? Guid.Empty,
+                        IdFeatureSalida = turnoColaborador?.IdFeatureSalida ?? Guid.Empty,
+                        TipoSolicitudSalida = EvaluaTipoSolicitud(turnoColaborador?.IdFeatureSalida),
                     };
-                    
-
-                    #endregion
-
-
-                    #region consulta y procesamiento de turno de receso
-
-
-                    DateTime turnoRecesoDesde = turnoLaborall.MarcacionEntrada ?? dtm;
-                    DateTime turnoRecesoHasta = turnoLaborall.MarcacionSalida ?? dtm.AddHours(23).AddMinutes(59);
-
-                    string codMarcacionEntradaReceso = (turnoRecesoFiltro?.Turno?.CodigoEntrada?.ToString()) ?? "14";
-                    string codMarcacionSalidaReceso = (turnoRecesoFiltro?.Turno?.CodigoSalida?.ToString()) ?? "15";
-
-                    List<BitacoraMarcacionType> marcacionEntradaRecesoFiltro_ = await _EvaluacionAsync.ConsultaMarcaciones(itemCol.Identificacion, turnoRecesoDesde, turnoRecesoHasta, codMarcacionEntradaReceso);
-                    BitacoraMarcacionType marcacionEntradaRecesoFiltro = marcacionEntradaRecesoFiltro_.FirstOrDefault();
-                    List<BitacoraMarcacionType> marcacionSalidaRecesoFiltro_ = new();
-                    BitacoraMarcacionType marcacionSalidaRecesoFiltro;
-                    if (marcacionEntradaRecesoFiltro != null)
-                    {
-                        string timeString = marcacionEntradaRecesoFiltro?.Time;
-                        DateTime date2 = DateTime.ParseExact(timeString, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
-                        marcacionSalidaRecesoFiltro_ = await _EvaluacionAsync.ConsultaMarcaciones(itemCol.Identificacion, date2, turnoLabDesde.AddDays(1), codMarcacionSalidaReceso);
-                    }
-                    marcacionSalidaRecesoFiltro = marcacionSalidaRecesoFiltro_?.FirstOrDefault();
 
                     TurnoReceso turnoReceso = new()
                     {
                         //turno de receso asignado
-                        Id = turnoRecesoFiltro?.Id ?? null,
-                        Entrada = turnoRecesoFiltro?.Turno?.Entrada ?? null,
-                        Salida = turnoRecesoFiltro?.Turno?.Salida ?? null,
-                        TotalHoras = (turnoRecesoFiltro?.Turno?.TotalHoras) ?? "0",
+                        Id = turnoColaborador?.IdTurno ?? null,
+                        Entrada = turnoColaborador?.Entrada ?? null,
+                        Salida = turnoColaborador?.Salida ?? null,
+                        TotalHoras = turnoColaborador?.TotalHoras ?? "0",
 
                         //marcaciones de receso entrada
-                        MarcacionEntrada = marcacionEntradaRecesoFiltro?.Time != null ? DateTime.ParseExact(marcacionEntradaRecesoFiltro.Time, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : null,
-                        FechaSolicitudEntradaReceso = marcacionEntradaRecesoFiltro?.FechaSolicitud != null ? DateTime.ParseExact(marcacionEntradaRecesoFiltro.FechaSolicitud, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : DateTime.Parse("01-01-1900"),
-                        UsuarioSolicitudEntradaReceso = marcacionEntradaRecesoFiltro?.UsuarioSolicitud ?? "0",
-                        IdSolicitudEntradaReceso = marcacionEntradaRecesoFiltro?.IdSolicitud ?? Guid.Empty,
-                        EstadoEntradaReceso = marcacionEntradaRecesoFiltro?.EstadoMarcacion ?? "",
-                        IdFeatureEntradaReceso = marcacionEntradaRecesoFiltro?.IdFeature ?? Guid.Empty,
-                        TipoSolicitudEntradaReceso = EvaluaTipoSolicitud(marcacionEntradaRecesoFiltro?.IdFeature),
+                        MarcacionEntrada = fechaEntradaReceso,
+                        MinutosNovedadEntradaReceso = turnoColaborador?.MinutosNovedadEntradaReceso ?? '0',
+                        NovedadEntradaReceso = turnoColaborador?.NovedadEntradaReceso ?? "",
+                        FechaSolicitudEntradaReceso = null,
+                        UsuarioSolicitudEntradaReceso = "",
+                        IdSolicitudEntradaReceso = Guid.Empty,
+                        EstadoEntradaReceso = turnoColaborador?.NovedadEntradaReceso,
+                        IdFeatureEntradaReceso = Guid.Empty,
+                        TipoSolicitudEntradaReceso = "",
 
-                        MarcacionSalida = marcacionSalidaRecesoFiltro?.Time != null ? DateTime.ParseExact(marcacionSalidaRecesoFiltro.Time, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : null,
-                        FechaSolicitudSalidaReceso = marcacionSalidaRecesoFiltro?.FechaSolicitud != null ? DateTime.ParseExact(marcacionSalidaRecesoFiltro.FechaSolicitud, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : DateTime.Parse("01-01-1900"),
-                        UsuarioSolicitudSalidaReceso = marcacionSalidaRecesoFiltro?.UsuarioSolicitud ?? "",
-                        IdSolicitudSalidaReceso = marcacionSalidaRecesoFiltro?.IdSolicitud ?? Guid.Empty,
-                        EstadoSalidaReceso = marcacionSalidaRecesoFiltro?.EstadoMarcacion ?? "",
-                        IdFeatureSalidaReceso = marcacionSalidaRecesoFiltro?.IdFeature ?? Guid.Empty,
-                        TipoSolicitudSalidaReceso = EvaluaTipoSolicitud(marcacionSalidaRecesoFiltro?.IdFeature)
-
+                        MarcacionSalida = fechaSalidaReceso,
+                        MinutosNovedadSalidaReceso = turnoColaborador?.MinutosNovedadSalidaReceso ?? '0',
+                        NovedadSalidaReceso = turnoColaborador?.NovedadSalidaReceso ?? "",
+                        FechaSolicitudSalidaReceso = null,
+                        UsuarioSolicitudSalidaReceso = "",
+                        IdSolicitudSalidaReceso = Guid.Empty,
+                        EstadoSalidaReceso = turnoColaborador?.NovedadSalidaReceso,
+                        IdFeatureSalidaReceso = Guid.Empty,
+                        TipoSolicitudSalidaReceso = ""
                     };
 
-                    #endregion
+                    // Solo si el turno es un turno LABORAL se deben considerar Novedades, caso contrario no se reportan novedades
+                    if ((turnoColaborador?.ClaseTurno ?? "") == "LABORAL")
+                    {
+                        if (filtroNovedades.Contains(turnoColaborador?.EstadoIngreso ?? ""))
+                        {
+                            // Novedad en la marcacion de Entrada
+                            if ((turnoColaborador?.FechaHoraIngreso ?? null) is not null && (turnoColaborador?.EstadoIngreso ?? "SN") != "SN")
+                            {
+                                novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                {
+                                    Descripcion = turnoColaborador?.NovedadIngreso ?? "",
+                                    MinutosNovedad = turnoColaborador?.MinutosNovedadIngreso.ToString() ?? "",
+                                    EstadoMarcacion = turnoColaborador?.EstadoIngreso ?? "",
+                                    FechaAprobacion = turnoColaborador?.FechaSolicitudIngreso
+                                });
+                            }
+                            // Novedad en la marcacion de Salida
+                            if ((turnoColaborador?.FechaHoraSalida ?? null) is not null && (turnoColaborador?.EstadoSalida ?? "SN") != "SN")
+                            {
+                                novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                {
+                                    Descripcion = turnoColaborador?.NovedadSalida ?? "",
+                                    MinutosNovedad = turnoColaborador?.MinutosNovedadSalida.ToString() ?? "",
+                                    EstadoMarcacion = turnoColaborador?.EstadoSalida ?? "",
+                                    FechaAprobacion = turnoColaborador?.FechaSolicitudSalida
+                                });
+                            }
+                            // Falta a dia de labores
+                            // Se debe considerar las solicitudes de permiso
+                            if ((turnoColaborador?.FechaHoraIngreso ?? null) is null && (turnoColaborador?.FechaHoraSalida ?? null) is null)
+                            {
+                                // TO DO: Descripcion = "FALTA JUSTIFICADA", // FJ
 
-
-                    #region Consulta y procesamiento de novedades
-                    DateTime novedadDesde = dtm;
-                    DateTime novedadHasta = dtm.AddHours(23).AddMinutes(59).AddSeconds(59);
+                                // Falta injustificada
+                                novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                {
+                                    Descripcion = "FALTA INJUSTIFICADA", // FI
+                                    MinutosNovedad = "",
+                                    EstadoMarcacion = "FI",
+                                    FechaAprobacion = null
+                                });
+                            }
+                            // No tiene turno asigando
+                            if ((turnoColaborador?.CodigoTurno ?? "") == "")
+                            {
+                                novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                {
+                                    Descripcion = "NO TIENE TURNO ASIGNADO", // NT
+                                    MinutosNovedad = "",
+                                    EstadoMarcacion = "NT",
+                                    FechaAprobacion = null
+                                });
+                            }
+                            // Sin Registro de Salida y sin turno asignado
+                            // Se debe considerar las solicitudes de permiso
+                            if ((turnoColaborador?.FechaHoraIngreso ?? null) is not null && (turnoColaborador?.FechaHoraSalida ?? null) is null)
+                            {
+                                novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                {
+                                    Descripcion = "SIN REGISTRO DE SALIDA Y SIN TURNO ASIGNADO", // NS
+                                    MinutosNovedad = "",
+                                    EstadoMarcacion = "NS",
+                                    FechaAprobacion = null
+                                });
+                            }
+                            // Sin Registro de retorno de receso
+                            // Se debe considerar las solicitudes de permiso
+                            if ((turnoColaborador?.FechaHoraEntradaReceso ?? null) is not null && (turnoColaborador?.FechaHoraSalidaReceso ?? null) is null)
+                            {
+                                novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                {
+                                    Descripcion = "SIN REGISTRO DE RETORNO DE RECESO", // NR
+                                    MinutosNovedad = "",
+                                    EstadoMarcacion = "NR",
+                                    FechaAprobacion = null
+                                });
+                            }
+                            // Exceso de Receso
+                            if ((turnoColaborador?.FechaHoraEntradaReceso ?? null) is not null && (turnoColaborador?.FechaHoraSalidaReceso ?? null) is not null &&
+                                (turnoColaborador?.NovedadSalidaReceso ?? null) is not null)
+                            {
+                                novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                {
+                                    Descripcion = turnoColaborador?.NovedadSalidaReceso ?? "",
+                                    MinutosNovedad = turnoColaborador?.MinutosNovedadSalidaReceso.ToString() ?? "",
+                                    EstadoMarcacion = "ER",
+                                    FechaAprobacion = null
+                                });
+                            }
+                        }
+                    }
 
 
                     var novedadesMarcacion = await _repoNovedadMarcacion.ListAsync(new NovedadMarcacionByColaboradorSpec(int.Parse(itemCol.CodigoConvivencia), filtroNovedades, novedadDesde, novedadHasta), cancellationToken);
@@ -891,10 +919,6 @@ public class MarcacionService : IMarcacion
                         }
                     }
 
-                    #endregion
-
-                    var colaborador = await _EvaluacionAsync.ConsultaColaborador(itemCol.Identificacion);
-
                     if (novedades.Count == 0) continue;
 
                     listaEvaluacionAsistencia.Add(new NovedadMarcacionWebType()
@@ -905,19 +929,190 @@ public class MarcacionService : IMarcacion
                         Udn = colaborador[0].DesUdn,
                         Area = colaborador[0].DesArea,
                         SubCentroCosto = colaborador[0].DesSubcentroCosto,
-                        Fecha = dtm,
+                        Fecha = (DateTime)turnoColaborador.FechaAsginacion,
                         Novedades = novedades,
                         TurnoLaboral = turnoLaborall,
                         TurnoReceso = turnoReceso
                     });
-
                 }
 
-            }
+                /*
+                                for (DateTime dtm = FDesde; dtm <= FHasta; dtm = dtm.AddDays(1))
+                                {
+                                    List<Application.Features.Marcacion.Dto.Novedad> novedades = new();
+                                    //Se obtiene el turno laboral asignado al colaborador de la fecha en proceso
+                                    var turnoFiltro = await _repositoryTurnoColAsync.FirstOrDefaultAsync(new TurnoColaboradorTreeSpec(itemCol.Identificacion, dtm), cancellationToken);
 
-            //var lista = listaEvaluacionAsistencia.Where(e => filtroNovedades.Contains(e.TurnoLaboral.EstadoEntrada) || filtroNovedades.Contains(e.TurnoLaboral.EstadoSalida) ||
-            //                                     filtroNovedades.Contains(e.TurnoReceso.EstadoEntradaReceso) || filtroNovedades.Contains(e.TurnoReceso.EstadoSalidaReceso) ||
-            //                                     filtroNovedades.Contains(e.Novedades.Select(e => e.EstadoMarcacion).ToString())).ToList();
+
+                                    #region consulta y procesamiento de turno laboral
+
+                                    DateTime turnoLabDesde = dtm;
+                                    DateTime turnoLabHasta = dtm.AddHours(23).AddMinutes(59);
+
+                                    if (turnoFiltro != null)
+                                    {
+                                        turnoLabDesde = dtm.AddHours(turnoFiltro?.Turno?.Entrada.Hour ?? 0).AddMinutes(turnoFiltro?.Turno?.Entrada.Minute ?? 0);
+                                        turnoLabHasta = dtm.AddHours(turnoFiltro?.Turno?.Salida.Hour ?? 0).AddMinutes(turnoFiltro?.Turno?.Salida.Minute ?? 0);
+                                        turnoRecesoFiltro = await _repositoryTurnoColAsync.FirstOrDefaultAsync(new TurnoRecesoColaboradorTreeSpec(itemCol.Identificacion, dtm, turnoFiltro?.Turno.Id), cancellationToken);
+                                        if (turnoRecesoFiltro != null) poseeTurnoReceso = true;
+                                    }
+                                    if (turnoLabDesde > turnoLabHasta) turnoLabHasta.AddDays(1);
+
+                                    //SE OBTIENE MARCACIONES DE LA FECHA EN PROCESO
+
+                                    string codMarcacionEntrada = (turnoFiltro?.Turno?.CodigoEntrada?.ToString()) ?? "10";
+                                    string codMarcacionSalida = (turnoFiltro?.Turno?.CodigoSalida?.ToString()) ?? "11";
+
+
+                                    List<BitacoraMarcacionType> objMarcacionColEntrada_ = await _EvaluacionAsync.ConsultaMarcaciones(itemCol.Identificacion, dtm, dtm.AddHours(23).AddMinutes(59), codMarcacionEntrada);
+                                    BitacoraMarcacionType objMarcacionColEntrada = objMarcacionColEntrada_.FirstOrDefault();
+                                    List<BitacoraMarcacionType> objMarcacionColSalida_ = new();
+                                    BitacoraMarcacionType objMarcacionColSalida;
+
+                                    if (objMarcacionColEntrada != null)
+                                    {
+                                        string timeString = objMarcacionColEntrada?.Time;
+                                        DateTime date3 = DateTime.ParseExact(timeString, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+                                        objMarcacionColSalida_ = await _EvaluacionAsync.ConsultaMarcaciones(itemCol.Identificacion, date3, turnoLabDesde.AddDays(1), codMarcacionSalida);
+                                    }
+
+                                    objMarcacionColSalida = objMarcacionColSalida_.FirstOrDefault();
+
+
+                                    string fEntrada = objMarcacionColEntrada?.Time.ToString();
+                                    DateTime? fechaEntrada = !string.IsNullOrEmpty(fEntrada) ? Convert.ToDateTime(fEntrada, CultureInfo.InvariantCulture) : null;
+
+
+                                    string fSalida = objMarcacionColSalida?.Time.ToString();
+                                    DateTime? fechaSalida = !string.IsNullOrEmpty(fSalida) ? Convert.ToDateTime(fSalida, CultureInfo.InvariantCulture) : null;
+
+                                    //SE PREPARA LA INFORMACION DE RETORNO
+                                    TurnoLaboral turnoLaborall = new()
+                                    {
+                                        //turno
+                                        Id = turnoFiltro?.Id,
+                                        Entrada = turnoFiltro?.Turno?.Entrada ?? null,
+                                        Salida = turnoFiltro?.Turno?.Salida ?? null,
+                                        TotalHoras = (turnoFiltro?.Turno?.TotalHoras) ?? "0",
+
+                                        MarcacionEntrada = fechaEntrada,
+                                        EstadoEntrada = objMarcacionColEntrada?.EstadoMarcacion ?? "",
+                                        FechaSolicitudEntrada = objMarcacionColEntrada?.FechaSolicitud != null ? DateTime.ParseExact(objMarcacionColEntrada.FechaSolicitud, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : DateTime.Parse("01-01-1900"),
+                                        UsuarioSolicitudEntrada = objMarcacionColEntrada?.UsuarioSolicitud ?? "0",
+                                        IdSolicitudEntrada = objMarcacionColEntrada?.IdSolicitud ?? Guid.Empty,
+                                        IdFeatureEntrada = objMarcacionColEntrada?.IdFeature ?? Guid.Empty,
+                                        TipoSolicitudEntrada = EvaluaTipoSolicitud(objMarcacionColEntrada?.IdFeature),
+
+                                        MarcacionSalida = fechaSalida,
+                                        EstadoSalida = objMarcacionColSalida?.EstadoMarcacion ?? "",
+                                        FechaSolicitudSalida = objMarcacionColSalida?.FechaSolicitud != null ? DateTime.ParseExact(objMarcacionColSalida.FechaSolicitud, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : DateTime.Parse("01-01-1900"),
+                                        UsuarioSolicitudSalida = objMarcacionColSalida?.UsuarioSolicitud ?? "0",
+                                        IdSolicitudSalida = objMarcacionColSalida?.IdSolicitud ?? Guid.Empty,
+                                        IdFeatureSalida = objMarcacionColSalida?.IdFeature ?? Guid.Empty,
+                                        TipoSolicitudSalida = EvaluaTipoSolicitud(objMarcacionColSalida?.IdFeature)
+
+                                    };
+
+
+                                    #endregion
+
+
+                                    #region consulta y procesamiento de turno de receso
+
+
+                                    DateTime turnoRecesoDesde = turnoLaborall.MarcacionEntrada ?? dtm;
+                                    DateTime turnoRecesoHasta = turnoLaborall.MarcacionSalida ?? dtm.AddHours(23).AddMinutes(59);
+
+                                    string codMarcacionEntradaReceso = (turnoRecesoFiltro?.Turno?.CodigoEntrada?.ToString()) ?? "14";
+                                    string codMarcacionSalidaReceso = (turnoRecesoFiltro?.Turno?.CodigoSalida?.ToString()) ?? "15";
+
+                                    List<BitacoraMarcacionType> marcacionEntradaRecesoFiltro_ = await _EvaluacionAsync.ConsultaMarcaciones(itemCol.Identificacion, turnoRecesoDesde, turnoRecesoHasta, codMarcacionEntradaReceso);
+                                    BitacoraMarcacionType marcacionEntradaRecesoFiltro = marcacionEntradaRecesoFiltro_.FirstOrDefault();
+                                    List<BitacoraMarcacionType> marcacionSalidaRecesoFiltro_ = new();
+                                    BitacoraMarcacionType marcacionSalidaRecesoFiltro;
+                                    if (marcacionEntradaRecesoFiltro != null)
+                                    {
+                                        string timeString = marcacionEntradaRecesoFiltro?.Time;
+                                        DateTime date2 = DateTime.ParseExact(timeString, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+                                        marcacionSalidaRecesoFiltro_ = await _EvaluacionAsync.ConsultaMarcaciones(itemCol.Identificacion, date2, turnoLabDesde.AddDays(1), codMarcacionSalidaReceso);
+                                    }
+                                    marcacionSalidaRecesoFiltro = marcacionSalidaRecesoFiltro_?.FirstOrDefault();
+
+                                    TurnoReceso turnoReceso = new()
+                                    {
+                                        //turno de receso asignado
+                                        Id = turnoRecesoFiltro?.Id ?? null,
+                                        Entrada = turnoRecesoFiltro?.Turno?.Entrada ?? null,
+                                        Salida = turnoRecesoFiltro?.Turno?.Salida ?? null,
+                                        TotalHoras = (turnoRecesoFiltro?.Turno?.TotalHoras) ?? "0",
+
+                                        //marcaciones de receso entrada
+                                        MarcacionEntrada = marcacionEntradaRecesoFiltro?.Time != null ? DateTime.ParseExact(marcacionEntradaRecesoFiltro.Time, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : null,
+                                        FechaSolicitudEntradaReceso = marcacionEntradaRecesoFiltro?.FechaSolicitud != null ? DateTime.ParseExact(marcacionEntradaRecesoFiltro.FechaSolicitud, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : DateTime.Parse("01-01-1900"),
+                                        UsuarioSolicitudEntradaReceso = marcacionEntradaRecesoFiltro?.UsuarioSolicitud ?? "0",
+                                        IdSolicitudEntradaReceso = marcacionEntradaRecesoFiltro?.IdSolicitud ?? Guid.Empty,
+                                        EstadoEntradaReceso = marcacionEntradaRecesoFiltro?.EstadoMarcacion ?? "",
+                                        IdFeatureEntradaReceso = marcacionEntradaRecesoFiltro?.IdFeature ?? Guid.Empty,
+                                        TipoSolicitudEntradaReceso = EvaluaTipoSolicitud(marcacionEntradaRecesoFiltro?.IdFeature),
+
+                                        MarcacionSalida = marcacionSalidaRecesoFiltro?.Time != null ? DateTime.ParseExact(marcacionSalidaRecesoFiltro.Time, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : null,
+                                        FechaSolicitudSalidaReceso = marcacionSalidaRecesoFiltro?.FechaSolicitud != null ? DateTime.ParseExact(marcacionSalidaRecesoFiltro.FechaSolicitud, @"MM/dd/yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) : DateTime.Parse("01-01-1900"),
+                                        UsuarioSolicitudSalidaReceso = marcacionSalidaRecesoFiltro?.UsuarioSolicitud ?? "",
+                                        IdSolicitudSalidaReceso = marcacionSalidaRecesoFiltro?.IdSolicitud ?? Guid.Empty,
+                                        EstadoSalidaReceso = marcacionSalidaRecesoFiltro?.EstadoMarcacion ?? "",
+                                        IdFeatureSalidaReceso = marcacionSalidaRecesoFiltro?.IdFeature ?? Guid.Empty,
+                                        TipoSolicitudSalidaReceso = EvaluaTipoSolicitud(marcacionSalidaRecesoFiltro?.IdFeature)
+
+                                    };
+
+                                    #endregion
+
+
+                                    #region Consulta y procesamiento de novedades
+                                    DateTime novedadDesde = dtm;
+                                    DateTime novedadHasta = dtm.AddHours(23).AddMinutes(59).AddSeconds(59);
+
+
+                                    var novedadesMarcacion = await _repoNovedadMarcacion.ListAsync(new NovedadMarcacionByColaboradorSpec(int.Parse(itemCol.CodigoConvivencia), filtroNovedades, novedadDesde, novedadHasta), cancellationToken);
+
+                                    foreach (var item in novedadesMarcacion)
+                                    {
+                                        if (filtroNovedades.Contains(item.TipoNovedad))
+                                        {
+                                            novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                            {
+                                                Descripcion = item.DescripcionMensaje,
+                                                MinutosNovedad = "",
+                                                EstadoMarcacion = item.TipoNovedad,
+                                                FechaAprobacion = item.FechaMarcacion
+                                            });
+
+                                        }
+                                    }
+
+                                    #endregion
+
+                                    var colaborador = await _EvaluacionAsync.ConsultaColaborador(itemCol.Identificacion);
+
+                                    if (novedades.Count == 0) continue;
+
+                                    listaEvaluacionAsistencia.Add(new NovedadMarcacionWebType()
+                                    {
+                                        Colaborador = itemCol.Nombres + " " + itemCol.Apellidos,
+                                        Identificacion = itemCol.Identificacion,
+                                        CodBiometrico = itemCol.CodigoConvivencia,
+                                        Udn = colaborador[0].DesUdn,
+                                        Area = colaborador[0].DesArea,
+                                        SubCentroCosto = colaborador[0].DesSubcentroCosto,
+                                        Fecha = dtm,
+                                        Novedades = novedades,
+                                        TurnoLaboral = turnoLaborall,
+                                        TurnoReceso = turnoReceso
+                                    });
+
+                                }
+                */
+            }
 
             return new ResponseType<List<NovedadMarcacionWebType>>() { Data = listaEvaluacionAsistencia, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
 

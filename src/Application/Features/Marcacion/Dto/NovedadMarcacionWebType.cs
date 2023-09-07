@@ -41,25 +41,44 @@ namespace EvaluacionCore.Application.Features.Marcacion.Dto
         [JsonPropertyName("idTurno")]
         public Guid? Id { get; set; }
 
+        [JsonPropertyName("codigoTurno")]
+        public string CodigoTurno { get; set; }
+
+        [JsonPropertyName("claseTurno")]
+        public string ClaseTurno { get; set; }
+
         [JsonPropertyName("entrada")]  //turno entrada
         public DateTime? Entrada { get; set; }
 
         [JsonPropertyName("idMarcacionEntrada")]
-        public int IdMarcacionEntrada { get; set; }
+        public int? IdMarcacionEntrada { get; set; }
 
         [JsonPropertyName("marcacionEntrada")]
         public DateTime? MarcacionEntrada { get; set; }
+
+        [JsonPropertyName("minutosNovedadIngreso")]
+        public int? MinutosNovedadIngreso { get; set; }
+
+        [JsonPropertyName("novedadIngreso")]
+        public string NovedadIngreso { get; set; }
 
         [JsonPropertyName("salida")] // turno salida
         public DateTime? Salida { get; set; }
 
         [JsonPropertyName("idMarcacionSalida")]
-        public int IdMarcacionSalida { get; set; }
+        public int? IdMarcacionSalida { get; set; }
 
         [JsonPropertyName("marcacionSalida")]
         public DateTime? MarcacionSalida { get; set; }
 
+        [JsonPropertyName("minutosNovedadSalida")]
+        public int? MinutosNovedadSalida { get; set; }
+
+        [JsonPropertyName("novedadSalida")]
+        public string NovedadSalida { get; set; }
+
         [JsonPropertyName("totalHoras")] //duracion del turno laboral
+
         public string TotalHoras { get; set; }
 
 
@@ -124,6 +143,12 @@ namespace EvaluacionCore.Application.Features.Marcacion.Dto
         [JsonPropertyName("marcacionEntrada")]
         public DateTime? MarcacionEntrada { get; set; }
 
+        [JsonPropertyName("minutosNovedadEntradaReceso")]
+        public int? MinutosNovedadEntradaReceso { get; set; }
+
+        [JsonPropertyName("novedadEntradaReceso")]
+        public string NovedadEntradaReceso { get; set; }
+
         [JsonPropertyName("salida")] // turno salida
         public DateTime? Salida { get; set; }
 
@@ -132,6 +157,12 @@ namespace EvaluacionCore.Application.Features.Marcacion.Dto
 
         [JsonPropertyName("marcacionSalida")]
         public DateTime? MarcacionSalida { get; set; }
+
+        [JsonPropertyName("minutosNovedadSalidaReceso")]
+        public int? MinutosNovedadSalidaReceso { get; set; }
+
+        [JsonPropertyName("novedadSalidaReceso")]
+        public string NovedadSalidaReceso { get; set; }
 
         [JsonPropertyName("totalHoras")]
         public string TotalHoras { get; set; } // duracion de turno de receso

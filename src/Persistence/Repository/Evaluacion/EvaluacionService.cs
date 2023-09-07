@@ -5,6 +5,7 @@ using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Features.BitacoraMarcacion.Dto;
 using EvaluacionCore.Application.Features.EvalCore.Commands.Specifications;
 using EvaluacionCore.Application.Features.EvalCore.Interfaces;
+using EvaluacionCore.Application.Features.Marcacion.Dto;
 using EvaluacionCore.Application.Features.Marcacion.Specifications;
 using EvaluacionCore.Application.Features.Permisos.Dto;
 using EvaluacionCore.Domain.Entities.Asistencia;
@@ -196,6 +197,32 @@ public class EvaluacionService : IEvaluacion
         }
 
         return bitacoraMarcacion;
+    }
+
+    public async Task<List<ControlAsistenciaType>> ConsultaAsistencia(string CodigoBiometrico, DateTime fechaDesde, DateTime fechaHasta)
+    {
+        List<ControlAsistenciaType> controlAsistencia = new();
+
+        try
+        {
+            // Vista que permite consultar en un rango de fechas todos los turnos que le han sido asignados un colaborador y las marcaciones que ha realizado en estos turnos
+            // asi como las novedades que existieren en las marcaciones y las solicitudes que hubiesen sido gestionadas por estas novedades
+            string query = "SELECT * FROM V_CASISTENCIA WHERE CODIGOBIOMETRICO = '" + CodigoBiometrico + "' AND FECHAASIGNACION BETWEEN '" + fechaDesde.ToString("yyyy/MM/dd HH:mm:ss") + "' AND '" + fechaHasta.ToString("yyyy/MM/dd HH:mm:ss") + "' ORDER BY FECHAASIGNACION ASC";
+
+            using IDbConnection con = new SqlConnection(ConnectionString_Marc);
+            if (con.State == ConnectionState.Closed) con.Open();
+
+            controlAsistencia = (await con.QueryAsync<ControlAsistenciaType>(
+                query)).ToList();
+
+            if (con.State == ConnectionState.Open) con.Close();
+        }
+        catch (Exception e)
+        {
+            _log.LogError(e, string.Empty);
+        }
+
+        return controlAsistencia;
     }
 
     public async Task<List<ColaboradorConvivenciaType>> ConsultaColaboradores(string codUdn, string codArea, string codScosto, string suscriptor)
