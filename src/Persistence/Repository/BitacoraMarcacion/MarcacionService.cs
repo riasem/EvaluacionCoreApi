@@ -901,24 +901,6 @@ public class MarcacionService : IMarcacion
                         }
                     }
 
-
-                    var novedadesMarcacion = await _repoNovedadMarcacion.ListAsync(new NovedadMarcacionByColaboradorSpec(int.Parse(itemCol.CodigoConvivencia), filtroNovedades, novedadDesde, novedadHasta), cancellationToken);
-
-                    foreach (var item in novedadesMarcacion)
-                    {
-                        if (filtroNovedades.Contains(item.TipoNovedad))
-                        {
-                            novedades.Add(new Application.Features.Marcacion.Dto.Novedad
-                            {
-                                Descripcion = item.DescripcionMensaje,
-                                MinutosNovedad = "",
-                                EstadoMarcacion = item.TipoNovedad,
-                                FechaAprobacion = item.FechaMarcacion
-                            });
-
-                        }
-                    }
-
                     if (novedades.Count == 0) continue;
 
                     listaEvaluacionAsistencia.Add(new NovedadMarcacionWebType()
