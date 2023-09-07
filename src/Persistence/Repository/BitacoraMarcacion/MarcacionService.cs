@@ -901,7 +901,7 @@ public class MarcacionService : IMarcacion
                         }
                     }
 
-                    if (novedades.Count == 0) continue;
+//                    if (novedades.Count == 0) continue;
 
                     listaEvaluacionAsistencia.Add(new NovedadMarcacionWebType()
                     {

@@ -207,7 +207,7 @@ public class EvaluacionService : IEvaluacion
         {
             // Vista que permite consultar en un rango de fechas todos los turnos que le han sido asignados un colaborador y las marcaciones que ha realizado en estos turnos
             // asi como las novedades que existieren en las marcaciones y las solicitudes que hubiesen sido gestionadas por estas novedades
-            string query = "SELECT * FROM V_CASISTENCIA WHERE CODIGOBIOMETRICO = '" + CodigoBiometrico + "' AND FECHAASIGNACION BETWEEN '" + fechaDesde.ToString("yyyy/MM/dd HH:mm:ss") + "' AND '" + fechaHasta.ToString("yyyy/MM/dd HH:mm:ss") + "' ORDER BY FECHAASIGNACION ASC";
+            string query = "SELECT * FROM GRIAMSE.dbo.V_CASISTENCIA WHERE CODIGOBIOMETRICO = '" + CodigoBiometrico + "' AND FECHAASGINACION BETWEEN '" + fechaDesde.ToString("yyyy/MM/dd HH:mm:ss") + "' AND '" + fechaHasta.ToString("yyyy/MM/dd HH:mm:ss") + "' ORDER BY FECHAASGINACION ASC";
 
             using IDbConnection con = new SqlConnection(ConnectionString_Marc);
             if (con.State == ConnectionState.Closed) con.Open();
