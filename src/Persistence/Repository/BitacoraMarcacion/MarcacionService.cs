@@ -2,6 +2,7 @@
 using Ardalis.Specification;
 using AutoMapper;
 using Dapper;
+using DocumentFormat.OpenXml.Bibliography;
 using EnrolApp.Application.Features.Marcacion.Commands.CreateMarcacion;
 using EnrolApp.Application.Features.Marcacion.Specifications;
 using EnrolApp.Domain.Entities.Horario;
@@ -24,14 +25,18 @@ using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionWeb;
 using EvaluacionCore.Application.Features.Marcacion.Dto;
 using EvaluacionCore.Application.Features.Marcacion.Interfaces;
 using EvaluacionCore.Application.Features.Marcacion.Specifications;
+using EvaluacionCore.Application.Features.Turnos.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using EvaluacionCore.Domain.Entities.Common;
+using EvaluacionCore.Domain.Entities.ControlAsistencia;
 using EvaluacionCore.Domain.Entities.Marcaciones;
+using EvaluacionCore.Domain.Entities.Organizacion;
 using EvaluacionCore.Domain.Entities.Seguridad;
 using Luxand;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System.Data;
 using System.Globalization;
 using TurnoLaboral = EvaluacionCore.Application.Features.Marcacion.Dto.TurnoLaboral;
@@ -752,15 +757,15 @@ public class MarcacionService : IMarcacion
                     {
                         //turno
                         Id = turnoColaborador?.IdTurno ?? null,
-                        CodigoTurno = turnoColaborador ?.CodigoTurno ?? null,
-                        ClaseTurno = turnoColaborador ?.ClaseTurno ?? null,
+                        CodigoTurno = turnoColaborador?.CodigoTurno ?? null,
+                        ClaseTurno = turnoColaborador?.ClaseTurno ?? null,
                         Entrada = turnoColaborador?.Entrada ?? null,
                         Salida = turnoColaborador?.Salida ?? null,
                         TotalHoras = turnoColaborador?.TotalHoras ?? "0",
 
                         MarcacionEntrada = fechaEntrada,
                         EstadoEntrada = turnoColaborador?.EstadoIngreso ?? "",
-                        MinutosNovedadIngreso = turnoColaborador?.MinutosNovedadIngreso ?? '0',
+                        MinutosNovedadIngreso = turnoColaborador?.MinutosNovedadIngreso ?? 0,
                         NovedadIngreso = turnoColaborador?.NovedadIngreso ?? "",
                         FechaSolicitudEntrada = turnoColaborador?.FechaSolicitudIngreso ?? null,
                         UsuarioSolicitudEntrada = turnoColaborador?.UsuarioSolicitudIngreso ?? "0",
@@ -770,7 +775,7 @@ public class MarcacionService : IMarcacion
 
                         MarcacionSalida = fechaSalida,
                         EstadoSalida = turnoColaborador?.EstadoSalida ?? "",
-                        MinutosNovedadSalida = turnoColaborador?.MinutosNovedadSalida ?? '0',
+                        MinutosNovedadSalida = turnoColaborador?.MinutosNovedadSalida ?? 0,
                         NovedadSalida = turnoColaborador?.NovedadSalida ?? "",
                         FechaSolicitudSalida = turnoColaborador?.FechaSolicitudSalida ?? null,
                         UsuarioSolicitudSalida = turnoColaborador?.UsuarioSolicitudSalida ?? "0",
@@ -778,6 +783,13 @@ public class MarcacionService : IMarcacion
                         IdFeatureSalida = turnoColaborador?.IdFeatureSalida ?? Guid.Empty,
                         TipoSolicitudSalida = EvaluaTipoSolicitud(turnoColaborador?.IdFeatureSalida),
                     };
+
+                    // Novedad de Turno de Receso por exceso de tiempo de receso
+                    var EstadoSalidaReceso = "";
+                    if ((turnoColaborador?.NovedadSalidaReceso ?? "") != "")
+                    {
+                        EstadoSalidaReceso = "ER";
+                    }
 
                     TurnoReceso turnoReceso = new()
                     {
@@ -789,7 +801,7 @@ public class MarcacionService : IMarcacion
 
                         //marcaciones de receso entrada
                         MarcacionEntrada = fechaEntradaReceso,
-                        MinutosNovedadEntradaReceso = turnoColaborador?.MinutosNovedadEntradaReceso ?? '0',
+                        MinutosNovedadEntradaReceso = turnoColaborador?.MinutosNovedadEntradaReceso ?? 0,
                         NovedadEntradaReceso = turnoColaborador?.NovedadEntradaReceso ?? "",
                         FechaSolicitudEntradaReceso = null,
                         UsuarioSolicitudEntradaReceso = "",
@@ -799,12 +811,12 @@ public class MarcacionService : IMarcacion
                         TipoSolicitudEntradaReceso = "",
 
                         MarcacionSalida = fechaSalidaReceso,
-                        MinutosNovedadSalidaReceso = turnoColaborador?.MinutosNovedadSalidaReceso ?? '0',
+                        MinutosNovedadSalidaReceso = turnoColaborador?.MinutosNovedadSalidaReceso ?? 0,
                         NovedadSalidaReceso = turnoColaborador?.NovedadSalidaReceso ?? "",
                         FechaSolicitudSalidaReceso = null,
                         UsuarioSolicitudSalidaReceso = "",
                         IdSolicitudSalidaReceso = Guid.Empty,
-                        EstadoSalidaReceso = turnoColaborador?.NovedadSalidaReceso,
+                        EstadoSalidaReceso = EstadoSalidaReceso,
                         IdFeatureSalidaReceso = Guid.Empty,
                         TipoSolicitudSalidaReceso = ""
                     };
@@ -812,10 +824,12 @@ public class MarcacionService : IMarcacion
                     // Solo si el turno es un turno LABORAL se deben considerar Novedades, caso contrario no se reportan novedades
                     if ((turnoColaborador?.ClaseTurno ?? "") == "LABORAL")
                     {
+ //                       var solicitudes = await _repositoryCAsisSoli_VAsync.ListAsync(new GetControlAsistenciaSoliByFilterSpec(request.Udn, area, depar, request.Periodo, susc), cancellationToken);
+
                         if (filtroNovedades.Contains(turnoColaborador?.EstadoIngreso ?? ""))
                         {
                             // Novedad en la marcacion de Entrada
-                            if ((turnoColaborador?.FechaHoraIngreso ?? null) is not null && (turnoColaborador?.EstadoIngreso ?? "SN") != "SN")
+                            if (fechaEntrada is not null && (turnoColaborador?.EstadoIngreso ?? "SN") != "SN")
                             {
                                 novedades.Add(new Application.Features.Marcacion.Dto.Novedad
                                 {
@@ -826,7 +840,7 @@ public class MarcacionService : IMarcacion
                                 });
                             }
                             // Novedad en la marcacion de Salida
-                            if ((turnoColaborador?.FechaHoraSalida ?? null) is not null && (turnoColaborador?.EstadoSalida ?? "SN") != "SN")
+                            if (fechaSalida is not null && (turnoColaborador?.EstadoSalida ?? "SN") != "SN")
                             {
                                 novedades.Add(new Application.Features.Marcacion.Dto.Novedad
                                 {
@@ -838,7 +852,7 @@ public class MarcacionService : IMarcacion
                             }
                             // Falta a dia de labores
                             // Se debe considerar las solicitudes de permiso
-                            if ((turnoColaborador?.FechaHoraIngreso ?? null) is null && (turnoColaborador?.FechaHoraSalida ?? null) is null)
+                            if (fechaEntrada is null && fechaSalida is null)
                             {
                                 // TO DO: Descripcion = "FALTA JUSTIFICADA", // FJ
 
@@ -864,7 +878,7 @@ public class MarcacionService : IMarcacion
                             }
                             // Sin Registro de Salida y sin turno asignado
                             // Se debe considerar las solicitudes de permiso
-                            if ((turnoColaborador?.FechaHoraIngreso ?? null) is not null && (turnoColaborador?.FechaHoraSalida ?? null) is null)
+                            if (fechaEntrada is not null && fechaSalida is null)
                             {
                                 novedades.Add(new Application.Features.Marcacion.Dto.Novedad
                                 {
@@ -876,7 +890,7 @@ public class MarcacionService : IMarcacion
                             }
                             // Sin Registro de retorno de receso
                             // Se debe considerar las solicitudes de permiso
-                            if ((turnoColaborador?.FechaHoraEntradaReceso ?? null) is not null && (turnoColaborador?.FechaHoraSalidaReceso ?? null) is null)
+                            if (fechaEntradaReceso is not null && fechaSalidaReceso is null)
                             {
                                 novedades.Add(new Application.Features.Marcacion.Dto.Novedad
                                 {
@@ -887,7 +901,7 @@ public class MarcacionService : IMarcacion
                                 });
                             }
                             // Exceso de Receso
-                            if ((turnoColaborador?.FechaHoraEntradaReceso ?? null) is not null && (turnoColaborador?.FechaHoraSalidaReceso ?? null) is not null &&
+                            if (fechaEntradaReceso is not null && fechaSalidaReceso is not null &&
                                 (turnoColaborador?.NovedadSalidaReceso ?? null) is not null)
                             {
                                 novedades.Add(new Application.Features.Marcacion.Dto.Novedad
