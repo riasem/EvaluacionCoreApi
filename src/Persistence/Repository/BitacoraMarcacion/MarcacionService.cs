@@ -36,6 +36,7 @@ using Luxand;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.Mapping;
 using Org.BouncyCastle.Asn1.Ocsp;
 using System.Data;
 using System.Globalization;
@@ -824,46 +825,103 @@ public class MarcacionService : IMarcacion
                     // Solo si el turno es un turno LABORAL se deben considerar Novedades, caso contrario no se reportan novedades
                     if ((turnoColaborador?.ClaseTurno ?? "") == "LABORAL")
                     {
- //                       var solicitudes = await _repositoryCAsisSoli_VAsync.ListAsync(new GetControlAsistenciaSoliByFilterSpec(request.Udn, area, depar, request.Periodo, susc), cancellationToken);
-
+                        // Valida si el estado de la marcacion de Ingreso consta entre los filtros de consulta
                         if (filtroNovedades.Contains(turnoColaborador?.EstadoIngreso ?? ""))
                         {
                             // Novedad en la marcacion de Entrada
                             if (fechaEntrada is not null && (turnoColaborador?.EstadoIngreso ?? "SN") != "SN")
                             {
-                                novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                // Consulta si existe alguna solicitud de permiso aprobada en la fecha de marcacion de entrada
+                                List<ConsultaSolicitudPermisoType> solicitudesPermiso = new();
+                                if (fechaEntrada is not null)
                                 {
-                                    Descripcion = turnoColaborador?.NovedadIngreso ?? "",
-                                    MinutosNovedad = turnoColaborador?.MinutosNovedadIngreso.ToString() ?? "",
-                                    EstadoMarcacion = turnoColaborador?.EstadoIngreso ?? "",
-                                    FechaAprobacion = turnoColaborador?.FechaSolicitudIngreso
-                                });
+                                    solicitudesPermiso = await _EvaluacionAsync.ConsultaSolicitudesAprobadasbyCodigoBiometrico(itemCol.CodigoConvivencia, fechaEntrada.Value);
+                                }
+                                if (solicitudesPermiso.Count > 0 && (solicitudesPermiso[0]?.NumeroSolicitud.ToString() ?? "0") != "0")
+                                {
+                                    novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                    {
+                                        Descripcion = "ATRASO JUSTIFICADO", // AJ
+                                        MinutosNovedad = turnoColaborador?.MinutosNovedadIngreso.ToString() ?? "",
+                                        EstadoMarcacion = "AJ",
+                                        FechaAprobacion = solicitudesPermiso[0]?.FechaAprobacion
+                                    });
+                                }
+                                else
+                                {
+                                    novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                    {
+                                        Descripcion = turnoColaborador?.NovedadIngreso ?? "",
+                                        MinutosNovedad = turnoColaborador?.MinutosNovedadIngreso.ToString() ?? "",
+                                        EstadoMarcacion = turnoColaborador?.EstadoIngreso ?? "",
+                                        FechaAprobacion = turnoColaborador?.FechaSolicitudIngreso
+                                    });
+                                }
                             }
                             // Novedad en la marcacion de Salida
                             if (fechaSalida is not null && (turnoColaborador?.EstadoSalida ?? "SN") != "SN")
                             {
-                                novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                // Consulta si existe alguna solicitud de permiso aprobada en la fecha de marcacion de salida
+                                List<ConsultaSolicitudPermisoType> solicitudesPermiso = new();
+                                if (fechaSalida is not null)
                                 {
-                                    Descripcion = turnoColaborador?.NovedadSalida ?? "",
-                                    MinutosNovedad = turnoColaborador?.MinutosNovedadSalida.ToString() ?? "",
-                                    EstadoMarcacion = turnoColaborador?.EstadoSalida ?? "",
-                                    FechaAprobacion = turnoColaborador?.FechaSolicitudSalida
-                                });
+                                    solicitudesPermiso = await _EvaluacionAsync.ConsultaSolicitudesAprobadasbyCodigoBiometrico(itemCol.CodigoConvivencia, fechaSalida.Value);
+                                }
+                                if (solicitudesPermiso.Count > 0 && (solicitudesPermiso[0]?.NumeroSolicitud.ToString() ?? "0") != "0")
+                                {
+                                    novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                    {
+                                        Descripcion = "SALIDA ANTICIPADA JUSTIFICADA", // SJ
+                                        MinutosNovedad = turnoColaborador?.MinutosNovedadSalida.ToString() ?? "",
+                                        EstadoMarcacion = "SJ",
+                                        FechaAprobacion = solicitudesPermiso[0]?.FechaAprobacion
+                                    });
+                                }
+                                else
+                                {
+                                    novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                    {
+                                        Descripcion = turnoColaborador?.NovedadSalida ?? "",
+                                        MinutosNovedad = turnoColaborador?.MinutosNovedadSalida.ToString() ?? "",
+                                        EstadoMarcacion = turnoColaborador?.EstadoSalida ?? "",
+                                        FechaAprobacion = turnoColaborador?.FechaSolicitudSalida
+                                    });
+                                }
                             }
                             // Falta a dia de labores
                             // Se debe considerar las solicitudes de permiso
                             if (fechaEntrada is null && fechaSalida is null)
                             {
-                                // TO DO: Descripcion = "FALTA JUSTIFICADA", // FJ
-
-                                // Falta injustificada
-                                novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                // Consulta si existe alguna solicitud de permiso aprobada en la fecha del turno
+                                List<ConsultaSolicitudPermisoType> solicitudesPermiso = new();
+                                string fTurno = turnoColaborador?.FechaTurno.ToString();
+                                DateTime? fechaTurno = !string.IsNullOrEmpty(fTurno) ? Convert.ToDateTime(fTurno, CultureInfo.InvariantCulture) : null;
+                                if (fechaTurno is not null)
                                 {
-                                    Descripcion = "FALTA INJUSTIFICADA", // FI
-                                    MinutosNovedad = "",
-                                    EstadoMarcacion = "FI",
-                                    FechaAprobacion = null
-                                });
+                                    solicitudesPermiso = await _EvaluacionAsync.ConsultaSolicitudesAprobadasbyCodigoBiometrico(itemCol.CodigoConvivencia, fechaTurno.Value);
+                                }
+                                if (solicitudesPermiso.Count > 0 && (solicitudesPermiso[0]?.NumeroSolicitud.ToString() ?? "0") != "0")
+                                {
+                                    // Falta justificada
+                                    novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                    {
+                                        Descripcion = "FALTA JUSTIFICADA", // FJ
+                                        MinutosNovedad = "",
+                                        EstadoMarcacion = "FJ",
+                                        FechaAprobacion = null
+                                    });
+                                }
+                                else
+                                {
+                                    // Falta injustificada
+                                    novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                    {
+                                        Descripcion = "FALTA INJUSTIFICADA", // FI
+                                        MinutosNovedad = "",
+                                        EstadoMarcacion = "FI",
+                                        FechaAprobacion = null
+                                    });
+                                }
                             }
                             // No tiene turno asigando
                             if ((turnoColaborador?.CodigoTurno ?? "") == "")
@@ -880,25 +938,67 @@ public class MarcacionService : IMarcacion
                             // Se debe considerar las solicitudes de permiso
                             if (fechaEntrada is not null && fechaSalida is null)
                             {
-                                novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                // Consulta si existe alguna solicitud de permiso aprobada para la fecha en la que debia marcar la salida
+                                List<ConsultaSolicitudPermisoType> solicitudesPermiso = new();
+                                string fSalidaTurno = turnoColaborador?.Salida.ToString();
+                                DateTime? fechaSalidaTurno = !string.IsNullOrEmpty(fSalidaTurno) ? Convert.ToDateTime(fSalidaTurno, CultureInfo.InvariantCulture) : null;
+                                if (fechaSalidaTurno is not null)
                                 {
-                                    Descripcion = "SIN REGISTRO DE SALIDA Y SIN TURNO ASIGNADO", // NS
-                                    MinutosNovedad = "",
-                                    EstadoMarcacion = "NS",
-                                    FechaAprobacion = null
-                                });
+                                    solicitudesPermiso = await _EvaluacionAsync.ConsultaSolicitudesAprobadasbyCodigoBiometrico(itemCol.CodigoConvivencia, fechaSalidaTurno.Value);
+                                }
+                                if (solicitudesPermiso.Count > 0 && (solicitudesPermiso[0]?.NumeroSolicitud.ToString() ?? "0") != "0")
+                                {
+                                    novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                    {
+                                        Descripcion = "SALIDA ANTICIPADA JUSTIFICADA", // SJ
+                                        MinutosNovedad = turnoColaborador?.MinutosNovedadSalida.ToString() ?? "",
+                                        EstadoMarcacion = "SJ",
+                                        FechaAprobacion = solicitudesPermiso[0]?.FechaAprobacion
+                                    });
+                                }
+                                else
+                                {
+                                    novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                    {
+                                        Descripcion = "SIN REGISTRO DE SALIDA Y SIN TURNO ASIGNADO", // NS
+                                        MinutosNovedad = "",
+                                        EstadoMarcacion = "NS",
+                                        FechaAprobacion = null
+                                    });
+                                }
                             }
                             // Sin Registro de retorno de receso
                             // Se debe considerar las solicitudes de permiso
                             if (fechaEntradaReceso is not null && fechaSalidaReceso is null)
                             {
-                                novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                // Consulta si existe alguna solicitud de permiso aprobada para la fecha en la que debia marcar la salida
+                                List<ConsultaSolicitudPermisoType> solicitudesPermiso = new();
+                                string fSalidaTurno = turnoColaborador?.Salida.ToString();
+                                DateTime? fechaSalidaTurno = !string.IsNullOrEmpty(fSalidaTurno) ? Convert.ToDateTime(fSalidaTurno, CultureInfo.InvariantCulture) : null;
+                                if (fechaSalidaTurno is not null)
                                 {
-                                    Descripcion = "SIN REGISTRO DE RETORNO DE RECESO", // NR
-                                    MinutosNovedad = "",
-                                    EstadoMarcacion = "NR",
-                                    FechaAprobacion = null
-                                });
+                                    solicitudesPermiso = await _EvaluacionAsync.ConsultaSolicitudesAprobadasbyCodigoBiometrico(itemCol.CodigoConvivencia, fechaSalidaTurno.Value);
+                                }
+                                if (solicitudesPermiso.Count > 0 && (solicitudesPermiso[0]?.NumeroSolicitud.ToString() ?? "0") != "0" && fechaSalida is null)
+                                {
+                                    novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                    {
+                                        Descripcion = "SALIDA ANTICIPADA JUSTIFICADA", // SJ
+                                        MinutosNovedad = turnoColaborador?.MinutosNovedadSalida.ToString() ?? "",
+                                        EstadoMarcacion = "SJ",
+                                        FechaAprobacion = solicitudesPermiso[0]?.FechaAprobacion
+                                    });
+                                }
+                                else
+                                {
+                                    novedades.Add(new Application.Features.Marcacion.Dto.Novedad
+                                    {
+                                        Descripcion = "SIN REGISTRO DE RETORNO DE RECESO", // NR
+                                        MinutosNovedad = "",
+                                        EstadoMarcacion = "NR",
+                                        FechaAprobacion = null
+                                    });
+                                }
                             }
                             // Exceso de Receso
                             if (fechaEntradaReceso is not null && fechaSalidaReceso is not null &&
