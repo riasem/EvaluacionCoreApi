@@ -739,7 +739,7 @@ public class MarcacionService : IMarcacion
                 if (itemCol is null) continue;
 
                 var colaborador = await _EvaluacionAsync.ConsultaColaborador(itemCol.Identificacion);
-                List<ControlAsistenciaType> objControlAsistencia = await _EvaluacionAsync.ConsultaAsistencia(itemCol.CodigoConvivencia, FDesde, FHasta.AddHours(23).AddMinutes(59));
+                List<ControlAsistenciaType> objControlAsistencia = await _EvaluacionAsync.ConsultaAsistencia(itemCol.CodigoConvivencia, FDesde, FHasta);
                 foreach (var turnoColaborador in objControlAsistencia)
                 {
                     List<Application.Features.Marcacion.Dto.Novedad> novedades = new();

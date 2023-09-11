@@ -5,6 +5,7 @@ using EvaluacionCore.Application.Features.Common.Specifications;
 using EvaluacionCore.Application.Features.EvalCore.Dto;
 using EvaluacionCore.Application.Features.EvalCore.Interfaces;
 using EvaluacionCore.Application.Features.EvalCore.Specifications;
+using EvaluacionCore.Application.Features.Marcacion.Dto;
 using EvaluacionCore.Application.Features.Turnos.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using EvaluacionCore.Domain.Entities.Common;
@@ -64,6 +65,79 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
         try
         {
             List<EvaluacionAsistenciaResponseType> listaEvaluacionAsistencia = new();
+            List<string> filtroNovedades = request.FiltroNovedades.Split("-").ToList();
+
+            string depar = request.Departamento == "" ? null : request.Departamento;
+            string susc = request.Suscriptor == "" ? null : request.Suscriptor;
+            string area = request.Area == "" ? null : request.Area;
+            var cabecera = await _repositoryCAsisCab_VAsync.ListAsync(new GetControlAsistenciaCabByFilterSpec(request.Udn, area, depar, request.Periodo, susc), cancellationToken);
+
+            #region Filtro de Colaboradores que se debe presentar en la consulta
+
+            var colaSesion = await _repoColabConvivenciaAync.FirstOrDefaultAsync(new GetColaboradorConvivenciaByUdnAreaSccSpec("", "", "", request.identSession), cancellationToken);
+
+            var rolCargo = await _repoRolCargoAync.FirstOrDefaultAsync(new GetRolesAccesoByCargoConvivenciaSpec(colaSesion.CodCargo, colaSesion.CodSubcentroCosto, request.idCanal, ""), cancellationToken);
+
+            if (rolCargo != null)
+            {
+                var listAttributos = await _repoAtributoRolAync.ListAsync(new GetAtributosByRolSpec(rolCargo.RolSG.Id), cancellationToken);
+
+                var idAtributoTTHH = _config.GetSection("Atributos:ControlAsistenciaTTHH").Get<string>();
+
+                var atributoTTHH = listAttributos.Where(x => x.Id == Guid.Parse(idAtributoTTHH)).ToList();
+                if (!atributoTTHH.Any())
+                {
+                    var objJefe = await _repoClienteAync.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(colaSesion.Identificacion), cancellationToken);
+                    var objColaboradoresJefe = await _repoClienteAync.ListAsync(new GetColaboradorByJefe(objJefe.Id), cancellationToken);
+
+                    cabecera = cabecera.Where(x => objJefe.Identificacion == x.Identificacion || objColaboradoresJefe.Any(c => c.Identificacion == x.Identificacion)).ToList();
+
+                }
+            }
+            else
+            {
+                cabecera = cabecera.Where(x => x.Identificacion == colaSesion.Identificacion).ToList();
+            }
+
+            #endregion
+
+            return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = null, Succeeded = false, StatusCode = "001", Message = "La consulta no retorna datos." };
+/*
+            if (cabecera.Count == 0)
+            {
+                return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = null, Succeeded = false, StatusCode = "001", Message = "La consulta no retorna datos." };
+            }
+            foreach (var item in cabecera)
+            {
+                if (poseeNovedades ||
+                    filtroNovedades.Contains(turnoLaborall.EstadoEntrada) ||
+                    filtroNovedades.Contains(turnoLaborall.EstadoSalida) ||
+                    filtroNovedades.Contains(turnoReceso.EstadoSalidaReceso) ||
+                    filtroNovedades.Contains(turnoReceso.EstadoEntradaReceso))
+                {
+                    listaEvaluacionAsistencia.Add(new EvaluacionAsistenciaResponseType()
+                    {
+                        Colaborador = itemCol?.FirstOrDefault()?.Empleado,
+                        Identificacion = itemCol?.FirstOrDefault()?.Identificacion,
+                        CodBiometrico = itemCol?.FirstOrDefault()?.CodigoBiometrico,
+                        Udn = itemCol?.FirstOrDefault()?.DesUdn,
+                        Area = itemCol?.FirstOrDefault()?.DesArea,
+                        SubCentroCosto = itemCol?.FirstOrDefault()?.DesSubcentroCosto,
+                        Fecha = item.Fecha,
+                        Novedades = novedades,
+                        TurnoLaboral = turnoLaborall,
+                        TurnoReceso = turnoReceso,
+                        Solicitudes = solicitudes1
+                    });
+                }
+            }
+            List<EvaluacionAsistenciaResponseType> listaTmp2;
+
+            return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = listaEvaluacionAsistencia, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
+
+*/
+/*
+        List<EvaluacionAsistenciaResponseType> listaEvaluacionAsistencia = new();
             List<ControlAsistenciaCab> controlAsistenciaCab = new();
             List<ControlAsistenciaDet> controlAsistenciaDet = new();
             List<ControlAsistenciaNovedad> controlAsistenciaNov = new();
@@ -259,14 +333,13 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
             
             return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = listaEvaluacionAsistencia, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
-            
+*/            
         }
-       catch (Exception e)
+        catch (Exception e)
         {
             return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = null, Succeeded = false, StatusCode = "002", Message = "Ocurrió un error durante la consulta" };
             //insertar logs
         }
-
     }
 
 
