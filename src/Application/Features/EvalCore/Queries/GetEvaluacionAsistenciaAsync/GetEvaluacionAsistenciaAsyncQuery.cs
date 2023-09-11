@@ -13,6 +13,8 @@ using EvaluacionCore.Domain.Entities.ControlAsistencia;
 using EvaluacionCore.Domain.Entities.Seguridad;
 using MediatR;
 using Microsoft.Extensions.Configuration;
+using EvaluacionCore.Application.Features.Marcacion.Interfaces;
+using System.Globalization;
 
 namespace EvaluacionCore.Application.Features.EvalCore.Queries.GetEvaluacionAsistenciaAsync;
 
@@ -33,6 +35,8 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
     private readonly IConfiguration _config;
     private string ConnectionString { get; }
 
+    private readonly IMarcacion _repoMarcacionAsync;
+    private readonly IRepositoryGRiasemAsync<PeriodosLaborales> _repositoryPeriodoAsync;
 
 
     public GetEvaluacionAsistenciaAsyncHandler(IEvaluacion repository,
@@ -43,7 +47,8 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                                                 IRepositoryAsync<Cliente> repoClienteAync,
                                                 IRepositoryGRiasemAsync<ControlAsistenciaCab_V> repoAsistenciaCabAync,
                                                 IRepositoryGRiasemAsync<ControlAsistenciaNovedad_V> repoAsistenciaNovAync,
-                                                IRepositoryGRiasemAsync<ControlAsistenciaSolicitudes_V> repoAsistenciaSolAync)
+                                                IRepositoryGRiasemAsync<ControlAsistenciaSolicitudes_V> repoAsistenciaSolAync,
+                                                IMarcacion repoMarcacionAsync, IRepositoryGRiasemAsync<PeriodosLaborales> repositoryPeriodoAsync)
     {
         _EvaluacionAsync = repository;
         _repositoryCAsisSoliAsync = repositorySoli;
@@ -57,6 +62,8 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
         _repositoryCAsisCab_VAsync = repoAsistenciaCabAync;
         _repositoryCAsisNov_VAsync = repoAsistenciaNovAync;
         _repositoryCAsisSoli_VAsync = repoAsistenciaSolAync;
+        _repoMarcacionAsync = repoMarcacionAsync;
+        _repositoryPeriodoAsync = repositoryPeriodoAsync;
     }
 
 
@@ -65,14 +72,20 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
         try
         {
             List<EvaluacionAsistenciaResponseType> listaEvaluacionAsistencia = new();
+            List<NovedadMarcacionWebType> listaNovedadMarcacionWeb = new();
+
             List<string> filtroNovedades = request.FiltroNovedades.Split("-").ToList();
 
             string depar = request.Departamento == "" ? null : request.Departamento;
             string susc = request.Suscriptor == "" ? null : request.Suscriptor;
             string area = request.Area == "" ? null : request.Area;
-            var cabecera = await _repositoryCAsisCab_VAsync.ListAsync(new GetControlAsistenciaCabByFilterSpec(request.Udn, area, depar, request.Periodo, susc), cancellationToken);
+
+            var periodolaboral = await _repositoryPeriodoAsync.FirstOrDefaultAsync(new GetPeriodoLaboralByDescSpec(request.Udn, request.Periodo));
+
+            if (periodolaboral is null) return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = null, Succeeded = false, StatusCode = "001", Message = "El Periodo no se encuentra definido para la UDN." };
 
             #region Filtro de Colaboradores que se debe presentar en la consulta
+            var colaboradores = await _repoColabConvivenciaAync.ListAsync(new GetColaboradorConvivenciaByUdnAreaSccSpec(request.Udn, area, depar, susc), cancellationToken);
 
             var colaSesion = await _repoColabConvivenciaAync.FirstOrDefaultAsync(new GetColaboradorConvivenciaByUdnAreaSccSpec("", "", "", request.identSession), cancellationToken);
 
@@ -90,18 +103,201 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                     var objJefe = await _repoClienteAync.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(colaSesion.Identificacion), cancellationToken);
                     var objColaboradoresJefe = await _repoClienteAync.ListAsync(new GetColaboradorByJefe(objJefe.Id), cancellationToken);
 
-                    cabecera = cabecera.Where(x => objJefe.Identificacion == x.Identificacion || objColaboradoresJefe.Any(c => c.Identificacion == x.Identificacion)).ToList();
-
+                    colaboradores = colaboradores.Where(x => objJefe.Identificacion == x.Identificacion || objColaboradoresJefe.Any(c => c.Identificacion == x.Identificacion)).ToList();
                 }
             }
             else
             {
-                cabecera = cabecera.Where(x => x.Identificacion == colaSesion.Identificacion).ToList();
+                colaboradores = colaboradores.Where(x => x.Identificacion == colaSesion.Identificacion).ToList();
             }
-
             #endregion
 
-            return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = null, Succeeded = false, StatusCode = "001", Message = "La consulta no retorna datos." };
+            #region Recorre cada uno de los Colaboradores que se deben presentar en la consulta
+            foreach (var col in colaboradores)
+            {
+                var novedadMarcacionWeb = await _repoMarcacionAsync.ConsultaAsistencia(col.Identificacion, request.FiltroNovedades, periodolaboral.FechaDesdeCorte, periodolaboral.FechaHastaCorte, cancellationToken);
+                if (novedadMarcacionWeb.Data != null) listaNovedadMarcacionWeb.AddRange(novedadMarcacionWeb.Data);
+
+                var asistenciasColaborador = novedadMarcacionWeb.Data;
+                foreach (var asistenciaColaborador in asistenciasColaborador)
+                {
+                    List<Dto.Novedad> novedades = new();
+                    List<ControlAsistenciaSolicitudes> solicitudes1 = new();
+                    int iteracion = 0;
+
+                    //SE PREPARA LA INFORMACION DE RETORNO
+                    Dto.TurnoLaboral turnoLaborall = new()
+                    {
+                        //turno
+                        Id = asistenciaColaborador.TurnoLaboral.Id,
+                        Entrada = asistenciaColaborador.TurnoLaboral.Entrada,
+                        Salida = asistenciaColaborador.TurnoLaboral.Salida,
+                        TotalHoras = asistenciaColaborador.TurnoLaboral.TotalHoras,
+
+                        MarcacionEntrada = asistenciaColaborador.TurnoLaboral.MarcacionEntrada,
+                        EstadoEntrada = asistenciaColaborador.TurnoLaboral.EstadoEntrada,
+                        FechaSolicitudEntrada = asistenciaColaborador.TurnoLaboral.FechaSolicitudEntrada,
+                        UsuarioSolicitudEntrada = asistenciaColaborador.TurnoLaboral.UsuarioSolicitudEntrada,
+                        IdSolicitudEntrada = asistenciaColaborador.TurnoLaboral.IdSolicitudEntrada,
+                        IdFeatureEntrada = asistenciaColaborador.TurnoLaboral.IdFeatureEntrada,
+                        TipoSolicitudEntrada = EvaluaTipoSolicitud(asistenciaColaborador.TurnoLaboral.IdFeatureEntrada),
+
+                        MarcacionSalida = asistenciaColaborador.TurnoLaboral.MarcacionSalida,
+                        EstadoSalida = asistenciaColaborador.TurnoLaboral.EstadoSalida,
+                        FechaSolicitudSalida = asistenciaColaborador.TurnoLaboral.FechaSolicitudSalida,
+                        UsuarioSolicitudSalida = asistenciaColaborador.TurnoLaboral.UsuarioSolicitudSalida,
+                        IdSolicitudSalida = asistenciaColaborador.TurnoLaboral.IdSolicitudSalida,
+                        IdFeatureSalida = asistenciaColaborador.TurnoLaboral.IdFeatureSalida,
+                        TipoSolicitudSalida = EvaluaTipoSolicitud(asistenciaColaborador.TurnoLaboral.IdFeatureSalida)
+                    };
+
+                    Dto.TurnoReceso turnoReceso = new()
+                    {
+                        //turno de receso asignado
+                        Id = asistenciaColaborador.TurnoReceso.Id,
+                        Entrada = asistenciaColaborador.TurnoReceso.Entrada,
+                        Salida = asistenciaColaborador.TurnoReceso.Salida,
+                        TotalHoras = asistenciaColaborador.TurnoReceso.TotalHoras,
+
+                        //marcaciones de receso entrada
+                        MarcacionEntrada = asistenciaColaborador.TurnoReceso.MarcacionEntrada,
+                        FechaSolicitudEntradaReceso = asistenciaColaborador.TurnoReceso.FechaSolicitudEntradaReceso,
+                        UsuarioSolicitudEntradaReceso = asistenciaColaborador.TurnoReceso.UsuarioSolicitudEntradaReceso,
+                        IdSolicitudEntradaReceso = asistenciaColaborador.TurnoReceso.IdSolicitudEntradaReceso,
+                        EstadoEntradaReceso = asistenciaColaborador.TurnoReceso.EstadoEntradaReceso,
+                        IdFeatureEntradaReceso = asistenciaColaborador.TurnoReceso.IdFeatureEntradaReceso,
+                        TipoSolicitudEntradaReceso = asistenciaColaborador.TurnoReceso.TipoSolicitudEntradaReceso,
+
+                        MarcacionSalida = asistenciaColaborador.TurnoReceso.MarcacionSalida,
+                        FechaSolicitudSalidaReceso = asistenciaColaborador.TurnoReceso.FechaSolicitudSalidaReceso,
+                        UsuarioSolicitudSalidaReceso = asistenciaColaborador.TurnoReceso.UsuarioSolicitudSalidaReceso,
+                        IdSolicitudSalidaReceso = asistenciaColaborador.TurnoReceso.IdSolicitudSalidaReceso,
+                        EstadoSalidaReceso = asistenciaColaborador.TurnoReceso.EstadoSalidaReceso,
+                        IdFeatureSalidaReceso = asistenciaColaborador.TurnoReceso.IdFeatureSalidaReceso,
+                        TipoSolicitudSalidaReceso = asistenciaColaborador.TurnoReceso.TipoSolicitudSalidaReceso
+                    };
+
+                    foreach (var novedad in asistenciaColaborador.Novedades)
+                    {
+                        novedades.Add(new Dto.Novedad
+                        {
+                            Descripcion = novedad.Descripcion,
+                            MinutosNovedad = novedad.MinutosNovedad,
+                            EstadoMarcacion = novedad.EstadoMarcacion
+                        });
+                    }
+
+                    #region Consulta y procesamiento de solicitudes
+                    if ((asistenciaColaborador.TurnoLaboral?.ClaseTurno ?? "") == "LABORAL")
+                    {
+                        // Consulta si existe alguna solicitud de permiso aprobada para la fecha en que marca la entrada
+                        if (asistenciaColaborador.TurnoLaboral?.IdSolicitudEntrada != Guid.Empty)
+                        {
+                            List<ConsultaSolicitudPermisoType> solicitudesPermiso = new();
+                            solicitudesPermiso = await _EvaluacionAsync.ConsultaSolicitudbyIdSolicitud(asistenciaColaborador.TurnoLaboral?.IdSolicitudEntrada.ToString(), "APROBADA");
+
+                            iteracion = iteracion + 1;
+                            solicitudes1.Add(new ControlAsistenciaSolicitudes
+                            {
+                                Id = solicitudesPermiso[0].NumeroSolicitud,
+                                IdControlAsistenciaDet = iteracion,
+                                Colaborador = asistenciaColaborador.Colaborador,
+                                Comentarios = solicitudesPermiso[0].Comentarios,
+                                IdFeature = Guid.Parse(asistenciaColaborador.TurnoLaboral?.IdFeatureEntrada.ToString()),
+                                IdSolicitud = Guid.Parse(asistenciaColaborador.TurnoLaboral?.IdSolicitudEntrada.ToString())
+                            });
+                        }
+                        // Consulta si existe alguna solicitud de permiso aprobada para la fecha en que marca la salida
+                        if (asistenciaColaborador.TurnoLaboral?.IdSolicitudSalida != Guid.Empty)
+                        {
+                            List<ConsultaSolicitudPermisoType> solicitudesPermiso = new();
+                            solicitudesPermiso = await _EvaluacionAsync.ConsultaSolicitudbyIdSolicitud(asistenciaColaborador.TurnoLaboral?.IdSolicitudSalida.ToString(), "APROBADA");
+
+                            iteracion = iteracion + 1;
+                            solicitudes1.Add(new ControlAsistenciaSolicitudes
+                            {
+                                Id = solicitudesPermiso[0].NumeroSolicitud,
+                                IdControlAsistenciaDet = iteracion,
+                                Colaborador = asistenciaColaborador.Colaborador,
+                                Comentarios = solicitudesPermiso[0].Comentarios,
+                                IdFeature = Guid.Parse(asistenciaColaborador.TurnoLaboral?.IdFeatureSalida.ToString()),
+                                IdSolicitud = Guid.Parse(asistenciaColaborador.TurnoLaboral?.IdSolicitudSalida.ToString())
+                            });
+                        }
+                        // Falta a dia de labores
+                        // Se debe considerar las solicitudes de permiso
+                        if (asistenciaColaborador.TurnoLaboral.MarcacionEntrada is null && asistenciaColaborador.TurnoLaboral.MarcacionSalida is null)
+                        {
+                            // Consulta si existe alguna solicitud de permiso aprobada en la fecha del turno
+                            List<ConsultaSolicitudPermisoType> solicitudesPermiso = new();
+                            string fTurno = asistenciaColaborador.TurnoLaboral?.Entrada.ToString();
+                            DateTime? fechaTurno = !string.IsNullOrEmpty(fTurno) ? Convert.ToDateTime(fTurno, CultureInfo.InvariantCulture) : null;
+                            if (fechaTurno is not null)
+                            {
+                                solicitudesPermiso = await _EvaluacionAsync.ConsultaSolicitudesAprobadasbyCodigoBiometrico(asistenciaColaborador.CodBiometrico, fechaTurno.Value);
+                            }
+                            if (solicitudesPermiso.Count > 0 && (solicitudesPermiso[0]?.NumeroSolicitud.ToString() ?? "0") != "0")
+                            {
+                                iteracion = iteracion + 1;
+                                solicitudes1.Add(new ControlAsistenciaSolicitudes
+                                {
+                                    Id = solicitudesPermiso[0].NumeroSolicitud,
+                                    IdControlAsistenciaDet = iteracion,
+                                    Colaborador = asistenciaColaborador.Colaborador,
+                                    Comentarios = solicitudesPermiso[0].Comentarios,
+                                    IdFeature = Guid.Parse(solicitudesPermiso[0].IdFeaturePermiso),
+                                    IdSolicitud = Guid.Parse(solicitudesPermiso[0].IdSolicitudPermiso.ToString())
+                                });
+                            }
+                        }
+                        // Marca entrada pero NO marca salida laboral
+                        // Se debe considerar las solicitudes de permiso
+                        if (asistenciaColaborador.TurnoLaboral.MarcacionEntrada is not null && asistenciaColaborador.TurnoLaboral.MarcacionSalida is null)
+                        {
+                            // Consulta si existe alguna solicitud de permiso aprobada en la fecha del turno
+                            List<ConsultaSolicitudPermisoType> solicitudesPermiso = new();
+                            string fTurno = asistenciaColaborador.TurnoLaboral?.Salida.ToString();
+                            DateTime? fechaTurno = !string.IsNullOrEmpty(fTurno) ? Convert.ToDateTime(fTurno, CultureInfo.InvariantCulture) : null;
+                            if (fechaTurno is not null)
+                            {
+                                solicitudesPermiso = await _EvaluacionAsync.ConsultaSolicitudesAprobadasbyCodigoBiometrico(asistenciaColaborador.CodBiometrico, fechaTurno.Value);
+                            }
+                            if (solicitudesPermiso.Count > 0 && (solicitudesPermiso[0]?.NumeroSolicitud.ToString() ?? "0") != "0")
+                            {
+                                iteracion = iteracion + 1;
+                                solicitudes1.Add(new ControlAsistenciaSolicitudes
+                                {
+                                    Id = solicitudesPermiso[0].NumeroSolicitud,
+                                    IdControlAsistenciaDet = iteracion,
+                                    Colaborador = asistenciaColaborador.Colaborador,
+                                    Comentarios = solicitudesPermiso[0].Comentarios,
+                                    IdFeature = Guid.Parse(solicitudesPermiso[0].IdFeaturePermiso),
+                                    IdSolicitud = Guid.Parse(solicitudesPermiso[0].IdSolicitudPermiso.ToString())
+                                });
+                            }
+                        }
+                    }
+                    #endregion
+
+                    listaEvaluacionAsistencia.Add(new EvaluacionAsistenciaResponseType()
+                    {
+                        Colaborador = asistenciaColaborador.Colaborador,
+                        Identificacion = asistenciaColaborador.Identificacion,
+                        CodBiometrico = asistenciaColaborador.CodBiometrico,
+                        Udn = asistenciaColaborador.Udn,
+                        Area = asistenciaColaborador.Area,
+                        SubCentroCosto = asistenciaColaborador.SubCentroCosto,
+                        Fecha = asistenciaColaborador.Fecha,
+                        Novedades = novedades,
+                        TurnoLaboral = turnoLaborall,
+                        TurnoReceso = turnoReceso,
+                        Solicitudes = solicitudes1
+                    });
+                }
+            }
+            #endregion
+
+            return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = listaEvaluacionAsistencia, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
 /*
             if (cabecera.Count == 0)
             {

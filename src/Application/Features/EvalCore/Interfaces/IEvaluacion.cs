@@ -17,6 +17,8 @@ public interface IEvaluacion
 
     Task<List<ConsultaSolicitudPermisoType>> ConsultaSolicitudesAprobadasbyCodigoBiometrico(string CodigoBiometrico, DateTime fecha);
 
+    Task<List<ConsultaSolicitudPermisoType>> ConsultaSolicitudbyIdSolicitud(string IdSolicitud, string EstadoSolicitud);
+
     Task<List<ColaboradorConvivenciaType>> ConsultaColaboradores(string codUdn, string codArea, string codScosto, string suscriptor);
     Task<List<ColaboradorConvivenciaType>> ConsultaColaborador(string suscriptor);
 

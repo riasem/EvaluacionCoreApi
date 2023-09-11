@@ -251,6 +251,32 @@ public class EvaluacionService : IEvaluacion
         return consultaSolicitudPermiso;
     }
 
+    public async Task<List<ConsultaSolicitudPermisoType>> ConsultaSolicitudbyIdSolicitud(string IdSolicitud, string EstadoSolicitud)
+    {
+        List<ConsultaSolicitudPermisoType> consultaSolicitudPermiso = new();
+
+        try
+        {
+            // Vista que permite consultar en un rango de fechas todos los turnos que le han sido asignados un colaborador y las marcaciones que ha realizado en estos turnos
+            // asi como las novedades que existieren en las marcaciones y las solicitudes que hubiesen sido gestionadas por estas novedades
+            string query = "SELECT * FROM Riasem.dbo.V_SOLICITUD_PERMISO WHERE IDSOLICITUDPERMISO = '" + IdSolicitud.ToString() + "' AND CODIGOESTADO = '" + EstadoSolicitud + "'";
+
+            using IDbConnection con = new SqlConnection(ConnectionString_Marc);
+            if (con.State == ConnectionState.Closed) con.Open();
+
+            consultaSolicitudPermiso = (await con.QueryAsync<ConsultaSolicitudPermisoType>(
+                query)).ToList();
+
+            if (con.State == ConnectionState.Open) con.Close();
+        }
+        catch (Exception e)
+        {
+            _log.LogError(e, string.Empty);
+        }
+
+        return consultaSolicitudPermiso;
+    }
+
     public async Task<List<ColaboradorConvivenciaType>> ConsultaColaboradores(string codUdn, string codArea, string codScosto, string suscriptor)
     {
         List<ColaboradorConvivenciaType> bitacoraMarcacion = new();

@@ -7,6 +7,15 @@ namespace EvaluacionCore.Application.Features.Marcacion.Dto
         [JsonPropertyName("codigoBiometricoBeneficiario")]
         public int CodigoBiometricoBeneficiario { get; set; }
 
+        [JsonPropertyName("identificacionEmpleado")]
+        public string IdentificacionEmpleado { get; set; }
+
+        [JsonPropertyName("comentarios")]
+        public string Comentarios { get; set; }
+
+        [JsonPropertyName("idFeaturePermiso")]
+        public string IdFeaturePermiso { get; set; }
+
         [JsonPropertyName("idSolicitudPermiso")]
         public Guid IdSolicitudPermiso { get; set; } = Guid.Empty;
 
