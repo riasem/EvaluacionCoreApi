@@ -5,6 +5,7 @@ using EvaluacionCore.Application.Features.EvalCore.Queries.GetEvaluacionAsistenc
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using System.IdentityModel.Tokens.Jwt;
 using WebEvaluacionCoreApi.Controllers;
 
@@ -64,9 +65,12 @@ public class EvaluacionController : ApiControllerBase
         //if (identificacion == "0")
         //{
         //    identificacion = "";
-        //}
+        //'}
+        Log.Information("PARAMETROS: periodo: "+ periodo+ ", Udn: "+ Udn+ ", Departamento: "+ Departamento+ ", Area: "+ Area+ ", cancellationToken: "+ cancellationToken+ ", identificacion: "+ identificacion+ ", FiltroNovedades: "+ FiltroNovedades+ ", idCanal: "+ idCanal);
         var identificacionSession = new JwtSecurityToken(this.HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
+        Log.Information("QUERY PARAMETER: identificacionSession: " + identificacionSession);
         var objResult = await Mediator.Send(new GetEvaluacionAsistenciaAsyncQuery(identificacion, periodo, Udn, Area, Departamento, FiltroNovedades,identificacionSession,idCanal), cancellationToken);
+        Log.Information("QUERY RESULT: " + objResult);
         return Ok(objResult);
         
     }
