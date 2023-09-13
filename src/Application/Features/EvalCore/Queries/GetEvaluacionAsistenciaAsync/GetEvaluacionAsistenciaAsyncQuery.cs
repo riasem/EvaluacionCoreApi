@@ -86,11 +86,41 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
 
             #region Filtro de Colaboradores que se debe presentar en la consulta
             var colaboradores = await _repoColabConvivenciaAync.ListAsync(new GetColaboradorConvivenciaByUdnAreaSccSpec(request.Udn, area, depar, susc), cancellationToken);
+            // Si la lista tiene menos de 1 registro, entonces lanzar una excepción
+            // "No hay colaboradores activos para ese filtro"
+            if (colaboradores is null || colaboradores.Count == 0)
+            {
+                throw new Exception("No hay colaboradores activos para las condiciones seleccionadas");
+            }
+            // 
+             var colaSesion = await _repoColabConvivenciaAync.FirstOrDefaultAsync(new GetColaboradorConvivenciaByUdnAreaSccSpec("", "", "", request.identSession), cancellationToken);
 
-            var colaSesion = await _repoColabConvivenciaAync.FirstOrDefaultAsync(new GetColaboradorConvivenciaByUdnAreaSccSpec("", "", "", request.identSession), cancellationToken);
-
-            var rolCargo = await _repoRolCargoAync.FirstOrDefaultAsync(new GetRolesAccesoByCargoConvivenciaSpec(colaSesion.CodCargo, colaSesion.CodSubcentroCosto, request.idCanal, ""), cancellationToken);
-
+            // Cambiar a un ListAsync
+            var rolesCargos = await _repoRolCargoAync.ListAsync(new GetRolesAccesoByCargoConvivenciaSpec(colaSesion.CodCargo, colaSesion.CodSubcentroCosto, request.idCanal, ""), cancellationToken);
+            bool banderaTtth = false;
+            var idAtributoTTHH = _config.GetSection("Atributos:ControlAsistenciaTTHH").Get<string>();
+            // Recorrer los RolesCargo, en busqueda del atributo de TalentoHumano
+            foreach (var rolCargo in rolesCargos)
+            {
+                var listAttributos = await _repoAtributoRolAync.ListAsync(new GetAtributosByRolSpec(rolCargo.RolSG.Id), cancellationToken);
+                var atributoTTHH = listAttributos.Where(x => x.Id == Guid.Parse(idAtributoTTHH)).ToList();
+                if (atributoTTHH.Any())
+                {
+                    banderaTtth = true;
+                }
+            }
+            if (!banderaTtth)
+            {
+                var objJefe = await _repoClienteAync.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(colaSesion.Identificacion), cancellationToken);
+                var objColaboradoresJefe = await _repoClienteAync.ListAsync(new GetColaboradorByJefe(objJefe.Id), cancellationToken);
+                // SI no tiene colaboradores, lanzar una excepcion
+                colaboradores = colaboradores.Where(x => objJefe.Identificacion == x.Identificacion || objColaboradoresJefe.Any(c => c.Identificacion == x.Identificacion)).ToList();
+            }
+            if (!colaboradores.Any())
+            {
+                throw new Exception("No tiene colaboradores asignados a su cargo");
+            }
+            /*
             if (rolCargo != null)
             {
                 var listAttributos = await _repoAtributoRolAync.ListAsync(new GetAtributosByRolSpec(rolCargo.RolSG.Id), cancellationToken);
@@ -102,7 +132,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                 {
                     var objJefe = await _repoClienteAync.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(colaSesion.Identificacion), cancellationToken);
                     var objColaboradoresJefe = await _repoClienteAync.ListAsync(new GetColaboradorByJefe(objJefe.Id), cancellationToken);
-
+                    // SI no tiene colaboradores, lanzar una excepcion
                     colaboradores = colaboradores.Where(x => objJefe.Identificacion == x.Identificacion || objColaboradoresJefe.Any(c => c.Identificacion == x.Identificacion)).ToList();
                 }
             }
@@ -110,6 +140,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
             {
                 colaboradores = colaboradores.Where(x => x.Identificacion == colaSesion.Identificacion).ToList();
             }
+            */
             #endregion
 
             #region Recorre cada uno de los Colaboradores que se deben presentar en la consulta
