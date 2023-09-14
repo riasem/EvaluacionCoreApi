@@ -90,7 +90,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
             // "No hay colaboradores activos para ese filtro"
             if (colaboradores is null || colaboradores.Count == 0)
             {
-                throw new Exception("No hay colaboradores activos para las condiciones seleccionadas");
+                return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = null, Succeeded = false, StatusCode = "001", Message = "No hay colaboradores activos para las condiciones seleccionadas" };
             }
             // 
              var colaSesion = await _repoColabConvivenciaAync.FirstOrDefaultAsync(new GetColaboradorConvivenciaByUdnAreaSccSpec("", "", "", request.identSession), cancellationToken);
@@ -109,6 +109,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                     banderaTtth = true;
                 }
             }
+            // Si no tiene el atributo de Talento Humano, procede a buscar los colaboradores a su cargo
             if (!banderaTtth)
             {
                 var objJefe = await _repoClienteAync.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(colaSesion.Identificacion), cancellationToken);
@@ -118,7 +119,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
             }
             if (!colaboradores.Any())
             {
-                throw new Exception("No tiene colaboradores asignados a su cargo");
+                return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = null, Succeeded = false, StatusCode = "001", Message = "No tiene colaboradores asignados a su cargo" };
             }
             /*
             if (rolCargo != null)
