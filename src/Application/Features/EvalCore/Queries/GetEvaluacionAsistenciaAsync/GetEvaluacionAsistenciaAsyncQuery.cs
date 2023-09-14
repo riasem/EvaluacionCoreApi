@@ -114,34 +114,19 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
             {
                 var objJefe = await _repoClienteAync.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(colaSesion.Identificacion), cancellationToken);
                 var objColaboradoresJefe = await _repoClienteAync.ListAsync(new GetColaboradorByJefe(objJefe.Id), cancellationToken);
+
+                if (!objColaboradoresJefe.Any())
+                {
+                    return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = null, Succeeded = false, StatusCode = "001", Message = "No tiene colaboradores asignados a su cargo" };
+                }
+
                 // SI no tiene colaboradores, lanzar una excepcion
                 colaboradores = colaboradores.Where(x => objJefe.Identificacion == x.Identificacion || objColaboradoresJefe.Any(c => c.Identificacion == x.Identificacion)).ToList();
             }
             if (!colaboradores.Any())
             {
-                return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = null, Succeeded = false, StatusCode = "001", Message = "No tiene colaboradores asignados a su cargo" };
+                return new ResponseType<List<EvaluacionAsistenciaResponseType>>() { Data = null, Succeeded = false, StatusCode = "001", Message = "No tiene colaboradores por consultar" };
             }
-            /*
-            if (rolCargo != null)
-            {
-                var listAttributos = await _repoAtributoRolAync.ListAsync(new GetAtributosByRolSpec(rolCargo.RolSG.Id), cancellationToken);
-
-                var idAtributoTTHH = _config.GetSection("Atributos:ControlAsistenciaTTHH").Get<string>();
-
-                var atributoTTHH = listAttributos.Where(x => x.Id == Guid.Parse(idAtributoTTHH)).ToList();
-                if (!atributoTTHH.Any())
-                {
-                    var objJefe = await _repoClienteAync.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(colaSesion.Identificacion), cancellationToken);
-                    var objColaboradoresJefe = await _repoClienteAync.ListAsync(new GetColaboradorByJefe(objJefe.Id), cancellationToken);
-                    // SI no tiene colaboradores, lanzar una excepcion
-                    colaboradores = colaboradores.Where(x => objJefe.Identificacion == x.Identificacion || objColaboradoresJefe.Any(c => c.Identificacion == x.Identificacion)).ToList();
-                }
-            }
-            else
-            {
-                colaboradores = colaboradores.Where(x => x.Identificacion == colaSesion.Identificacion).ToList();
-            }
-            */
             #endregion
 
             #region Recorre cada uno de los Colaboradores que se deben presentar en la consulta
@@ -162,10 +147,14 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                     {
                         //turno
                         Id = asistenciaColaborador.TurnoLaboral.Id,
+                        CodigoTurno = asistenciaColaborador?.TurnoLaboral?.CodigoTurno ?? null,
+                        ClaseTurno = asistenciaColaborador?.TurnoLaboral?.ClaseTurno ?? null,
                         Entrada = asistenciaColaborador.TurnoLaboral.Entrada,
                         Salida = asistenciaColaborador.TurnoLaboral.Salida,
                         TotalHoras = asistenciaColaborador.TurnoLaboral.TotalHoras,
 
+                        MinutosNovedadIngreso = asistenciaColaborador?.TurnoLaboral?.MinutosNovedadIngreso ?? 0,
+                        NovedadIngreso = asistenciaColaborador?.TurnoLaboral?.NovedadIngreso ?? "",
                         MarcacionEntrada = asistenciaColaborador.TurnoLaboral.MarcacionEntrada,
                         EstadoEntrada = asistenciaColaborador.TurnoLaboral.EstadoEntrada,
                         FechaSolicitudEntrada = asistenciaColaborador.TurnoLaboral.FechaSolicitudEntrada,
@@ -174,6 +163,8 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                         IdFeatureEntrada = asistenciaColaborador.TurnoLaboral.IdFeatureEntrada,
                         TipoSolicitudEntrada = EvaluaTipoSolicitud(asistenciaColaborador.TurnoLaboral.IdFeatureEntrada),
 
+                        MinutosNovedadSalida = asistenciaColaborador?.TurnoLaboral?.MinutosNovedadSalida ?? 0,
+                        NovedadSalida = asistenciaColaborador?.TurnoLaboral?.NovedadSalida ?? "",
                         MarcacionSalida = asistenciaColaborador.TurnoLaboral.MarcacionSalida,
                         EstadoSalida = asistenciaColaborador.TurnoLaboral.EstadoSalida,
                         FechaSolicitudSalida = asistenciaColaborador.TurnoLaboral.FechaSolicitudSalida,
@@ -192,6 +183,8 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                         TotalHoras = asistenciaColaborador.TurnoReceso.TotalHoras,
 
                         //marcaciones de receso entrada
+                        MinutosNovedadEntradaReceso = asistenciaColaborador?.TurnoReceso?.MinutosNovedadEntradaReceso ?? 0,
+                        NovedadEntradaReceso = asistenciaColaborador?.TurnoReceso?.NovedadEntradaReceso ?? "",
                         MarcacionEntrada = asistenciaColaborador.TurnoReceso.MarcacionEntrada,
                         FechaSolicitudEntradaReceso = asistenciaColaborador.TurnoReceso.FechaSolicitudEntradaReceso,
                         UsuarioSolicitudEntradaReceso = asistenciaColaborador.TurnoReceso.UsuarioSolicitudEntradaReceso,
@@ -200,6 +193,8 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                         IdFeatureEntradaReceso = asistenciaColaborador.TurnoReceso.IdFeatureEntradaReceso,
                         TipoSolicitudEntradaReceso = asistenciaColaborador.TurnoReceso.TipoSolicitudEntradaReceso,
 
+                        MinutosNovedadSalidaReceso = asistenciaColaborador?.TurnoReceso?.MinutosNovedadSalidaReceso ?? 0,
+                        NovedadSalidaReceso = asistenciaColaborador?.TurnoReceso?.NovedadSalidaReceso ?? "",
                         MarcacionSalida = asistenciaColaborador.TurnoReceso.MarcacionSalida,
                         FechaSolicitudSalidaReceso = asistenciaColaborador.TurnoReceso.FechaSolicitudSalidaReceso,
                         UsuarioSolicitudSalidaReceso = asistenciaColaborador.TurnoReceso.UsuarioSolicitudSalidaReceso,

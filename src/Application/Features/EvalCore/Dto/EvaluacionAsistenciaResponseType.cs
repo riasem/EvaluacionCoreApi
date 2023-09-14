@@ -45,6 +45,12 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
         [JsonPropertyName("idTurno")]
         public Guid? Id { get; set; }
 
+        [JsonPropertyName("codigoTurno")]
+        public string CodigoTurno { get; set; }
+
+        [JsonPropertyName("claseTurno")]
+        public string ClaseTurno { get; set; }
+
         [JsonPropertyName("entrada")]  //turno entrada
         public DateTime? Entrada { get; set; }
 
@@ -66,8 +72,13 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
         [JsonPropertyName("totalHoras")] //duracion del turno laboral
         public string TotalHoras { get; set; }
 
-
         //se añaden campos en marcacion para el control de novedades y solicitudes de entrada
+        [JsonPropertyName("minutosNovedadIngreso")]
+        public int? MinutosNovedadIngreso { get; set; }
+
+        [JsonPropertyName("novedadIngreso")]
+        public string NovedadIngreso { get; set; }
+
         [JsonPropertyName("idSolicitudEntrada")]
         public Guid? IdSolicitudEntrada  {get; set;}
 
@@ -91,6 +102,12 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
 
 
         //se añaden campos en marcacion para el control de novedades y solicitudes de salida
+        [JsonPropertyName("minutosNovedadSalida")]
+        public int? MinutosNovedadSalida { get; set; }
+
+        [JsonPropertyName("novedadSalida")]
+        public string NovedadSalida { get; set; }
+
         [JsonPropertyName("idSolicitudSalida")]
         public Guid? IdSolicitudSalida { get; set;}
 
@@ -145,6 +162,12 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
 
 
         //se añaden campos en marcacion para el control de novedades y solicitudes de entrada
+        [JsonPropertyName("minutosNovedadEntradaReceso")]
+        public int? MinutosNovedadEntradaReceso { get; set; }
+
+        [JsonPropertyName("novedadEntradaReceso")]
+        public string NovedadEntradaReceso { get; set; }
+
         [JsonPropertyName("idSolicitudEntradaReceso")]
         public Guid? IdSolicitudEntradaReceso { get; set; }
 
@@ -168,6 +191,12 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
 
 
         //se añaden campos en marcacion para el control de novedades y solicitudes de salida
+        [JsonPropertyName("minutosNovedadSalidaReceso")]
+        public int? MinutosNovedadSalidaReceso { get; set; }
+
+        [JsonPropertyName("novedadSalidaReceso")]
+        public string NovedadSalidaReceso { get; set; }
+
         [JsonPropertyName("idSolicitudSalidaReceso")]
         public Guid? IdSolicitudSalidaReceso { get; set; }
 
