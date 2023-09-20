@@ -82,12 +82,14 @@ namespace Workflow.Persistence.Repository.Biometria
                             #region Luxand
 
                             var Licencia = await _repoLicencia.FirstOrDefaultAsync(new LicenciaByServicioSpec(Guid.Parse(GuidLicenciaLuxand)));
+                            //Licencia = "rJuuL/jvuzXcdzpFwRzPUt6cnUiEAwdE58ISp4om8DFhI0hMabxMlLJaT8wWxs4dTe9BdAf86KK0Mr6YGn3bNyG6P26y8bTzH2IQejnUnbN8oKEc+FrsDghER+MD1dbs3prVIVXna4lhchnXKnc/a0UC72Xfw5Nt70Oj5ieB6Bs=";
                             if (Licencia is null) return new ResponseType<string> { StatusCode = "101", Succeeded = true, Message = "No se ha podido obtener datos de Licencia" };
 
                             var objColaborador = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(request.Identificacion));
                             if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
                             string licencia;
                             licencia = Licencia.CodigoLicencia;
+                            //licencia = "rJuuL/jvuzXcdzpFwRzPUt6cnUiEAwdE58ISp4om8DFhI0hMabxMlLJaT8wWxs4dTe9BdAf86KK0Mr6YGn3bNyG6P26y8bTzH2IQejnUnbN8oKEc+FrsDghER+MD1dbs3prVIVXna4lhchnXKnc/a0UC72Xfw5Nt70Oj5ieB6Bs=";
                             //  ilimitada               licencia = "JOassJsQHq6XVRdg5bUgLyUsSEXDS3qPFSRfzJ9WYMSrPYmp7TCFiytbKyVOZZeFacobAJyN1zRqPNIX2mBVJQERs3s4EIyU5b7Eb7UcjG8Tx+ovF2hw8HuktW+vQuuxp8txaYZcc4nL4oi2y+3gTPTzmXn+6YoLPvr5ZEWJ+XQ=";
                             //  temporal                licencia = "YK6tt2AQmhevRUTW9hDnev5pB14PEjdaSzXfchF8Z/cJix53l2mt38mNEJUkfXPmWQ8TKQyZQsXlLRFiVkgrDj86co0xYLhoJltayZlea1zmqyzaN/yre+zOqEyr/1fDXLWkE4MEoQY8eOpj6hCrRsDP10EkunTtiz6mC8ar6AU=";
                             var xxx = FSDK.ActivateLibrary(licencia);
@@ -510,46 +512,57 @@ namespace Workflow.Persistence.Repository.Biometria
 
         public async Task<ResponseType<string>> GetFaceVerificationAsync(GetFaceVerificationRequest request)
         {
-            try
+            // Constante para sacar el sessionId (Cedula) de la tablet de Planta Alta
+            String IdentificacionSesion = "0123456787";
+            var identSesion = await _repoCargoEje.FirstOrDefaultAsync(new GetEjeByIdentificacionSpec(IdentificacionSesion));
+            if (identSesion.ApiLuxand == false)
             {
-                nombreEnpoint = _config.GetSection("Luxand:FaceLandMarks").Get<string>();
-                uriEndPoint = string.Concat(apiBaseLuxand, nombreEnpoint);
-
-                using var client = new HttpClient();
-                client.DefaultRequestHeaders.Add("token", apiKeyLuxand ?? string.Empty);
-
-                byte[] bytes = Convert.FromBase64String(request.Base64);
-
-                Stream stream = new MemoryStream(bytes);
-
-                using var multipartFormContent = new MultipartFormDataContent();
-
-                var fileStreamContent = new StreamContent(stream);
-                fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue(string.Concat("image/", request.Extension));
-
-                multipartFormContent.Add(fileStreamContent, name: "photo", fileName: string.Concat(request.Nombre, ".", request.Extension));
-
-                var resLuxand = await client.PostAsync(uriEndPoint, multipartFormContent);
-
-                if (!resLuxand.IsSuccessStatusCode)
-                    return new ResponseType<string>() { Data = null, Message = "No se pudo realizar la verificación", StatusCode = "101", Succeeded = false };
-
-                var responseType = resLuxand.Content.ReadFromJsonAsync<LandMarkResponseType>().Result;
-
-                if (responseType.Status != "success")
-                    return new ResponseType<string>() { Data = null, Message = "Ocurrió un inconveniente al realizar la verificación", StatusCode = "101", Succeeded = false };
-
-                if (responseType.Landmarks.Count == 0)
-                    return new ResponseType<string>() { Data = null, Message = "Imagen no válida", StatusCode = "101", Succeeded = false };
-
                 return new ResponseType<string>() { Data = null, Message = "Verificación existosa", StatusCode = "100", Succeeded = true };
             }
-            catch (Exception ex)
+            else
             {
-                _log.LogInformation("EXCEPTION 10: " + ex.Message);
-                _log.LogError(ex, string.Empty);
-                return new ResponseType<string>() { Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
+                try
+                {
+                    nombreEnpoint = _config.GetSection("Luxand:FaceLandMarks").Get<string>();
+                    uriEndPoint = string.Concat(apiBaseLuxand, nombreEnpoint);
+
+                    using var client = new HttpClient();
+                    client.DefaultRequestHeaders.Add("token", apiKeyLuxand ?? string.Empty);
+
+                    byte[] bytes = Convert.FromBase64String(request.Base64);
+
+                    Stream stream = new MemoryStream(bytes);
+
+                    using var multipartFormContent = new MultipartFormDataContent();
+
+                    var fileStreamContent = new StreamContent(stream);
+                    fileStreamContent.Headers.ContentType = new MediaTypeHeaderValue(string.Concat("image/", request.Extension));
+
+                    multipartFormContent.Add(fileStreamContent, name: "photo", fileName: string.Concat(request.Nombre, ".", request.Extension));
+
+                    var resLuxand = await client.PostAsync(uriEndPoint, multipartFormContent);
+
+                    if (!resLuxand.IsSuccessStatusCode)
+                        return new ResponseType<string>() { Data = null, Message = "No se pudo realizar la verificación", StatusCode = "101", Succeeded = false };
+
+                    var responseType = resLuxand.Content.ReadFromJsonAsync<LandMarkResponseType>().Result;
+
+                    if (responseType.Status != "success")
+                        return new ResponseType<string>() { Data = null, Message = "Ocurrió un inconveniente al realizar la verificación", StatusCode = "101", Succeeded = false };
+
+                    if (responseType.Landmarks.Count == 0)
+                        return new ResponseType<string>() { Data = null, Message = "Imagen no válida", StatusCode = "101", Succeeded = false };
+
+                    return new ResponseType<string>() { Data = null, Message = "Verificación existosa", StatusCode = "100", Succeeded = true };
+                }
+                catch (Exception ex)
+                {
+                    _log.LogInformation("EXCEPTION 10: " + ex.Message);
+                    _log.LogError(ex, string.Empty);
+                    return new ResponseType<string>() { Message = CodeMessageResponse.GetMessageByCode("500"), StatusCode = "500", Succeeded = false };
+                }
             }
+            
         }
 
         public async Task<bool> VerifyPersonExistsLuxand(string uri, string uidPerson)
