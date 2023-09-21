@@ -463,7 +463,9 @@ namespace Workflow.Persistence.Repository.Biometria
         }
 
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task<ResponseType<string>> CreateFacePersonAsync(CreateFacePersonRequest request)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             try
             {
@@ -499,8 +501,9 @@ namespace Workflow.Persistence.Repository.Biometria
                     return new ResponseType<string>() { Data = null, Message = "Ocurrió un inconveniente al realizar la creación", StatusCode = "101", Succeeded = false };
 
                 await VerifyPersonExistsLuxand(uriEndPoint, request.FacialPersonUid);*/
-
-                return new ResponseType<string>() { Data = responseType.Uuid.ToString(), Message = "Creación existosa", StatusCode = "100", Succeeded = true };
+                Guid newId = Guid.NewGuid();
+                return new ResponseType<string>() { Data = newId.ToString(), Message = "Creación existosa", StatusCode = "100", Succeeded = true };
+                // return new ResponseType<string>() { Data = responseType.Uuid.ToString(), Message = "Creación existosa", StatusCode = "100", Succeeded = true };
             }
             catch (Exception ex)
             {
