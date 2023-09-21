@@ -467,7 +467,7 @@ namespace Workflow.Persistence.Repository.Biometria
         {
             try
             {
-                nombreEnpoint = _config.GetSection("Luxand:GetCreatePerson").Get<string>();
+                /*nombreEnpoint = _config.GetSection("Luxand:GetCreatePerson").Get<string>();
                 uriEndPoint = string.Concat(apiBaseLuxand, nombreEnpoint);
 
                 using var client = new HttpClient();
@@ -498,7 +498,7 @@ namespace Workflow.Persistence.Repository.Biometria
                 if (responseType.Status != "success")
                     return new ResponseType<string>() { Data = null, Message = "Ocurrió un inconveniente al realizar la creación", StatusCode = "101", Succeeded = false };
 
-                await VerifyPersonExistsLuxand(uriEndPoint, request.FacialPersonUid);
+                await VerifyPersonExistsLuxand(uriEndPoint, request.FacialPersonUid);*/
 
                 return new ResponseType<string>() { Data = responseType.Uuid.ToString(), Message = "Creación existosa", StatusCode = "100", Succeeded = true };
             }
