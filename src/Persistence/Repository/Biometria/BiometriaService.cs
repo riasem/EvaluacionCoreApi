@@ -89,7 +89,7 @@ namespace Workflow.Persistence.Repository.Biometria
                             if (objColaborador is null) return new ResponseType<string>() { Data = null, Message = "Colaborador no tiene Imagen de Perfil", StatusCode = "101", Succeeded = true };
                             string licencia;
                             licencia = Licencia.CodigoLicencia;
-                            //licencia = "rJuuL/jvuzXcdzpFwRzPUt6cnUiEAwdE58ISp4om8DFhI0hMabxMlLJaT8wWxs4dTe9BdAf86KK0Mr6YGn3bNyG6P26y8bTzH2IQejnUnbN8oKEc+FrsDghER+MD1dbs3prVIVXna4lhchnXKnc/a0UC72Xfw5Nt70Oj5ieB6Bs=";
+                            licencia = "r93zOVstUX946LTWsxW/dtDQ0OB5M1xTrdIZAhxfCSY4Y4KA9MqEACiLwsDklCUwFLLR+OoAlxAvnTf+svN1z4HYGohI/jTILOjvURt/5J9pQwiPQwHsTUUWT0GJiSN0UDFpC+Dz40PuoR/hIfMjpqXrZ38L1b/o+M2P/52dv7w=";
                             //  ilimitada               licencia = "JOassJsQHq6XVRdg5bUgLyUsSEXDS3qPFSRfzJ9WYMSrPYmp7TCFiytbKyVOZZeFacobAJyN1zRqPNIX2mBVJQERs3s4EIyU5b7Eb7UcjG8Tx+ovF2hw8HuktW+vQuuxp8txaYZcc4nL4oi2y+3gTPTzmXn+6YoLPvr5ZEWJ+XQ=";
                             //  temporal                licencia = "YK6tt2AQmhevRUTW9hDnev5pB14PEjdaSzXfchF8Z/cJix53l2mt38mNEJUkfXPmWQ8TKQyZQsXlLRFiVkgrDj86co0xYLhoJltayZlea1zmqyzaN/yre+zOqEyr/1fDXLWkE4MEoQY8eOpj6hCrRsDP10EkunTtiz6mC8ar6AU=";
                             var xxx = FSDK.ActivateLibrary(licencia);
@@ -171,8 +171,9 @@ namespace Workflow.Persistence.Repository.Biometria
                                     cantidadNucleos = num,
                                     retornaHardwareID = www,
                                     resulthardwareID = hardwareID
-
+                                    
                                 };
+                                _log.LogInformation("PUNTO DE CONTROL: " + "licencia: " + licencia + ", retornaNucleos: " + qqq + ", cantidadNucleos: " + num + ", hardwareId: " + www + ", resultHardwareId" + hardwareID);
                                 return new ResponseType<string>() { Data = datos.ToString(), Message = "Autenticación existosa", StatusCode = "100", Succeeded = true };
                             }
                         }
