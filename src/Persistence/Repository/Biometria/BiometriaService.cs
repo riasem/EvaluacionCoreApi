@@ -104,6 +104,7 @@ namespace Workflow.Persistence.Repository.Biometria
                             var yyy = FSDK.InitializeLibrary();
                             if (xxx != -2)
                             {
+                                _log.LogInformation("PUNTO DE CONTROL 1: Si se activo la licencia");
                                 FSDK.CImage imageCola;
                                 try
                                 {
