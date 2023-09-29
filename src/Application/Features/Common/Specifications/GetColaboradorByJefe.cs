@@ -7,6 +7,6 @@ public class GetColaboradorByJefe : Specification<Cliente>
 {
     public GetColaboradorByJefe(Guid idClientePadre)
     {
-        Query.Where(e => e.ClientePadreId == idClientePadre);
+        Query.Where(e => e.Estado != "L" && e.ClientePadreId == idClientePadre);
     }
 }
