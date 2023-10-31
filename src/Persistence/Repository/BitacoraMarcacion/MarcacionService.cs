@@ -26,6 +26,7 @@ using EvaluacionCore.Application.Features.Marcacion.Dto;
 using EvaluacionCore.Application.Features.Marcacion.Interfaces;
 using EvaluacionCore.Application.Features.Marcacion.Specifications;
 using EvaluacionCore.Application.Features.Turnos.Specifications;
+using EvaluacionCore.Domain.Common;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using EvaluacionCore.Domain.Entities.Common;
 using EvaluacionCore.Domain.Entities.ControlAsistencia;
@@ -38,6 +39,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.Mapping;
 using Org.BouncyCastle.Asn1.Ocsp;
+using Org.BouncyCastle.Asn1.X500;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
@@ -1026,10 +1028,10 @@ public class MarcacionService : IMarcacion
                 });
             }
             return new ResponseType<List<NovedadMarcacionWebType>>() { Data = listaEvaluacionAsistencia, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
-
         }
         catch (Exception e)
         {
+            _log.LogDebug("Excepcion: " + e.Message);
             return new ResponseType<List<NovedadMarcacionWebType>>() { Data = null, Succeeded = false, StatusCode = "002", Message = "Ocurrió un error durante la consulta" };
             //insertar logs
         }

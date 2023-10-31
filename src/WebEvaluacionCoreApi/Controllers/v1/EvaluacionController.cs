@@ -66,8 +66,9 @@ public class EvaluacionController : ApiControllerBase
         //{
         //    identificacion = "";
         //'}
-        Log.Information("PARAMETROS: periodo: "+ periodo+ ", Udn: "+ Udn+ ", Departamento: "+ Departamento+ ", Area: "+ Area+ ", cancellationToken: "+ cancellationToken+ ", identificacion: "+ identificacion+ ", FiltroNovedades: "+ FiltroNovedades+ ", idCanal: "+ idCanal);
         var identificacionSession = new JwtSecurityToken(this.HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
+
+        Log.Information("PARAMETROS: periodo: "+ periodo+ ", Udn: "+ Udn+ ", Departamento: "+ Departamento+ ", Area: "+ Area+ ", cancellationToken: "+ cancellationToken+ ", identificacion: "+ identificacion+ ", FiltroNovedades: "+ FiltroNovedades+ ", idCanal: "+ idCanal);
         //identificacionSession = "0909555260";
         Log.Information("QUERY PARAMETER: identificacionSession: " + identificacionSession);
         var objResult = await Mediator.Send(new GetEvaluacionAsistenciaAsyncQuery(identificacion, periodo, Udn, Area, Departamento, FiltroNovedades,identificacionSession,idCanal), cancellationToken);
