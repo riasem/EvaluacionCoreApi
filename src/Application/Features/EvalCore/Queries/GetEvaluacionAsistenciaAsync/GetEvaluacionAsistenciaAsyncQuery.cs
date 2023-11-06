@@ -103,16 +103,12 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
             // Recorrer los RolesCargo, en busqueda del atributo de TalentoHumano
             foreach (var rolCargo in rolesCargos)
             {
-                if (rolCargo.RolSGId.Equals(Guid.Parse(idAtributoTTHH)))
+                var listAttributos = await _repoAtributoRolAync.ListAsync(new GetAtributosByRolSpec(rolCargo.RolSG.Id), cancellationToken);
+                var atributoTTHH = listAttributos.Where(x => x.Id == Guid.Parse(idAtributoTTHH)).ToList();
+                if (atributoTTHH.Any())
                 {
                     banderaTtth = true;
                 }
-                //var listAttributos = await _repoAtributoRolAync.ListAsync(new GetAtributosByRolSpec(rolCargo.RolSG.Id), cancellationToken);
-                //var atributoTTHH = listAttributos.Where(x => x.Id == Guid.Parse(idAtributoTTHH)).ToList();
-                //if (atributoTTHH.Any())
-                //{
-                    //banderaTtth = true;
-                //}
             }
             // Si no tiene el atributo de Talento Humano, procede a buscar los colaboradores a su cargo
             if (!banderaTtth)
