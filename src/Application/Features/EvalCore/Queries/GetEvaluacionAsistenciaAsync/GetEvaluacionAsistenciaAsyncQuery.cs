@@ -103,7 +103,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
             // Recorrer los RolesCargo, en busqueda del atributo de TalentoHumano
             foreach (var rolCargo in rolesCargos)
             {
-                if (rolCargo.RolSGId.Equals(Guid.Parse(idAtributoTTHH)))
+                if (rolCargo.RolSG.Id.Equals(idAtributoTTHH))
                 {
                     banderaTtth = true;
                 }
@@ -141,7 +141,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                 if (novedadMarcacionWeb.Data != null) listaNovedadMarcacionWeb.AddRange(novedadMarcacionWeb.Data);
 
                 var asistenciasColaborador = novedadMarcacionWeb.Data;
-                if (asistenciasColaborador != null && asistenciasColaborador.Any()) {
+                /* if (asistenciasColaborador != null && asistenciasColaborador.Any()) { */
                     foreach (var asistenciaColaborador in asistenciasColaborador)
                     {
                         List<Dto.Novedad> novedades = new();
@@ -333,7 +333,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                             Solicitudes = solicitudes1
                         });
                     }
-                }
+                /* } */
                 
             }
             #endregion
