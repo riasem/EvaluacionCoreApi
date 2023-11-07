@@ -728,8 +728,8 @@ public class MarcacionService : IMarcacion
         try
         {
             List<NovedadMarcacionWebType> listaEvaluacionAsistencia = new();
-
-            string[] filtroNovedades = FiltroNovedades.Split(",");
+            
+            string[] filtroNovedades = FiltroNovedades.Replace("-", ",").Split(",");
 
             var itemCol = await _repoCliente.FirstOrDefaultAsync(new GetColaboradorByIdentificacionSpec(Identificacion), cancellationToken);
             if (itemCol is null) return new ResponseType<List<NovedadMarcacionWebType>>() { Data = null, Succeeded = true, StatusCode = "000", Message = "Consulta generada exitosamente" };
