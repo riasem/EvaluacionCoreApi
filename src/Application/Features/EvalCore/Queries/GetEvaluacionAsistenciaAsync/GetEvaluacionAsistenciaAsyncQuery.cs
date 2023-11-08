@@ -103,9 +103,7 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
             // Recorrer los RolesCargo, en busqueda del atributo de TalentoHumano
             foreach (var rolCargo in rolesCargos)
             {
-                var listAttributos = await _repoAtributoRolAync.ListAsync(new GetAtributosByRolSpec(rolCargo.RolSG.Id), cancellationToken);
-                var atributoTTHH = listAttributos.Where(x => x.Id == Guid.Parse(idAtributoTTHH)).ToList();
-                if (atributoTTHH.Any())
+                if (rolCargo.RolSGId.Equals(Guid.Parse(idAtributoTTHH)))
                 {
                     banderaTtth = true;
                 }
@@ -137,6 +135,10 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                 if (novedadMarcacionWeb.Data != null) listaNovedadMarcacionWeb.AddRange(novedadMarcacionWeb.Data);
 
                 var asistenciasColaborador = novedadMarcacionWeb.Data;
+                if (asistenciasColaborador == null || !asistenciasColaborador.Any())
+                {
+                    continue;
+                }
                 foreach (var asistenciaColaborador in asistenciasColaborador)
                 {
                     List<Dto.Novedad> novedades = new();
