@@ -135,6 +135,8 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                 if (novedadMarcacionWeb.Data != null) listaNovedadMarcacionWeb.AddRange(novedadMarcacionWeb.Data);
 
                 var asistenciasColaborador = novedadMarcacionWeb.Data;
+                // Agregado por CADCOMPSA. 8/11/2023, para continuar al siguiente
+                // colaborador cuando no encuentra marcaciones en el periodo seleccionado.
                 if (asistenciasColaborador == null || !asistenciasColaborador.Any())
                 {
                     continue;

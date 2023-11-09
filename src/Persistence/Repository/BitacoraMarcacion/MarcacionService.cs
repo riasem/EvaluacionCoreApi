@@ -1041,7 +1041,7 @@ public class MarcacionService : IMarcacion
     {
         try
         {
-            FHasta = FHasta.AddHours(23).AddMinutes(59).AddSeconds(59);
+            //FHasta = FHasta.AddHours(23).AddMinutes(59).AddSeconds(59);
             List<NovedadMarcacionWebType> listaEvaluacionAsistencia = new();
             string[] Identificaciones = Identificacion.Split(",");
             string[] filtroNovedades = FiltroNovedades.Split(",");
