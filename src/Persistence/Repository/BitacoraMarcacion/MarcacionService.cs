@@ -24,6 +24,7 @@ using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionOffl
 using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionWeb;
 using EvaluacionCore.Application.Features.Marcacion.Dto;
 using EvaluacionCore.Application.Features.Marcacion.Interfaces;
+using EvaluacionCore.Application.Features.Marcacion.Queries.GetHorasExtrasColaborador;
 using EvaluacionCore.Application.Features.Marcacion.Specifications;
 using EvaluacionCore.Application.Features.Turnos.Specifications;
 using EvaluacionCore.Domain.Common;
@@ -37,12 +38,15 @@ using Luxand;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.Mapping;
 using Org.BouncyCastle.Asn1.Ocsp;
 using Org.BouncyCastle.Asn1.X500;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlTypes;
 using System.Globalization;
+using System.Text.Json.Serialization;
 using TurnoLaboral = EvaluacionCore.Application.Features.Marcacion.Dto.TurnoLaboral;
 using TurnoReceso = EvaluacionCore.Application.Features.Marcacion.Dto.TurnoReceso;
 
@@ -2024,6 +2028,163 @@ public class MarcacionService : IMarcacion
         }
 
     }
+
+    public async Task<ResponseType<List<HorasExtrasColaboradorResponse>>> GetConsultaHorasExtrasColaborador(string Opcion, string IdentificacionSesion, DateTime fechaDesde, DateTime fechaHasta, List<Identificacion> Identificaciones, CancellationToken cancellationToken)
+    {
+        try
+        {
+            //            string query = "EXEC [dbo].[EAPP_SP_REPROCESA_MARCACIONES] NULL, NULL, NULL, '" + fechaDesde.ToString("yyyy/MM/dd HH:mm:ss") + "' , '" + marcacionColaborador.ToString("yyyy/MM/dd HH:mm:ss") + "',  '" + colaborador.Identificacion + "';";
+            //            using IDbConnection con = new SqlConnection(ConnectionString_Marc);
+            //            if (con.State == ConnectionState.Closed) con.Open();
+            //            con.Query(query);
+            //            if (con.State == ConnectionState.Open) con.Close();
+
+            //if (con.State == ConnectionState.Closed) con.Open();
+            //con.Query(query);
+            //if (con.State == ConnectionState.Open) con.Close();
+
+            List<DatosFiltro> tvpDatosFiltro = new();
+
+            if (Opcion == "1")
+            {
+                // Adiciona, a la lista de filtros de busqueda, las identificaciones de los jefes directos
+                foreach (var datoFiltro in Identificaciones)
+                {
+                    var datosFiltro = new DatosFiltro()
+                    {
+                        TipoFiltro = "identificacionJefatura",
+                        ValorFiltro = datoFiltro.IdentificacionJefatura
+                    };
+                    if (!tvpDatosFiltro.Any())
+                    {
+                        tvpDatosFiltro = new();
+                    }
+                    tvpDatosFiltro.Add(datosFiltro);
+                }
+            }
+            if (Opcion == "2")
+            {
+                // Adiciona, a la lista de filtros de busqueda, las identificaciones de los jefes directos
+                foreach (var datoFiltro in Identificaciones)
+                {
+                    var datosFiltro = new DatosFiltro()
+                    {
+                        TipoFiltro = "idLocalidad",
+                        ValorFiltro = datoFiltro.IdLocalidad.ToString()
+                    };
+                    if (!tvpDatosFiltro.Any())
+                    {
+                        tvpDatosFiltro = new();
+                    }
+                    tvpDatosFiltro.Add(datosFiltro);
+                }
+            }
+            if (Opcion == "3")
+            {
+                // Adiciona, a la lista de filtros de busqueda, las identificaciones de los jefes directos
+                foreach (var datoFiltro in Identificaciones)
+                {
+                    var datosFiltro = new DatosFiltro()
+                    {
+                        TipoFiltro = "identificacionColaborador",
+                        ValorFiltro = datoFiltro.IdentificacionColaborador
+                    };
+                    if (!tvpDatosFiltro.Any())
+                    {
+                        tvpDatosFiltro = new();
+                    }
+                    tvpDatosFiltro.Add(datosFiltro);
+                }
+            }
+
+            //ejecutar una consulta sobre una función escalar
+            string query = "EXEC Select [dbo].[EAPP_FN_CONSULTA_TURNO_MARCACION_COLABORADOR] '" + Opcion + "' , '" + IdentificacionSesion + "' , '" + fechaDesde.ToString("yyyy/MM/dd") + "' , '" + fechaHasta.ToString("yyyy/MM/dd") + "' , '" +  tvpDatosFiltro.ToString() + "';";
+
+            var connectionString = this.ConnectionString_Marc; //cadena de conexión a tu base de datos.
+
+            var horasExtrasColaborador = new List<HorasExtrasColaboradorResponse>();
+
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                con.Open();
+                using (SqlCommand comando = new SqlCommand("[dbo].[EAPP_FN_CONSULTA_TURNO_MARCACION_COLABORADOR]",con))
+                {
+                    comando.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    var dt = new DataTable();
+                    dt.Columns.Add("TipoFiltro", typeof(string));
+                    dt.Columns.Add("ValorFiltro", typeof(string));
+
+                    foreach(var datoFiltro in tvpDatosFiltro)
+                    {
+                        dt.Rows.Add(datoFiltro);
+                    }
+
+                    var parametro = comando.Parameters.AddWithValue("tvpDatosFiltro", dt);
+                    parametro.SqlDbType = SqlDbType.Structured;
+
+                    var reader = comando.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        horasExtrasColaborador.Add(new HorasExtrasColaboradorResponse()
+                        {
+                            CodigoUDN = reader["codigoUDN"].ToString()!,
+                            NombreUDN = reader["nombreUDN"].ToString()!,
+                            DiaSemanaIngreso = reader["diaSemanaIngreso"].ToString()!,
+                            FechaIngreso = DateTime.Parse(reader["fechaIngreso"].ToString()!),
+                            HoraIngreso = reader["horaIngreso"].ToString()!,
+                            FechaSalida = DateTime.Parse(reader["fechaSalida"].ToString()!),
+                            HoraSalida = reader["horaSalida"].ToString()!,
+                            IdTurno = reader["idTurno"].ToString()!,
+                            DescTurno = reader["descTurno"].ToString()!,
+                            HorasTurnoAsignadas = reader["horasTurnoAsignadas"].ToString()!,
+                            HorasExtraAprobadas = reader["horasExtraAprobadas"].ToString()!,
+                            HorasTurnoTrabajadas = reader["horasTurnoTrabajadas"].ToString()!,
+                            HorasExtraTrabajadas = reader["horasExtraTrabajadas"].ToString()!,
+                            IdentificacionColaborador = reader["identificacionColaborador"].ToString()!,
+                            NombreColaborador = reader["nombreColaborador"].ToString()!,
+                            IdLocalidadPrincipalColaborador = reader["idLocalidadPrincipalColaborador"].ToString()!,
+                            CodigoLocalidadPrincipalColaborador = reader["codigoLocalidadPrincipalColaborador"].ToString()!,
+                            NombreLocalidadPrincipalColaborador = reader["nombreLocalidadPrincipalColaborador"].ToString()!,
+                            IdentificacionJefeColaborador = reader["identificacionJefeColaborador"].ToString()!,
+                            NombreJefeColaborador = reader["nombreJefeColaborador"].ToString()!,
+                            ClienteTurno = new ClienteTurno()
+                            {
+                                IdTurno = reader["idTurno"].ToString()!,
+                                IdTurnoReceso = reader["idTurnoReceso"].ToString()!,
+                                HorasSobretiempoAprobadas = reader["horasSobretiempoAprobadas"].ToString()!,
+                                IdentificacionAprobador = reader["identificacionAprobador"].ToString()!,
+                                ComentariosAprobacion = reader["comentariosAprobacion"].ToString()!
+                            }
+                        };
+
+                    }
+                }
+
+
+                if (con.State == ConnectionState.Closed) con.Open();
+                con.Query(query);
+
+                if (con.State == ConnectionState.Open) con.Close();
+            }
+
+            return new ResponseType<List<HorasExtrasColaboradorResponse>>() { Data = horasExtrasColaborador, Message = CodeMessageResponse.GetMessageByCode("000"), StatusCode = "000", Succeeded = true };
+        }
+        catch (SqlException sqlError)
+        {
+            // manejar sqlException
+            throw sqlError;
+
+        }
+        catch (Exception ex)
+        {
+            _log.LogError(ex, string.Empty);
+            return new ResponseType<List<HorasExtrasColaboradorResponse>>() { Message = CodeMessageResponse.GetMessageByCode("002"), StatusCode = "002", Succeeded = false };
+
+        }
+    }
+
     private string EvaluaTipoSolicitud(Guid? idFeature)
     {
         Guid permiso = Guid.Parse("DE4D17BD-9F03-4CCB-A3C0-3F37629CEA6A");

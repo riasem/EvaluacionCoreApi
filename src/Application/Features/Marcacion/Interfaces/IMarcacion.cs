@@ -39,4 +39,6 @@ public interface IMarcacion
 
     Task<ResponseType<string>> CargarMarcacionesTxt(List<CargaMarcacionesTxtRequest> request, string IdentificacionSesion, CancellationToken cancellationToken);
 
-}
+    Task<ResponseType<List<HorasExtrasColaboradorResponse>>> GetConsultaHorasExtrasColaborador(string? IdentificacionSesion, DateTime? fechaDesde, DateTime? fechaHasta, CancellationToken cancellationToken);
+
+ }

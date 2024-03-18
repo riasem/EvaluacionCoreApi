@@ -15,12 +15,14 @@ using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionWeb;
 using EvaluacionCore.Application.Features.Marcacion.Commands.GetBitacoraMarcacion;
 using EvaluacionCore.Application.Features.Marcacion.Dto;
 using EvaluacionCore.Application.Features.Marcacion.Queries.GetDispositivoMarcacion;
+using EvaluacionCore.Application.Features.Marcacion.Queries.GetHorasExtrasColaborador;
 using EvaluacionCore.Application.Features.Marcacion.Queries.GetListadoColaborador;
 using EvaluacionCore.Application.Features.Marcacion.Queries.GetNovedadesMarcacionOffline;
 using EvaluacionCore.Application.Features.Marcacion.Queries.GetRecurso;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace WebEvaluacionCoreApi.Controllers.v1
@@ -377,7 +379,18 @@ namespace WebEvaluacionCoreApi.Controllers.v1
             return Ok(objResult);
         }
 
+        [HttpGet("GetConsultaHorasExtrasColaborador")]
+        [EnableCors("AllowOrigin")]
+        [ProducesResponseType(typeof(ResponseType<List<HorasExtrasColaboradorResponse>>), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetConsultaHorasExtrasColaborador([FromBody] HorasExtrasColaboradorRequest request, CancellationToken cancellationToken)
+        {
+            var IdentificacionSesion = new JwtSecurityToken(HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
 
+            var query = new GetHorasExtrasColaboradorQueries(request, IdentificacionSesion);
+            var objResult = await Mediator.Send(query, cancellationToken);
+            return Ok(objResult);
+        }
 
     }
 }
