@@ -44,10 +44,6 @@ public class GetTurnosColaboradorAsyncHandler : IRequestHandler<GetTurnosColabor
             var idColaborador = objColaborador.Where(e => e.Identificacion == request.Identificacion).FirstOrDefault();
 
             var objTurnoColaborador = await _repositoryTurnoColAsync.ListAsync(new TurnoColaboradorByFilterSpec(idColaborador.Id, request.FechaDesde, request.FechaHasta), cancellationToken);
-            //var objTurnoColaborador = objTurnoColaboradorBase.Where(e => /*e.Colaborador.Identificacion == request.Identificacion 
-            //                                                        &&*/ e.FechaAsignacion > request.FechaDesde 
-            //                                                        && e.FechaAsignacion < request.FechaHasta).ToList();
-
 
             List<TurnoColaboradorType> turnoColaboradorType = new();
 
@@ -70,7 +66,9 @@ public class GetTurnosColaboradorAsyncHandler : IRequestHandler<GetTurnosColabor
                     IdTurnoPadre = turno.IdTurnoPadre,
                     ApellidosColaborador = colaborador.Apellidos,
                     NombresColaborador = colaborador.Nombres,
-                    Identificacion = colaborador.Identificacion
+                    Identificacion = colaborador.Identificacion,
+                    HorasExtraordinariasAprobadas = item.HorasExtraordinariasAprobadas,
+                    ComentariosAprobacion = item.ComentariosAprobacion
                 });
 
             }

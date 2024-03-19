@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 
 namespace EvaluacionCore.Application.Features.Turnos.Dto
@@ -65,8 +66,11 @@ namespace EvaluacionCore.Application.Features.Turnos.Dto
         [JsonPropertyName("tiempoMaxLaboExtra")]
         public int? TiempoMaxLaboExtra { get; set; }
 
+        [JsonPropertyName("horasExtraordinariasAprobadas")]
+        public int? HorasExtraordinariasAprobadas { get; set; }
 
-
+        [JsonPropertyName("comentariosAprobacion")]
+        public string ComentariosAprobacion { get; set; }
 
     }
 }
