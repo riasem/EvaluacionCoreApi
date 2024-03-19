@@ -13,6 +13,9 @@ namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoColabor
         [JsonPropertyName("fechaAsignacionHasta")]
         public DateTime FechaAsignacionHasta { get; set; }
 
+        [JsonPropertyName("identificacionAprobador")]
+        public string IdentificacionAprobador { get; set; }
+
         [JsonPropertyName("clienteSubturno")]
         public List<ClienteSubturno> ClienteSubturnos { get; set; }
 
@@ -22,12 +25,20 @@ namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoColabor
     {
         [JsonPropertyName("idCliente")]
         public Guid IdCliente { get; set; }
+
+        [JsonPropertyName("horasSobretiempoAprobadas")]
+        public int HorasSobretiempoAprobadas { get; set; }
+
+        [JsonPropertyName("comentariosAprobacion")]
+        public int ComentariosAprobacion { get; set; }
+
         [JsonPropertyName("clienteSubturno")]
         public List<Subturno> Subturnos { get; set; }
     }
 
     public class Subturno
     {
+        [JsonPropertyName("idSubturno")]
         public Guid IdSubturno { get; set; }
     }
 }
