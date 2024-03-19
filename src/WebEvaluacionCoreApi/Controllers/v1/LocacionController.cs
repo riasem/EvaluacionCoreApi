@@ -1,4 +1,6 @@
 ﻿using EvaluacionCore.Application.Common.Wrappers;
+using EvaluacionCore.Application.Features.Locacions.Dto;
+using EvaluacionCore.Application.Features.Locacions.Queries.ConsultaLocalidadesXCoordinador;
 using EvaluacionCore.Application.Features.Localidads.Commands.AsignarLocalidadCliente;
 using EvaluacionCore.Application.Features.Localidads.Commands.CreateLocalidad;
 using EvaluacionCore.Application.Features.Localidads.Commands.DeleteLocation;
@@ -97,5 +99,22 @@ public class LocalidadController : ApiControllerBase
 
     }
 
+    /// <summary>
+    /// Obtener el listado de las locacilidades que tienen asignadas como principal, los colaboradores que pertenecen al lineaje de un jefe
+    /// </summary>
+    /// <param name="Identificacion"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpGet("ConsultaLocalidadesXCoordinador")]
+    [EnableCors("AllowOrigin")]
+    [ProducesResponseType(typeof(ResponseType<LocalidadXColaboradorType>), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [Authorize]
+    public async Task<IActionResult> ConsultaLocalidadesXCoordinador(string? Identificacion, CancellationToken cancellationToken)
+    {
+        var objResult = await Mediator.Send(new ConsultaLocalidadesXCoordinadorAsyncQueries(Identificacion), cancellationToken);
+        return Ok(objResult);
+
+    }
 
 }
