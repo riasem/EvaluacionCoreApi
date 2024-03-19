@@ -30,7 +30,7 @@ namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoColabor
         public int HorasSobretiempoAprobadas { get; set; }
 
         [JsonPropertyName("comentariosAprobacion")]
-        public int ComentariosAprobacion { get; set; }
+        public string ComentariosAprobacion { get; set; }
 
         [JsonPropertyName("clienteSubturno")]
         public List<Subturno> Subturnos { get; set; }
