@@ -25,8 +25,6 @@ public partial class TurnoColaborador
     [Column("estado", Order = 4, TypeName = "varchar")]
     public string Estado { get; set; } = "A";
 
-
-
     //AUDITORIA
     [Column("usuarioCreacion", Order = 5, TypeName = "varchar")]
     [StringLength(20)] public string UsuarioCreacion { get; set; } = string.Empty;
@@ -40,7 +38,11 @@ public partial class TurnoColaborador
     [Column("fechaModificacion", Order = 8, TypeName = "datetime2")]
     public DateTime? FechaModificacion { get; set; }
 
+    [Column("horasExtraordinariasAprobadas", Order = 9, TypeName = "int")]
+    public int HorasExtraordinariasAprobadas { get; set; } = 0;
+
+    [Column("comentariosAprobacion", Order = 10, TypeName = "varchar")]
+    public string ComentariosAprobacion { get; set; }
 
     public virtual ICollection<MarcacionColaborador> MarcacionColaboradores { get; set; }
 }
-
