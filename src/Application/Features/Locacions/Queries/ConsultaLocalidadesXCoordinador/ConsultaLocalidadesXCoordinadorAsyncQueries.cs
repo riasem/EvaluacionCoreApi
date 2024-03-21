@@ -31,7 +31,8 @@ public class ConsultaLocalidadesXCoordinadorAsyncQueriesHandler : IRequestHandle
 
     public async Task<ResponseType<List<LocalidadXColaboradorType>>> Handle(ConsultaLocalidadesXCoordinadorAsyncQueries request, CancellationToken cancellationToken)
     {
-        try
+        return new ResponseType<List<LocalidadXColaboradorType>>() { Data = null, Message = "Ocurrió un error durante la consulta", StatusCode = "002", Succeeded = false };
+        /*try
         {
             var objLocalidad = await _repositoryAsync.ListAsync(cancellationToken);
 
@@ -60,5 +61,7 @@ public class ConsultaLocalidadesXCoordinadorAsyncQueriesHandler : IRequestHandle
         {
             return new ResponseType<List<LocalidadType>>() { Data = null, Message = "Ocurrió un error durante la consulta", StatusCode = "002", Succeeded = false };
         }
+    } */
     }
+
 }

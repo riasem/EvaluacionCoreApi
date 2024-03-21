@@ -21,7 +21,7 @@ public class GetHorasExtrasColaboradorQueriesHandler : IRequestHandler<GetHorasE
     public async Task<ResponseType<List<HorasExtrasColaboradorResponse>>> Handle(GetHorasExtrasColaboradorQueries request, CancellationToken cancellationToken)
     {
 
-        var objResult = await _repository.GetConsultaHorasExtrasColaborador(request.IdentificacionSesion, request.request.FechaDesde, request.request.FechaHasta, cancellationToken);
+        var objResult = await _repository.GetConsultaHorasExtrasColaborador(request.request.Opcion, request.IdentificacionSesion, (DateTime)request.request.FechaDesde, (DateTime)request.request.FechaHasta, request.request.Identificaciones, cancellationToken);
 
         return objResult;
     }

@@ -3,6 +3,7 @@ using Ardalis.Specification;
 using AutoMapper;
 using Dapper;
 using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Wordprocessing;
 using EnrolApp.Application.Features.Marcacion.Commands.CreateMarcacion;
 using EnrolApp.Application.Features.Marcacion.Specifications;
 using EnrolApp.Domain.Entities.Horario;
@@ -2043,7 +2044,11 @@ public class MarcacionService : IMarcacion
             //con.Query(query);
             //if (con.State == ConnectionState.Open) con.Close();
 
+
+            IEnumerable<DatosFiltro> DatosFiltros /*= Enumerable.Empty<DatosFiltro>(); */;
+
             List<DatosFiltro> tvpDatosFiltro = new();
+
 
             if (Opcion == "1")
             {
@@ -2059,8 +2064,10 @@ public class MarcacionService : IMarcacion
                     {
                         tvpDatosFiltro = new();
                     }
+                    //DatosFiltros.Append(datosFiltro);
                     tvpDatosFiltro.Add(datosFiltro);
                 }
+                
             }
             if (Opcion == "2")
             {
@@ -2076,8 +2083,10 @@ public class MarcacionService : IMarcacion
                     {
                         tvpDatosFiltro = new();
                     }
+                    //DatosFiltros.Append(datosFiltro);
                     tvpDatosFiltro.Add(datosFiltro);
                 }
+
             }
             if (Opcion == "3")
             {
@@ -2093,78 +2102,117 @@ public class MarcacionService : IMarcacion
                     {
                         tvpDatosFiltro = new();
                     }
+                    //DatosFiltros.Append(datosFiltro);
                     tvpDatosFiltro.Add(datosFiltro);
                 }
             }
 
+            DatosFiltros = ReadLines(tvpDatosFiltro);
+
             //ejecutar una consulta sobre una función escalar
-            string query = "EXEC Select [dbo].[EAPP_FN_CONSULTA_TURNO_MARCACION_COLABORADOR] '" + Opcion + "' , '" + IdentificacionSesion + "' , '" + fechaDesde.ToString("yyyy/MM/dd") + "' , '" + fechaHasta.ToString("yyyy/MM/dd") + "' , '" +  tvpDatosFiltro.ToString() + "';";
+            string query = "Select [dbo].[EAPP_FN_CONSULTA_TURNO_MARCACION_COLABORADOR] ('" + Opcion + "' , '" + IdentificacionSesion + "' , '" + fechaDesde.ToString("yyyy/MM/dd") + "' , '" + fechaHasta.ToString("yyyy/MM/dd") + "' , '" +  tvpDatosFiltro.ToString() + "')";
 
             var connectionString = this.ConnectionString_Marc; //cadena de conexión a tu base de datos.
 
             var horasExtrasColaborador = new List<HorasExtrasColaboradorResponse>();
 
+
+
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 con.Open();
-                using (SqlCommand comando = new SqlCommand("[dbo].[EAPP_FN_CONSULTA_TURNO_MARCACION_COLABORADOR]",con))
+                using (SqlCommand comando = new SqlCommand("EAPP_SP_CONSULTA_TURNO_MARCACION_COLABORADORES", con))
                 {
                     comando.CommandType = System.Data.CommandType.StoredProcedure;
 
                     var dt = new DataTable();
-                    dt.Columns.Add("TipoFiltro", typeof(string));
-                    dt.Columns.Add("ValorFiltro", typeof(string));
-
-                    foreach(var datoFiltro in tvpDatosFiltro)
-                    {
-                        dt.Rows.Add(datoFiltro);
-                    }
-
-                    var parametro = comando.Parameters.AddWithValue("tvpDatosFiltro", dt);
+                    // string Opcion, string IdentificacionSesion, DateTime fechaDesde, DateTime fechaHasta
+                    var parametro01 = comando.Parameters.AddWithValue("opcion", Opcion);
+                    parametro01.SqlDbType = SqlDbType.NVarChar;
+                    var parametro02 = comando.Parameters.AddWithValue("identificacionSesion", IdentificacionSesion);
+                    parametro02.SqlDbType = SqlDbType.NVarChar;
+                    var parametro03 = comando.Parameters.AddWithValue("fechaDesde", fechaDesde.ToString("yyyy-MM-dd"));
+                    parametro03.SqlDbType = SqlDbType.NVarChar;
+                    var parametro04 = comando.Parameters.AddWithValue("fechaHasta", fechaHasta.ToString("yyyy-MM-dd"));
+                    parametro04.SqlDbType = SqlDbType.NVarChar;
+                    var parametro = comando.Parameters.AddWithValue("tvpDatosFiltro", CreateDataTable(DatosFiltros));
                     parametro.SqlDbType = SqlDbType.Structured;
+                    parametro.TypeName = "FiltroBusquedaType";
 
                     var reader = comando.ExecuteReader();
-
                     while (reader.Read())
                     {
+                        String CodigoUDN = reader["codigoUDN"].ToString()!;
+                        String NombreUDN = reader["nombreUDN"].ToString()!;
+                        String DiaSemanaIngreso = reader["diaSemanaIngreso"].ToString()!;
+                        DateTime? FechaIngreso = null;
+                        String? strFechaIngreso = reader["fechaIngreso"].ToString()!.Trim();
+                        if (strFechaIngreso != null && strFechaIngreso != String.Empty)
+                        {
+                            FechaIngreso = DateTime.Parse(strFechaIngreso);
+                        }
+                        String HoraIngreso = reader["horaIngreso"].ToString()!;
+                        DateTime? FechaSalida = null;
+                        String? strFechaSalida = reader["fechaSalida"].ToString()!.Trim();
+                        if (strFechaSalida != null && strFechaSalida != String.Empty)
+                        {
+                            FechaSalida = DateTime.Parse(strFechaSalida);
+                        }
+                        String HoraSalida = reader["horaSalida"].ToString()!;
+                        String IdTurno = reader["idTurno"].ToString()!;
+                        String DescTurno = reader["descTurno"].ToString()!;
+                        String HorasTurnoAsignadas = reader["horasTurnoAsignadas"].ToString()!;
+                        String HorasExtraAprobadas = reader["horasExtraAprobadas"].ToString()!;
+                        String HorasTurnoTrabajadas = reader["horasTurnoTrabajadas"].ToString()!;
+                        String HorasExtraTrabajadas = reader["horasExtraTrabajadas"].ToString()!;
+                        String IdentificacionColaborador = reader["identificacionColaborador"].ToString()!;
+                        String NombreColaborador = reader["nombreColaborador"].ToString()!;
+                        String IdLocalidadPrincipalColaborador = reader["idLocalidadPrincipalColaborador"].ToString()!;
+                        String CodigoLocalidadPrincipalColaborador = reader["codigoLocalidadPrincipalColaborador"].ToString()!;
+                        String NombreLocalidadPrincipalColaborador = reader["nombreLocalidadPrincipalColaborador"].ToString()!;
+                        String IdentificacionJefeColaborador = reader["identificacionJefeColaborador"].ToString()!;
+                        String NombreJefeColaborador = reader["nombreJefeColaborador"].ToString()!;
+                        //
+                        String IdTurnoReceso = reader["idTurnoReceso"].ToString()!;
+                        String HorasSobretiempoAprobadas = reader["horasSobretiempoAprobadas"].ToString()!;
+                        String IdentificacionAprobador = reader["identificacionAprobador"].ToString()!;
+                        String ComentariosAprobacion = reader["comentariosAprobacion"].ToString()!;
+                        //
                         horasExtrasColaborador.Add(new HorasExtrasColaboradorResponse()
                         {
-                            CodigoUDN = reader["codigoUDN"].ToString()!,
-                            NombreUDN = reader["nombreUDN"].ToString()!,
-                            DiaSemanaIngreso = reader["diaSemanaIngreso"].ToString()!,
-                            FechaIngreso = DateTime.Parse(reader["fechaIngreso"].ToString()!),
-                            HoraIngreso = reader["horaIngreso"].ToString()!,
-                            FechaSalida = DateTime.Parse(reader["fechaSalida"].ToString()!),
-                            HoraSalida = reader["horaSalida"].ToString()!,
-                            IdTurno = reader["idTurno"].ToString()!,
-                            DescTurno = reader["descTurno"].ToString()!,
-                            HorasTurnoAsignadas = reader["horasTurnoAsignadas"].ToString()!,
-                            HorasExtraAprobadas = reader["horasExtraAprobadas"].ToString()!,
-                            HorasTurnoTrabajadas = reader["horasTurnoTrabajadas"].ToString()!,
-                            HorasExtraTrabajadas = reader["horasExtraTrabajadas"].ToString()!,
-                            IdentificacionColaborador = reader["identificacionColaborador"].ToString()!,
-                            NombreColaborador = reader["nombreColaborador"].ToString()!,
-                            IdLocalidadPrincipalColaborador = reader["idLocalidadPrincipalColaborador"].ToString()!,
-                            CodigoLocalidadPrincipalColaborador = reader["codigoLocalidadPrincipalColaborador"].ToString()!,
-                            NombreLocalidadPrincipalColaborador = reader["nombreLocalidadPrincipalColaborador"].ToString()!,
-                            IdentificacionJefeColaborador = reader["identificacionJefeColaborador"].ToString()!,
-                            NombreJefeColaborador = reader["nombreJefeColaborador"].ToString()!,
+                            CodigoUDN = CodigoUDN,
+                            NombreUDN = NombreUDN,
+                            DiaSemanaIngreso = DiaSemanaIngreso,
+                            FechaIngreso = FechaIngreso,
+                            HoraIngreso = HoraIngreso,
+                            FechaSalida = FechaSalida,
+                            HoraSalida = HoraSalida,
+                            IdTurno = IdTurno,
+                            DescTurno = DescTurno,
+                            HorasTurnoAsignadas = HorasTurnoAsignadas,
+                            HorasExtraAprobadas = HorasExtraAprobadas,
+                            HorasTurnoTrabajadas = HorasTurnoTrabajadas,
+                            HorasExtraTrabajadas = HorasExtraTrabajadas,
+                            IdentificacionColaborador = IdentificacionColaborador,
+                            NombreColaborador = NombreColaborador,
+                            IdLocalidadPrincipalColaborador = IdLocalidadPrincipalColaborador,
+                            CodigoLocalidadPrincipalColaborador = CodigoLocalidadPrincipalColaborador,
+                            NombreLocalidadPrincipalColaborador = NombreLocalidadPrincipalColaborador,
+                            IdentificacionJefeColaborador = IdentificacionJefeColaborador,
+                            NombreJefeColaborador = NombreJefeColaborador,
                             ClienteTurno = new ClienteTurno()
                             {
-                                IdTurno = reader["idTurno"].ToString()!,
-                                IdTurnoReceso = reader["idTurnoReceso"].ToString()!,
-                                HorasSobretiempoAprobadas = reader["horasSobretiempoAprobadas"].ToString()!,
-                                IdentificacionAprobador = reader["identificacionAprobador"].ToString()!,
-                                ComentariosAprobacion = reader["comentariosAprobacion"].ToString()!
+                                IdTurno = IdTurno,
+                                IdTurnoReceso = IdTurnoReceso,
+                                HorasSobretiempoAprobadas = HorasSobretiempoAprobadas,
+                                IdentificacionAprobador = IdentificacionAprobador,
+                                ComentariosAprobacion = ComentariosAprobacion
                             }
-                        };
-
+                        });
                     }
+
+                    reader.Close();
                 }
-
-
-                if (con.State == ConnectionState.Closed) con.Open();
-                con.Query(query);
 
                 if (con.State == ConnectionState.Open) con.Close();
             }
@@ -2183,6 +2231,34 @@ public class MarcacionService : IMarcacion
             return new ResponseType<List<HorasExtrasColaboradorResponse>>() { Message = CodeMessageResponse.GetMessageByCode("002"), StatusCode = "002", Succeeded = false };
 
         }
+    }
+
+
+    private static IEnumerable<DatosFiltro> ReadLines(List<DatosFiltro> tvpDatosFiltro)
+    {
+        foreach (DatosFiltro datoFiltro in tvpDatosFiltro)
+        {
+            yield return datoFiltro;
+        }
+    }
+
+
+    private static DataTable CreateDataTable(IEnumerable<DatosFiltro> datosFiltrado)
+    {
+        DataTable table = new DataTable();
+        DataRow row;
+        table.Columns.Add("TipoFiltro", typeof(String)).MaxLength = 50; ;
+        table.Columns.Add("ValorFiltro", typeof(String)).MaxLength = 50;
+        foreach (DatosFiltro fila in datosFiltrado)
+        {
+            row = table.NewRow();
+
+            // Then add the new row to the collection.
+            row["TipoFiltro"] = fila.TipoFiltro;
+            row["ValorFiltro"] = fila.ValorFiltro;
+            table.Rows.Add(row);
+        }
+        return table;
     }
 
     private string EvaluaTipoSolicitud(Guid? idFeature)

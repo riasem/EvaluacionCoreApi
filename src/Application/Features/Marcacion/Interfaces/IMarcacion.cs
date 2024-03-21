@@ -6,6 +6,7 @@ using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionApp;
 using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionOffline;
 using EvaluacionCore.Application.Features.Marcacion.Commands.CreateMarcacionWeb;
 using EvaluacionCore.Application.Features.Marcacion.Dto;
+using EvaluacionCore.Application.Features.Marcacion.Queries.GetHorasExtrasColaborador;
 
 namespace EvaluacionCore.Application.Features.Marcacion.Interfaces;
 
@@ -39,6 +40,6 @@ public interface IMarcacion
 
     Task<ResponseType<string>> CargarMarcacionesTxt(List<CargaMarcacionesTxtRequest> request, string IdentificacionSesion, CancellationToken cancellationToken);
 
-    Task<ResponseType<List<HorasExtrasColaboradorResponse>>> GetConsultaHorasExtrasColaborador(string? IdentificacionSesion, DateTime? fechaDesde, DateTime? fechaHasta, CancellationToken cancellationToken);
+    Task<ResponseType<List<HorasExtrasColaboradorResponse>>> GetConsultaHorasExtrasColaborador(string Opcion, string IdentificacionSesion, DateTime fechaDesde, DateTime fechaHasta, List<Identificacion> Identificaciones, CancellationToken cancellationToken);
 
  }

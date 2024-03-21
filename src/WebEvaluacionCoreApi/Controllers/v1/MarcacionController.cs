@@ -379,7 +379,7 @@ namespace WebEvaluacionCoreApi.Controllers.v1
             return Ok(objResult);
         }
 
-        [HttpGet("GetConsultaHorasExtrasColaborador")]
+        [HttpPost("GetConsultaHorasExtrasColaborador")]
         [EnableCors("AllowOrigin")]
         [ProducesResponseType(typeof(ResponseType<List<HorasExtrasColaboradorResponse>>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
