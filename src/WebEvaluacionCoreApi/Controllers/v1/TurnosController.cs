@@ -1,4 +1,8 @@
 ﻿using EvaluacionCore.Application.Common.Wrappers;
+using EvaluacionCore.Application.Features.Locacions.Dto;
+using EvaluacionCore.Application.Features.Locacions.Queries.ConsultaLocalidadesXCoordinador;
+using EvaluacionCore.Application.Features.Marcacion.Dto;
+using EvaluacionCore.Application.Features.Marcacion.Queries.GetHorasExtrasColaborador;
 using EvaluacionCore.Application.Features.Turnos.Commands.CargarInfoExcelTurnos;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurno;
 using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoColaborador;
@@ -6,6 +10,8 @@ using EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoSubTurno;
 using EvaluacionCore.Application.Features.Turnos.Commands.GetTurnosAsignadosExcel;
 using EvaluacionCore.Application.Features.Turnos.Commands.InactivaTurnoColaborador;
 using EvaluacionCore.Application.Features.Turnos.Commands.UpdateTurnoColaborador;
+using EvaluacionCore.Application.Features.Turnos.Dto;
+using EvaluacionCore.Application.Features.Turnos.Queries.ConsultaJefaturasXCoordinador;
 using EvaluacionCore.Application.Features.Turnos.Queries.GetMaestrosTurnoAsync;
 using EvaluacionCore.Application.Features.Turnos.Queries.GetTurnosAsignadoColaboradorAsync;
 using EvaluacionCore.Application.Features.Turnos.Queries.GetTurnosAsync;
@@ -73,6 +79,25 @@ public class TurnosController : ApiControllerBase
     public async Task<IActionResult> AsignarSubturnoColaborador([FromBody] CreateTurnoColaboradorRequest request, CancellationToken cancellationToken)
     {
         var objResult = await Mediator.Send(new CreateTurnoColaboradorCommand(request), cancellationToken);
+        return Ok(objResult);
+    }
+
+    /// <summary>
+    /// Obtiene las jefaturas del linaje de un jefe
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpPost("ConsultaJefaturasXCoordinador")]
+    [EnableCors("AllowOrigin")]
+    [ProducesResponseType(typeof(ResponseType<List<JefaturasXCoordinadorResponse>>), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ConsultaJefaturasXCoordinador([FromBody] JefaturasXCoordinadorRequest request, CancellationToken cancellationToken)
+    {
+        var IdentificacionSesion = new JwtSecurityToken(HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
+
+        var query = new ConsultaJefaturasXCoordinadorQueries(request, IdentificacionSesion);
+        var objResult = await Mediator.Send(query, cancellationToken);
         return Ok(objResult);
     }
 
