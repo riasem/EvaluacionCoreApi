@@ -7,9 +7,12 @@ using EvaluacionCore.Application.Features.Localidads.Commands.DeleteLocation;
 using EvaluacionCore.Application.Features.Localidads.Commands.UpdateLocalidad;
 using EvaluacionCore.Application.Features.Localidads.Dto;
 using EvaluacionCore.Application.Features.Localidads.Queries.GetLocalidad;
+using EvaluacionCore.Application.Features.Turnos.Dto;
+using EvaluacionCore.Application.Features.Turnos.Queries.ConsultaJefaturasXCoordinador;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace WebEvaluacionCoreApi.Controllers.v1;
 
@@ -102,19 +105,19 @@ public class LocalidadController : ApiControllerBase
     /// <summary>
     /// Obtener el listado de las locacilidades que tienen asignadas como principal, los colaboradores que pertenecen al lineaje de un jefe
     /// </summary>
-    /// <param name="Identificacion"></param>
+    /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    [HttpGet("ConsultaLocalidadesXCoordinador")]
+    [HttpPost("ConsultaLocalidadesXCoordinador")]
     [EnableCors("AllowOrigin")]
-    [ProducesResponseType(typeof(ResponseType<LocalidadXColaboradorType>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ResponseType<List<LocalidadXColaboradorType>>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [Authorize]
-    public async Task<IActionResult> ConsultaLocalidadesXCoordinador(string? Identificacion, CancellationToken cancellationToken)
+    public async Task<IActionResult> ConsultaLocalidadesXCoordinador(CancellationToken cancellationToken)
     {
-        var objResult = await Mediator.Send(new ConsultaLocalidadesXCoordinadorAsyncQueries(Identificacion), cancellationToken);
+        var IdentificacionSesion = new JwtSecurityToken(HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
+
+        var query = new ConsultaLocalidadesXCoordinadorAsyncQueries(IdentificacionSesion);
+        var objResult = await Mediator.Send(query, cancellationToken);
         return Ok(objResult);
-
     }
-
 }

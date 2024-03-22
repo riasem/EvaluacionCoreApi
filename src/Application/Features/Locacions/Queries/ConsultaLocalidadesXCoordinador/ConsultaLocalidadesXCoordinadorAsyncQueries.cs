@@ -1,67 +1,101 @@
 ﻿using AutoMapper;
+using EvaluacionCore.Application.Common.Exceptions;
 using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.Locacions.Dto;
 using EvaluacionCore.Application.Features.Locacions.Specifications;
 using EvaluacionCore.Application.Features.Localidads.Dto;
+using EvaluacionCore.Application.Features.Turnos.Dto;
+using EvaluacionCore.Application.Features.Turnos.Queries.ConsultaJefaturasXCoordinador;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using MediatR;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace EvaluacionCore.Application.Features.Locacions.Queries.ConsultaLocalidadesXCoordinador;
 
-public record ConsultaLocalidadesXCoordinadorAsyncQueries(string Identificacion) : IRequest<ResponseType<List<LocalidadXColaboradorType>>>;
+public record ConsultaLocalidadesXCoordinadorAsyncQueries(string IdentificacionSesion) : IRequest<ResponseType<List<LocalidadXColaboradorType>>>;
 
 public class ConsultaLocalidadesXCoordinadorAsyncQueriesHandler : IRequestHandler<ConsultaLocalidadesXCoordinadorAsyncQueries, ResponseType<List<LocalidadXColaboradorType>>>
 {
-    private readonly IRepositoryAsync<Localidad> _repositoryAsync;
-    private readonly IRepositoryAsync<LocalidadColaborador> _repositoryLcAsync;
-    private readonly IMapper _mapper;
+    private readonly IConfiguration _config;
+    private readonly ILogger<ConsultaLocalidadesXCoordinadorAsyncQueriesHandler> _log;
+    private string ConnectionString_Marc { get; }
 
-    public ConsultaLocalidadesXCoordinadorAsyncQueriesHandler(IRepositoryAsync<Localidad> repository, IRepositoryAsync<LocalidadColaborador> repositoryLc, IMapper mapper)
+    public ConsultaLocalidadesXCoordinadorAsyncQueriesHandler(IConfiguration config, ILogger<ConsultaLocalidadesXCoordinadorAsyncQueriesHandler> log)
     {
-        _repositoryAsync = repository;
-        _repositoryLcAsync = repositoryLc;
-        _mapper = mapper;
+        _config = config;
+        _log = log;
+        ConnectionString_Marc = _config.GetConnectionString("DefaultConnection");
     }
 
     public async Task<ResponseType<List<LocalidadXColaboradorType>>> Handle(ConsultaLocalidadesXCoordinadorAsyncQueries request, CancellationToken cancellationToken)
     {
-        return new ResponseType<List<LocalidadXColaboradorType>>() { Data = null, Message = "Ocurrió un error durante la consulta", StatusCode = "002", Succeeded = false };
-        /*try
+        try
         {
-            var objLocalidad = await _repositoryAsync.ListAsync(cancellationToken);
+            var connectionString = this.ConnectionString_Marc; //cadena de conexión a tu base de datos.
 
-            if (request.IdLocalidad is not null)
-            {
-                objLocalidad = objLocalidad.Where(x => x.Id == Guid.Parse(request.IdLocalidad) && x.Estado == "A").ToList();
-            }
-            else if (request.Identificacion is not null)
-            {
-                var localidadcolaborador = await _repositoryLcAsync.ListAsync(new GetLocationByColaboradorSpec(request.Identificacion), cancellationToken);
-                objLocalidad = new List<Localidad>();
+            var localidadesXColaborador = new List<LocalidadXColaboradorType>();
 
-                foreach (var lc in localidadcolaborador)
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                con.Open();
+                using (SqlCommand comando = new SqlCommand("EAPP_SP_CONSULTA_LOCALIDAD_COORDINADOR", con))
                 {
-                    objLocalidad.Add(lc.Localidad);
+                    comando.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    var dt = new DataTable();
+                    // string IdentificacionSesion
+                    var parametro02 = comando.Parameters.AddWithValue("identificacionSesion", request.IdentificacionSesion);
+                    parametro02.SqlDbType = SqlDbType.NVarChar;
+
+                    var reader = comando.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        String IdentificacionLocalidad = reader["identificacionLocalidad"].ToString()!;
+                        String CodigoLocalidad = reader["codigoLocalidad"].ToString()!;
+                        String NombreLocalidad = reader["nombreLocalidad"].ToString()!;
+                        Guid IdLocalidad = new Guid();
+
+                        if (IdentificacionLocalidad != String.Empty || IdentificacionLocalidad != null)
+                        {
+                            IdLocalidad = Guid.Parse(IdentificacionLocalidad);
+                        }
+                        localidadesXColaborador.Add(new LocalidadXColaboradorType()
+                        {
+                            IdentificacionLocalidad = IdLocalidad,
+                            CodigoLocalidad = CodigoLocalidad,
+                            NombreLocalidad = NombreLocalidad
+                        });
+                    }
+
+                    reader.Close();
                 }
-            }
-            else
-            {
-                objLocalidad = objLocalidad.Where(x => x.Estado == "A").ToList();
+
+                if (con.State == ConnectionState.Open) con.Close();
             }
 
-            return new ResponseType<List<LocalidadType>>() { Data = _mapper.Map<List<LocalidadType>>(objLocalidad), Message = "Consulta Generada exitosamente", StatusCode = "000", Succeeded = true };
+            return new ResponseType<List<LocalidadXColaboradorType>>() { Data = localidadesXColaborador, Message = CodeMessageResponse.GetMessageByCode("000"), StatusCode = "000", Succeeded = true };
         }
-        catch (Exception e)
+        catch (SqlException sqlError)
         {
-            return new ResponseType<List<LocalidadType>>() { Data = null, Message = "Ocurrió un error durante la consulta", StatusCode = "002", Succeeded = false };
+            // manejar sqlException
+            throw sqlError;
+
         }
-    } */
+        catch (Exception ex)
+        {
+            _log.LogError(ex, string.Empty);
+            return new ResponseType<List<LocalidadXColaboradorType>>() { Message = CodeMessageResponse.GetMessageByCode("002"), StatusCode = "002", Succeeded = false };
+
+        }
     }
 
 }
