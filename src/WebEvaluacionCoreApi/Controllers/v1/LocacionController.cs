@@ -105,7 +105,6 @@ public class LocalidadController : ApiControllerBase
     /// <summary>
     /// Obtener el listado de las locacilidades que tienen asignadas como principal, los colaboradores que pertenecen al lineaje de un jefe
     /// </summary>
-    /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost("ConsultaLocalidadesXCoordinador")]

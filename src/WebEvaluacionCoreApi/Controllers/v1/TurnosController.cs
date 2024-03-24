@@ -11,6 +11,7 @@ using EvaluacionCore.Application.Features.Turnos.Commands.GetTurnosAsignadosExce
 using EvaluacionCore.Application.Features.Turnos.Commands.InactivaTurnoColaborador;
 using EvaluacionCore.Application.Features.Turnos.Commands.UpdateTurnoColaborador;
 using EvaluacionCore.Application.Features.Turnos.Dto;
+using EvaluacionCore.Application.Features.Turnos.Queries.ConsultaColaboradoresXJefeAsync;
 using EvaluacionCore.Application.Features.Turnos.Queries.ConsultaJefaturasXCoordinador;
 using EvaluacionCore.Application.Features.Turnos.Queries.GetMaestrosTurnoAsync;
 using EvaluacionCore.Application.Features.Turnos.Queries.GetTurnosAsignadoColaboradorAsync;
@@ -101,6 +102,23 @@ public class TurnosController : ApiControllerBase
         return Ok(objResult);
     }
 
+    /// <summary>
+    /// Obtiene los colaboradores del linaje de un jefe
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpPost("ConsultaColaboradoresXJefe")]
+    [EnableCors("AllowOrigin")]
+    [ProducesResponseType(typeof(ResponseType<List<ColaboradorXJefeResponse>>), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ConsultaColaboradoresXJefe(CancellationToken cancellationToken)
+    {
+        var IdentificacionSesion = new JwtSecurityToken(HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
+
+        var query = new ConsultaColaboradoresXJefeAsyncQuery(IdentificacionSesion);
+        var objResult = await Mediator.Send(query, cancellationToken);
+        return Ok(objResult);
+    }
 
     /// <summary>
     /// Retorna el listado de turnos
