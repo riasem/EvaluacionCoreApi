@@ -41,7 +41,7 @@ public partial class TurnoColaborador
     [Column("horasExtraordinariasAprobadas", Order = 9, TypeName = "int")]
     public int HorasExtraordinariasAprobadas { get; set; } = 0;
 
-    [Column("comentariosAprobacion", Order = 10, TypeName = "varchar")]
+    [Column("comentariosAprobacion", Order = 10, TypeName = "nvarchar")]
     public string ComentariosAprobacion { get; set; }
 
     public virtual ICollection<MarcacionColaborador> MarcacionColaboradores { get; set; }
