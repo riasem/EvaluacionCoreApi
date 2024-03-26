@@ -39,7 +39,7 @@ public partial class TurnoColaborador
     public DateTime? FechaModificacion { get; set; }
 
     [Column("horasExtraordinariasAprobadas", Order = 9, TypeName = "int")]
-    public int HorasExtraordinariasAprobadas { get; set; } = 0;
+    public int? HorasExtraordinariasAprobadas { get; set; } = 0;
 
     [Column("comentariosAprobacion", Order = 10, TypeName = "nvarchar")]
     public string ComentariosAprobacion { get; set; }

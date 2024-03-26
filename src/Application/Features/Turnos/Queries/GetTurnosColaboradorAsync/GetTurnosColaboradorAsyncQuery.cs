@@ -51,7 +51,7 @@ public class GetTurnosColaboradorAsyncHandler : IRequestHandler<GetTurnosColabor
             {
                 var turno = objTurno.Where(x => x.Id == item.IdTurno).FirstOrDefault();
                 var colaborador = objColaborador.Where(x => x.Id == item.IdColaborador).FirstOrDefault();
-
+                var horasExtraordinariasAprobadas = item?.HorasExtraordinariasAprobadas ?? 0;
 
                 turnoColaboradorType.Add(new TurnoColaboradorType
                 {
@@ -67,7 +67,7 @@ public class GetTurnosColaboradorAsyncHandler : IRequestHandler<GetTurnosColabor
                     ApellidosColaborador = colaborador.Apellidos,
                     NombresColaborador = colaborador.Nombres,
                     Identificacion = colaborador.Identificacion,
-                    HorasExtraordinariasAprobadas = item.HorasExtraordinariasAprobadas,
+                    HorasExtraordinariasAprobadas = horasExtraordinariasAprobadas,
                     ComentariosAprobacion = item.ComentariosAprobacion
                 });
 
