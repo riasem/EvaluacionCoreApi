@@ -72,6 +72,12 @@ public class HorasExtrasColaboradorResponse
     [JsonPropertyName("nombreJefeColaborador")]
     public string NombreJefeColaborador { get; set; }
 
+    [JsonPropertyName("entrada")]
+    public string Entrada { get; set; }
+
+    [JsonPropertyName("salida")]
+    public string Salida { get; set; }
+
     [JsonPropertyName("clienteTurno")]
     public ClienteTurno ClienteTurno { get; set; }
 

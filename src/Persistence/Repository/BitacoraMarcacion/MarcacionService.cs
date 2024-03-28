@@ -3,6 +3,7 @@ using Ardalis.Specification;
 using AutoMapper;
 using Dapper;
 using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Presentation;
 using DocumentFormat.OpenXml.Wordprocessing;
 using EnrolApp.Application.Features.Marcacion.Commands.CreateMarcacion;
 using EnrolApp.Application.Features.Marcacion.Specifications;
@@ -2034,16 +2035,6 @@ public class MarcacionService : IMarcacion
     {
         try
         {
-            //            string query = "EXEC [dbo].[EAPP_SP_REPROCESA_MARCACIONES] NULL, NULL, NULL, '" + fechaDesde.ToString("yyyy/MM/dd HH:mm:ss") + "' , '" + marcacionColaborador.ToString("yyyy/MM/dd HH:mm:ss") + "',  '" + colaborador.Identificacion + "';";
-            //            using IDbConnection con = new SqlConnection(ConnectionString_Marc);
-            //            if (con.State == ConnectionState.Closed) con.Open();
-            //            con.Query(query);
-            //            if (con.State == ConnectionState.Open) con.Close();
-
-            //if (con.State == ConnectionState.Closed) con.Open();
-            //con.Query(query);
-            //if (con.State == ConnectionState.Open) con.Close();
-
 
             IEnumerable<DatosFiltro> DatosFiltros /*= Enumerable.Empty<DatosFiltro>(); */;
 
@@ -2172,6 +2163,8 @@ public class MarcacionService : IMarcacion
                         String NombreLocalidadPrincipalColaborador = reader["nombreLocalidadPrincipalColaborador"].ToString()!;
                         String IdentificacionJefeColaborador = reader["identificacionJefeColaborador"].ToString()!;
                         String NombreJefeColaborador = reader["nombreJefeColaborador"].ToString()!;
+                        String Entrada = reader["entrada"].ToString()!;
+                        String Salida = reader["salida"].ToString()!;
                         //
                         String IdTurnoReceso = reader["idTurnoReceso"].ToString()!;
                         String HorasSobretiempoAprobadas = reader["horasSobretiempoAprobadas"].ToString()!;
@@ -2200,6 +2193,8 @@ public class MarcacionService : IMarcacion
                             NombreLocalidadPrincipalColaborador = NombreLocalidadPrincipalColaborador,
                             IdentificacionJefeColaborador = IdentificacionJefeColaborador,
                             NombreJefeColaborador = NombreJefeColaborador,
+                            Entrada = Entrada,
+                            Salida = Salida,
                             ClienteTurno = new ClienteTurno()
                             {
                                 IdTurno = IdTurno,
