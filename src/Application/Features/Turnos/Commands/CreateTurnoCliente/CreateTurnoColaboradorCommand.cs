@@ -2,11 +2,15 @@
 using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
 using EvaluacionCore.Application.Features.Calendario.Interfaces;
+using EvaluacionCore.Application.Features.Marcacion.Specifications;
 using EvaluacionCore.Application.Features.Turnos.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using EvaluacionCore.Domain.Entities.Common;
 using MediatR;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using System.Data;
+using System.Globalization;
 
 namespace EvaluacionCore.Application.Features.Turnos.Commands.CreateTurnoColaborador;
 
@@ -36,7 +40,15 @@ public class CreateTurnoColaboradorCommandHandler : IRequestHandler<CreateTurnoC
         List<TurnoColaborador> turnos = new();
         List<TurnoColaborador> subturnos = new();
         bool subturnoAsignado = false;
-
+        string ConnectionString_Marc;
+        List<string> cedulasColaboradores = new();
+        DateTime ayer = DateTime.Now.AddDays(-1);
+        DateTime fechaLimite = DateTime.Now.AddDays(-1);
+        // Agregado por IC. Para ejecutar la conexión a BD GRIAMSE
+        ConnectionString_Marc = _config.GetConnectionString("Bd_Marcaciones_GRIAMSE");
+        string queryString = "";
+        SqlCommand command;
+        //
         try
         {
             DateTime fechaDesde = request.TurnoRequest.FechaAsignacionDesde;
@@ -94,6 +106,16 @@ public class CreateTurnoColaboradorCommandHandler : IRequestHandler<CreateTurnoC
 
                     // Obtiene los datos del colaborador y establece las horas de sobretiempo aprobadas con su comentario respectivo si tuviere
                     var objCliente = await _repoCliente.GetByIdAsync(item.IdCliente);
+                    // Agregado por IC. 4/04/2024 
+                    // Alimenta una lista de las cedulas de los colaboradores a los que se les está
+                    // asignando un turno. Esta lista de valores será usada más adelante para 
+                    // mandar a reprocesar en el rango de fechas de asignación del turno,
+                    // siempre y cuando no sean fechas a futuro.
+                    if (!cedulasColaboradores.Contains(objCliente.Identificacion))
+                    {
+                        cedulasColaboradores.Add(objCliente.Identificacion);
+                    }
+                    //
                     var horasExtraordinariasAprobadas = item.HorasSobretiempoAprobadas;
                     var comentariosAprobacion = item.ComentariosAprobacion;
 
@@ -265,6 +287,34 @@ public class CreateTurnoColaboradorCommandHandler : IRequestHandler<CreateTurnoC
                     return new ResponseType<string>() { Data = null, Message = "No se pudo registrar la asignación del (los) turno(s) de receso", StatusCode = "101", Succeeded = false };
             }
 
+
+            #region Reprocesamiento de marcaciones
+            // Evalúa si la fecha desde es menor a la fecha de hoy,
+            if (fechaDesde < DateTime.Now.Date)
+            {
+                // Ajusta la fechaHasta como máximo hasta el día de ayer.
+                if (fechaHasta <= ayer) {
+                    fechaLimite = fechaHasta;
+                } else
+                {
+                    fechaLimite = ayer;
+                }
+                // Recorre la lista de cedulas de colaboradores a los que se les asignó el turno
+                foreach (var colaborador in cedulasColaboradores)
+                {
+                    queryString = "EXEC [dbo].[EAPP_SP_REPROCESA_MARCACIONES] NULL, NULL, NULL, '" + fechaDesde.ToString("yyyy/MM/dd HH:mm:ss") + "' , '" + fechaLimite.ToString("yyyy/MM/dd HH:mm:ss") + "',  '" + colaborador + "';";
+                    using (SqlConnection connection = new SqlConnection(ConnectionString_Marc))
+                    {
+                        command = new SqlCommand(queryString, connection);
+                        connection.Open();
+                        SqlDataReader reader = command.ExecuteReader();
+                    }
+                }
+                //
+            }
+            //
+            #endregion
+            
             return new ResponseType<string>() { Data = null, Message = "Turnos asignados correctamente", StatusCode = "100", Succeeded = true };
         }
         catch (Exception)
