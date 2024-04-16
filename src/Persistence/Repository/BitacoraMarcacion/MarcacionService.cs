@@ -785,6 +785,10 @@ public class MarcacionService : IMarcacion
                     IdSolicitudSalida = turnoColaborador?.IdSolicitudSalida ?? Guid.Empty,
                     IdFeatureSalida = turnoColaborador?.IdFeatureSalida ?? Guid.Empty,
                     TipoSolicitudSalida = EvaluaTipoSolicitud(turnoColaborador?.IdFeatureSalida),
+                    /** HorasAprobadasSobretiempo = 
+IdentificacionAprobadorSobretiempo
+HorasTrabajadasSobretiempo
+ComentariosAprobacion */
                 };
 
                 // Novedad de Turno de Receso por exceso de tiempo de receso

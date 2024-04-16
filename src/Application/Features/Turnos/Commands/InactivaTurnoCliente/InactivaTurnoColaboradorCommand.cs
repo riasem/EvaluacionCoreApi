@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using EvaluacionCore.Application.Common.Interfaces;
 using EvaluacionCore.Application.Common.Wrappers;
+using EvaluacionCore.Application.Features.Common.Specifications;
 using EvaluacionCore.Domain.Entities.Asistencia;
 using MediatR;
 
@@ -38,10 +39,28 @@ public class InactivaTurnoColaboradorCommandHandler : IRequestHandler<InactivaTu
                             Estado = "A",
                             UsuarioCreacion = "SYSTEM",
                             FechaAsignacion = it.FechaAsignacion,
-                            FechaCreacion = DateTime.Now
+                            FechaCreacion = DateTime.Now,
+                            HorasExtraordinariasAprobadas = it.horasSobretiempoAprobadas,
+                            ComentariosAprobacion = it.comentariosAprobacion
                         };
 
                         await _repoTurnoAsync.AddAsync(objClient, cancellationToken);
+                    } else
+                    {
+                        TurnoColaborador turnoColaborador = await _repoTurnoAsync.FirstOrDefaultAsync(new GetTurnoColaboradorByTurnoAsignado(it.IdColaborador, it.IdTurno, it.FechaAsignacion));
+                        TurnoColaborador objClient = new()
+                        {
+                            Id = turnoColaborador.Id, //id turno colaborador
+                            IdTurno = it.IdTurno,
+                            IdColaborador = it.IdColaborador,
+                            Estado = "A",
+                            UsuarioCreacion = "SYSTEM",
+                            FechaAsignacion = it.FechaAsignacion,
+                            FechaCreacion = DateTime.Now,
+                            HorasExtraordinariasAprobadas = it.horasSobretiempoAprobadas,
+                            ComentariosAprobacion = it.comentariosAprobacion
+                        };
+                        await _repoTurnoAsync.UpdateAsync(objClient, cancellationToken);
                     }
 
                     foreach (var item in it.Subturnos)
@@ -56,7 +75,9 @@ public class InactivaTurnoColaboradorCommandHandler : IRequestHandler<InactivaTu
                                 Estado = "A",
                                 UsuarioCreacion = "SYSTEM",
                                 FechaAsignacion = it.FechaAsignacion,
-                                FechaCreacion = DateTime.Now
+                                FechaCreacion = DateTime.Now //,
+                                //HorasExtraordinariasAprobadas = it.horasSobretiempoAprobadas,
+                                //ComentariosAprobacion = it.comentariosAprobacion
                             };
 
                             await _repoTurnoAsync.AddAsync(objClient, cancellationToken);
@@ -72,7 +93,9 @@ public class InactivaTurnoColaboradorCommandHandler : IRequestHandler<InactivaTu
                                 FechaModificacion = DateTime.Now,
                                 UsuarioModificacion = "SYSTEM",
                                 IdTurno = item.Id,
-                                IdColaborador = it.IdColaborador
+                                IdColaborador = it.IdColaborador //,
+                                // HorasExtraordinariasAprobadas = it.horasSobretiempoAprobadas,
+                                // ComentariosAprobacion = it.comentariosAprobacion
                             };
 
                             await _repoTurnoAsync.UpdateAsync(objClient, cancellationToken);
@@ -90,7 +113,9 @@ public class InactivaTurnoColaboradorCommandHandler : IRequestHandler<InactivaTu
 
                         FechaModificacion = DateTime.Now,
                         UsuarioModificacion = "SYSTEM",
-                        FechaAsignacion = it.FechaAsignacion
+                        FechaAsignacion = it.FechaAsignacion,
+                        HorasExtraordinariasAprobadas = it.horasSobretiempoAprobadas,
+                        ComentariosAprobacion = it.comentariosAprobacion,
                     };
 
                     await _repoTurnoAsync.UpdateAsync(objClient, cancellationToken);
@@ -105,7 +130,9 @@ public class InactivaTurnoColaboradorCommandHandler : IRequestHandler<InactivaTu
                             IdColaborador = it.IdColaborador,
                             FechaModificacion = DateTime.Now,
                             UsuarioModificacion = "SYSTEM",
-                            FechaAsignacion = it.FechaAsignacion,
+                            FechaAsignacion = it.FechaAsignacion /*,
+                            HorasExtraordinariasAprobadas = it.horasSobretiempoAprobadas,
+                            ComentariosAprobacion = it.comentariosAprobacion */
                         };
 
                         await _repoTurnoAsync.UpdateAsync(objClient2, cancellationToken);

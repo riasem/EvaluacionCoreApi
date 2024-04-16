@@ -17,6 +17,12 @@ namespace EvaluacionCore.Application.Features.Turnos.Commands.UpdateTurnoColabor
         [JsonPropertyName("fechaAsignacionHasta")]
         public DateTime FechaAsignacionHasta { get; set; }
 
+        [JsonPropertyName("horasSobretiempoAprobadas")]
+        public int horasSobretiempoAprobadas { get; set; }
+
+        [JsonPropertyName("comentariosAprobacion")]
+        public string comentariosAprobacion { get; set; }
+
         [JsonPropertyName("clienteSubturno")]
         public List<ClienteSubturno2> ClienteSubturnos { get; set; }
 

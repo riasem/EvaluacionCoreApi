@@ -5,6 +5,10 @@ namespace EvaluacionCore.Application.Features.Turnos.Commands.InactivaTurnoColab
     public partial class InactivaTurnoColaboradorRequest
     {
 
+        [JsonProperty("idTurnoAsignado")]
+        public Guid? IdTurnoAsignado { get; set; }
+
+
         [JsonProperty("idTurno")]
         public Guid IdTurno { get; set; }
 
@@ -19,6 +23,12 @@ namespace EvaluacionCore.Application.Features.Turnos.Commands.InactivaTurnoColab
 
         [JsonProperty("idAsignacion")]
         public Guid? IdAsignacion { get; set; }
+
+        [JsonProperty("horasSobretiempoAprobadas")]
+        public int? horasSobretiempoAprobadas { get; set; }
+
+        [JsonProperty("comentariosAprobacion")]
+        public string? comentariosAprobacion { get; set; }
 
         [JsonProperty("subturnos")]
         public List<Subturno3> Subturnos { get; set; }

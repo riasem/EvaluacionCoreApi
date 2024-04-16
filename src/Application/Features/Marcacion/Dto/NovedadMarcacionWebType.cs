@@ -127,6 +127,20 @@ namespace EvaluacionCore.Application.Features.Marcacion.Dto
         [JsonPropertyName("estadoSolicitudSalida")]
         public Guid? EstadoSolicitudSalida { get; set; }
 
+        [JsonPropertyName("horasAprobadasSobretiempo")]
+        public int? HorasAprobadasSobretiempo { get; set; }
+
+        [JsonPropertyName("identificacionAprobadorSobretiempo")]
+        public String? IdentificacionAprobadorSobretiempo { get; set; }
+
+
+        [JsonPropertyName("horasTrabajadasSobretiempo")]
+        public float? HorasTrabajadasSobretiempo { get; set; }
+
+        [JsonPropertyName("comentariosAprobacion")]
+        public String? ComentariosAprobacion { get; set; }
+        
+
     }
 
     public class TurnoReceso
