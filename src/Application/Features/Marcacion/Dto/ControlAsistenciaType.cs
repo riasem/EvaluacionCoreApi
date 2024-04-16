@@ -103,5 +103,21 @@ namespace EvaluacionCore.Application.Features.Marcacion.Dto
         [JsonPropertyName("novedadSalidaReceso")]
         public string NovedadSalidaReceso { get; set; }
 
+        
+        [JsonPropertyName("horasTurnoTrabajadas")]
+        public float horasTurnoTrabajadas { get; set; }
+
+        [JsonPropertyName("horasExtraTrabajadas")]
+        public float horasExtraTrabajadas { get; set; }
+
+        [JsonPropertyName("horasExtraAprobadas")]
+        public int horasExtraAprobadas { get; set; }
+
+        [JsonPropertyName("comentariosAprobador")]
+        public string comentariosAprobador { get; set; }
+
+        [JsonPropertyName("nombreAprobador")]
+        public string nombreAprobador { get; set; }
+
     }
 }
