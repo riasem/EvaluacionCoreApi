@@ -2,6 +2,7 @@
 using EvaluacionCore.Application.Features.EvalCore.Commands.EvaluacionAsistencias;
 using EvaluacionCore.Application.Features.EvalCore.Queries.GetComboPeriodoAsync;
 using EvaluacionCore.Application.Features.EvalCore.Queries.GetEvaluacionAsistenciaAsync;
+using EvaluacionCore.Application.Features.EvalCore.Queries.GetMarcacionAsistenciaAsync;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -76,6 +77,46 @@ public class EvaluacionController : ApiControllerBase
         return Ok(objResult);
         
     }
+
+
+
+    /// <summary>
+    /// Obtener Control de Asistencias
+    /// </summary>
+    /// <param name="identificacion"></param>
+    /// <param name="fechaDesde"></param>
+    /// <param name="fechaHasta"></param>
+    /// <param name="Udn"></param>
+    /// <param name="Departamento"></param>
+    /// <param name="Area"></param>
+    /// <param name="FiltroNovedades"></param>
+    /// <param name="idCanal"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns>Capacidad que realiza la evaluación de asistencias.</returns>
+    /// <response code="201">Evaluación Realizada</response>
+    /// <response code="400">Ocurrió un error al realizar la evaluación</response>
+    [HttpGet("GetMarcacionesAsistencias")]
+    [EnableCors("AllowOrigin")]
+    [ProducesResponseType(typeof(ResponseType<string>), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [Authorize]
+    public async Task<IActionResult> GetMarcacionesAsistencias(string fechaDesde, string fechaHasta, string? Udn, string? Departamento, string? Area, CancellationToken cancellationToken, string? identificacion, string FiltroNovedades, Guid? idCanal)
+    {
+        //if (identificacion == "0")
+        //{
+        //    identificacion = "";
+        //'}
+        var identificacionSession = new JwtSecurityToken(this.HttpContext.Request.Headers["Authorization"].ToString().Split(" ")[1]).Claims.FirstOrDefault(x => x.Type == "Identificacion")?.Value ?? string.Empty;
+
+        Log.Information("PARAMETROS: fechaDesde: " + fechaDesde + ", Udn: " + Udn + ", Departamento: " + Departamento + ", Area: " + Area + ", cancellationToken: " + cancellationToken + ", identificacion: " + identificacion + ", FiltroNovedades: " + FiltroNovedades + ", idCanal: " + idCanal);
+        //identificacionSession = "0909555260";
+        Log.Information("QUERY PARAMETER: identificacionSession: " + identificacionSession);
+        var objResult = await Mediator.Send(new GetMarcacionAsistenciaAsyncQuery(identificacion, fechaDesde, fechaHasta, Udn, Area, Departamento, FiltroNovedades, identificacionSession, idCanal), cancellationToken);
+        Log.Information("QUERY RESULT: " + objResult);
+        return Ok(objResult);
+
+    }
+
 
     /// <summary>
     /// Obtener Combo de novedades para control de asistencias
