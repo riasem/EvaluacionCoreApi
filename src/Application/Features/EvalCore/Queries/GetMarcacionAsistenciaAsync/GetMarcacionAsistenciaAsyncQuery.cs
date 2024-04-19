@@ -67,6 +67,16 @@ public class GetMarcacionAsistenciaAsyncHandler : IRequestHandler<GetMarcacionAs
         _repositoryPeriodoAsync = repositoryPeriodoAsync;
     }
 
+    private static string ConvertDateYYYYMMDD(string fechaDDMMYYYY)
+    {
+        string fechaYYYYMMDD;
+
+        var fs = fechaDDMMYYYY.Split("/");
+        var date = new DateTime(Convert.ToInt32(fs[2]), Convert.ToInt32(fs[1]), Convert.ToInt32(fs[0]));
+        fechaYYYYMMDD = date.ToString("yyyy-MM-dd");
+
+        return fechaYYYYMMDD;
+    }
 
     async Task<ResponseType<List<EvaluacionAsistenciaResponseType>>> IRequestHandler<GetMarcacionAsistenciaAsyncQuery, ResponseType<List<EvaluacionAsistenciaResponseType>>>.Handle(GetMarcacionAsistenciaAsyncQuery request, CancellationToken cancellationToken)
     {
@@ -124,8 +134,8 @@ public class GetMarcacionAsistenciaAsyncHandler : IRequestHandler<GetMarcacionAs
             }
             #endregion
 
-            DateTime fechaDesde = DateTime.Parse(request.fechaDesde);
-            DateTime fechaHasta = DateTime.Parse(request.fechaHasta);
+            DateTime fechaDesde = DateTime.Parse(ConvertDateYYYYMMDD(request.fechaDesde));
+            DateTime fechaHasta = DateTime.Parse(ConvertDateYYYYMMDD(request.fechaHasta));
 
             #region Recorre cada uno de los Colaboradores que se deben presentar en la consulta
             foreach (var col in colaboradores)
