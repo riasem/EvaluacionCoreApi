@@ -176,7 +176,12 @@ public class GetEvaluacionAsistenciaAsyncHandler : IRequestHandler<GetEvaluacion
                         UsuarioSolicitudSalida = asistenciaColaborador.TurnoLaboral.UsuarioSolicitudSalida,
                         IdSolicitudSalida = asistenciaColaborador.TurnoLaboral.IdSolicitudSalida,
                         IdFeatureSalida = asistenciaColaborador.TurnoLaboral.IdFeatureSalida,
-                        TipoSolicitudSalida = EvaluaTipoSolicitud(asistenciaColaborador.TurnoLaboral.IdFeatureSalida)
+                        TipoSolicitudSalida = EvaluaTipoSolicitud(asistenciaColaborador.TurnoLaboral.IdFeatureSalida),
+
+                        HorasAprobadasSobretiempo = asistenciaColaborador.TurnoLaboral.HorasAprobadasSobretiempo,
+                        IdentificacionAprobadorSobretiempo = asistenciaColaborador.TurnoLaboral.IdentificacionAprobadorSobretiempo,
+                        HorasTrabajadasSobretiempo = asistenciaColaborador.TurnoLaboral.HorasTrabajadasSobretiempo,
+                        ComentariosAprobacion = asistenciaColaborador.TurnoLaboral.ComentariosAprobacion
                     };
 
                     Dto.TurnoReceso turnoReceso = new()

@@ -731,6 +731,7 @@ public class MarcacionService : IMarcacion
 
     public async Task<ResponseType<List<NovedadMarcacionWebType>>> ConsultaAsistencia(string Identificacion, string FiltroNovedades, DateTime FDesde, DateTime FHasta, CancellationToken cancellationToken)
     {
+
         try
         {
             List<NovedadMarcacionWebType> listaEvaluacionAsistencia = new();

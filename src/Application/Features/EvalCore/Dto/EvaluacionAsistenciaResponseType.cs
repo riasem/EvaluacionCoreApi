@@ -129,6 +129,28 @@ namespace EvaluacionCore.Application.Features.EvalCore.Dto
         [JsonPropertyName("estadoSolicitudSalida")]
         public Guid? EstadoSolicitudSalida { get; set; }
 
+        /*
+        HorasTrabajadasSobretiempo = turnoColaborador.horasExtraTrabajadas,
+                    IdentificacionAprobadorSobretiempo = turnoColaborador.nombreAprobador,
+                    HorasAprobadasSobretiempo = turnoColaborador.horasExtraAprobadas,
+                    ComentariosAprobacion = turnoColaborador.comentariosAprobador
+        */
+        [JsonPropertyName("horasAprobadasSobretiempo")]
+        public int? HorasAprobadasSobretiempo { get; set; }
+
+        [JsonPropertyName("identificacionAprobadorSobretiempo")]
+        public String? IdentificacionAprobadorSobretiempo { get; set; }
+
+
+        [JsonPropertyName("horasTrabajadasSobretiempo")]
+        public float? HorasTrabajadasSobretiempo { get; set; }
+
+        [JsonPropertyName("comentariosAprobacion")]
+        public String? ComentariosAprobacion { get; set; }
+
+
+
+
     }
 
     public class TurnoReceso
